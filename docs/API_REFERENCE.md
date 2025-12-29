@@ -52,6 +52,13 @@ Called once per frame (typically 30 or 60 FPS). This is where you render visuals
   - `True` = Auto clear is OFF (persist mode)
   - `False` = Auto clear is ON (clear each frame)
 
+# ### Shift Button (COMMENTED OUT - Experimental/Not in Official API)
+# - `eyesy.shift` - Shift button state (boolean) - **Experimental/Not in Official API**
+#   - `True` when shift button is pressed
+#   - **Note**: This is not part of the official EYESY OS v3 API. It works in the test runner but may not be available on actual hardware.
+#   - The official API uses Shift for system shortcuts (e.g., Shift+Knob1 adjusts audio input gain)
+#   - Use `hasattr(eyesy, 'shift')` to check for availability before using
+
 ### File Paths
 - `eyesy.mode_root` - Path to the current mode's folder
   - Use this to load images: `eyesy.mode_root + '/Images/image.png'`
@@ -148,4 +155,21 @@ def setup(screen, eyesy):
 - Audio input array size may vary, always check `len(eyesy.audio_in)` before indexing
 - Scene changes may temporarily override knob values
 - Use `eyesy.mode_root` to access mode-specific assets like images
+
+# ## Shift Button Usage (COMMENTED OUT)
+#
+# The Shift button on EYESY is primarily used for system-level shortcuts (see [EYESY OS v3 Documentation](https://critterandguitari.github.io/cg-docs/EYESY/ey_os_3/#24-shift--button-shortcuts)):
+# - **Shift + Mode Forward/Backward** - Select foreground color palette
+# - **Shift + Scene Forward/Backward** - Select background color palette
+# - **Shift + Save** - Update current scene
+# - **Shift + Screenshot/Trigger** - Control knob sequencer
+# - **Shift + OSD** - Open on-screen menu
+# - **Shift + Knob 1** - Adjust audio input gain (system function)
+#
+# For mode-specific shift+knob features, use `hasattr(eyesy, 'shift')` to check availability:
+# ```python
+# if hasattr(eyesy, 'shift') and eyesy.shift:
+#     # Shift-specific feature
+#     pass
+# ```
 

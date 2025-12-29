@@ -1,13 +1,11 @@
 import os
 import pygame
 import random
-
 #Knob1 - MIDI Data (number, name, number & name, blank)
 #Knob2 - Grid Settings (off, square --> circle, off)
 #Knob3 - Feedback setting. all the way left is 'off'
 #Knob4 - foreground color
 #Knob5 - background color
-
 def setup(screen, eyesy):
     global xr, yr, last_screen, image, square_size, smallfont, font, corner_radius
     xr = eyesy.xres
@@ -18,43 +16,33 @@ def setup(screen, eyesy):
     smallfont = pygame.font.Font(None, int(square_size / 2.2))  # Adjusted font size
     font = pygame.font.Font(None, int(square_size / 2))  # Adjusted font size
     corner_radius = 0
-    
-
 def draw(screen, eyesy):
     global xr, yr, last_screen, image, square_size, smallfont, font, corner_radius
     bg_color = eyesy.color_picker_bg(eyesy.knob5)
     color = eyesy.color_picker_lfo(eyesy.knob4, 1.5)
-    
     xF = 0.078 # max feedback distance in x dimension
     yF = 0.139 # max feedback distance in y dimension
-
     xrSm = xr - (xr * (eyesy.knob3*xF)) #sets feedback distance in x dim
     yrSm = yr - (yr * (eyesy.knob3*yF)) #sets feedback distance in y dim
-
     # Screengrab feedback loop
     thing = pygame.transform.scale(image, (int(xrSm), int(yrSm)))  # scales down screengrab
     if eyesy.knob3>0.1: #turn on feedback
         screen.blit(thing, (int(xr * (eyesy.knob3*(xF/2))), int(yr * (eyesy.knob3*(yF/2)))))  # re-centers screengrab
-
     # Square Parameters
     thickness = 1 # line thickness
     if eyesy.knob2 < 0.25:
         corner_radius = 0
     if 0.25 <= eyesy.knob2 < 0.85:
         corner_radius = int(scale_knob2_value(eyesy.knob2) * (square_size / 2))  # scaled corner radius size
-    
     if eyesy.knob2 < 0.15 or eyesy.knob2 > .91:
         gridlines = False
     else:
         gridlines = True
-
-    
     for i in range(128):
         row = i // 16
         col = i % 16
         x = col * square_size + (eyesy.xres - 16 * square_size) / 2
         y = row * square_size + (eyesy.yres - 8 * square_size) / 2
-
         # Draw the square
         rect = pygame.Rect(x, y, square_size, square_size)
         if eyesy.midi_notes[i]:
@@ -63,7 +51,6 @@ def draw(screen, eyesy):
             if gridlines:
                 outline_color = (255, 255, 255)
                 pygame.draw.rect(screen, outline_color, rect, thickness, corner_radius)
-
         # Determine the text to display based on knob1 value
         if eyesy.knob1 < 0.25:
             text_content = str(i)
@@ -71,9 +58,8 @@ def draw(screen, eyesy):
             text_content = midi_note_names[127 - i]
         elif 0.5 <= eyesy.knob1 < 0.75:
             text_content = f"{i}\n{midi_note_names[127 - i]}"
-        else: 
+        else:
             text_content = chr(0x2003) #em space character
-
         # Draw the text
         if "\n" in text_content:
             # Split the text into two lines
@@ -88,12 +74,9 @@ def draw(screen, eyesy):
             text = font.render(text_content, True, (255, 255, 255))
             text_rect = text.get_rect(center=(x + square_size / 2, y + square_size / 2))
             screen.blit(text, text_rect)
-
     # Screengrab feedback loop
     image = last_screen
     last_screen = screen.copy()
-
-        
 midi_note_names = [
     "G9", "F#9", "F9", "E9", "D#9", "D9", "C#9", "C9",
     "B8", "A#8", "A8", "G#8", "G8", "F#8", "F8", "E8", "D#8", "D8", "C#8", "C8",
@@ -107,8 +90,6 @@ midi_note_names = [
     "B0", "A#0", "A0", "G#0", "G0", "F#0", "F0", "E0", "D#0", "D0", "C#0", "C0",
     "B-1", "A#-1", "A-1", "G#-1", "G-1", "F#-1", "F-1", "E-1", "D#-1", "D-1", "C#-1", "C-1"
 ]
-
-
 def scale_knob2_value(knob2_value):
     input_min = 0.25
     input_max = 0.80

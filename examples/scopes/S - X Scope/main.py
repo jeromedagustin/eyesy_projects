@@ -2,13 +2,11 @@ import os
 import pygame
 import math
 import pygame.gfxdraw
-
 #Knob1 - line width
 #Knob2 - shadow angle & position
 #Knob3 - scope angle & position
 #Knob4 - foreground color
 #Knob5 - background color
-
 def setup(screen, eyesy):
     global xr,yr,li,xr8,yr8, linewidth
     xr = eyesy.xres
@@ -18,8 +16,6 @@ def setup(screen, eyesy):
     li = xr * 0.016 #(20*xr)/xr
     last_pointj = [0,0]
     linewidth= int(eyesy.knob1*li)+1
-    
-
 def draw(screen, eyesy):
     global xr,yr,li,xr8,yr8, linewidth
     eyesy.color_picker_bg(eyesy.knob5)
@@ -31,10 +27,8 @@ def draw(screen, eyesy):
     linewidth= int(eyesy.knob1*li)+1
     gixoff =  int((xr-squ)/2)
     gjxoff =  int(((xr-squ)/2)+squ)
-    
     for i in range(0, 30) : #shadow L-R
-        
-        xstep = int((squ / 30)+0.49999) 
+        xstep = int((squ / 30)+0.49999)
         yoff = int((yr8+(yr8/3))+yshadow) *eyesy.knob3*5-yr/3 + yr/8
         auDio = int((eyesy.audio_in[i]*0.00003058) * squ)
         NauDio = auDio*-1
@@ -46,11 +40,9 @@ def draw(screen, eyesy):
         else :
             pygame.draw.line(screen, color, last_pointi, [((i*xstep)+ixoff) + auDio, ((i*xstep)+yoff) + NauDio], linewidth)
             last_pointi = [((i*xstep)+ixoff) + auDio, ((i*xstep)+yoff) + NauDio]
-        
     for j in range(0, 30) : #shadow L-R
-        
-        xstep = int((squ / 30)+0.49999)  
-        jxoff =  int((((xr-squ)/2)+squ)+xshadow) 
+        xstep = int((squ / 30)+0.49999)
+        jxoff =  int((((xr-squ)/2)+squ)+xshadow)
         yoff = yr/3-int((yr8+(yr8/3))+yshadow) * eyesy.knob3*5 + yr/8
         auDio = int((eyesy.audio_in[j]*0.00003058) * squ)
         NauDio = auDio*-1
@@ -61,10 +53,8 @@ def draw(screen, eyesy):
         else :
             pygame.draw.line(screen, color, last_pointj, [(jxoff-(j*xstep)) + NauDio, ((j*xstep)+yoff) + NauDio], linewidth)
             last_pointj = [(jxoff-(j*xstep)) + NauDio, ((j*xstep)+yoff) + NauDio]
-        
     for i in range(0, 30) : #LINE L-R
-        
-        xstep = int((squ / 30)+0.49999) 
+        xstep = int((squ / 30)+0.49999)
         yoff = int(yr8+(yr8/3))*eyesy.knob3*5-yr/3 + yr/8
         auDio = int((eyesy.audio_in[i]*0.00003058) * squ)
         NauDio = auDio*-1
@@ -75,16 +65,13 @@ def draw(screen, eyesy):
         else :
             pygame.draw.line(screen, color, last_pointi, [((i*xstep)+gixoff) + auDio, ((i*xstep)+yoff) + NauDio], linewidth)
             last_pointi = [((i*xstep)+gixoff) + auDio, ((i*xstep)+yoff) + NauDio]
-        
     for j in range(0, 30) : #LINE L-R
-        
-        xstep = int((squ / 30)+0.49999) 
+        xstep = int((squ / 30)+0.49999)
         yoff = yr/3 - int(yr8+(yr8/3)) * eyesy.knob3*5 + yr/8
         auDio = int((eyesy.audio_in[j]*0.00003058) * squ)
         NauDio = auDio*-1
         color = eyesy.color_picker_lfo(eyesy.knob4)
         if j == 0 : last_pointj = [gjxoff + NauDio, yoff + NauDio ]
-        
         if j == 29 :
             pygame.draw.line(screen, color, last_pointj, [gixoff + NauDio, (squ+yoff) + NauDio], linewidth)
         else :

@@ -1,0 +1,198 @@
+# EYESY Projects - Cursor Rules
+
+## Project Overview
+This is a repository for EYESY visual synthesizer modes. EYESY modes are Python scripts that create real-time audio-reactive or trigger-based visualizations using pygame.
+
+## Project Structure
+- `examples/` - Factory EYESY modes organized by type (scopes, triggers, utilities, mixed)
+- `custom/` - User-created custom modes (create new folders here for new modes)
+- `docs/` - Documentation (API_REFERENCE.md, QUICK_REFERENCE.md, DEVELOPMENT_GUIDE.md)
+- `tools/` - Helper scripts for testing modes locally (eyesy_runner.py with enhanced features)
+- `screenshots/` - Screenshots captured from test runner (auto-created)
+- `EYESY_Modes_OSv3/` - Original factory modes repository
+
+## Mode Structure
+Each EYESY mode must be in its own folder with:
+- `main.py` - The main mode file (required)
+- `Images/` - Optional folder for image assets
+- Other assets as needed
+
+## Required Functions
+Every mode MUST implement these two functions:
+
+```python
+def setup(screen, eyesy):
+    """Called once when mode is loaded. Initialize variables, load images, etc."""
+    pass
+
+def draw(screen, eyesy):
+    """Called once per frame. This is where all drawing happens."""
+    pass
+```
+
+## EYESY API Conventions
+
+### Knob Assignments (Standard Convention)
+- **Knob 1-3**: Mode-specific parameters (document in comments)
+- **Knob 4**: Foreground color (`eyesy.color_picker(eyesy.knob4)`)
+- **Knob 5**: Background color (`eyesy.color_picker_bg(eyesy.knob5)`)
+
+### Common Variables
+- `eyesy.knob1` through `eyesy.knob5` - Knob values (0.0 to 1.0)
+- `eyesy.audio_in[]` - Audio input array (values -32768 to 32768)
+- `eyesy.trig` - Trigger state (boolean)
+- `eyesy.xres`, `eyesy.yres` - Screen resolution
+- `eyesy.auto_clear` - Auto clear setting (boolean)
+- `eyesy.mode_root` - Path to mode folder
+
+### Common Functions
+- `eyesy.color_picker(knob)` - Get RGB color tuple from knob
+- `eyesy.color_picker_lfo(knob)` - Get color with LFO animation
+- `eyesy.color_picker_bg(knob)` - Set background color
+
+## Coding Standards
+
+### Imports
+Standard imports for EYESY modes:
+```python
+import os
+import pygame
+import math
+import time  # If needed for timing
+```
+
+### Audio Input Handling
+- Always normalize audio values: `eyesy.audio_in[i] / 32768.0` (results in -1.0 to 1.0)
+- Check array length: `len(eyesy.audio_in)` before indexing
+- Audio array size may vary (typically 100-200 samples)
+
+### Drawing Patterns
+- Always set background first: `eyesy.color_picker_bg(eyesy.knob5)`
+- Use `pygame.draw` functions for shapes
+- Screen center: `(eyesy.xres // 2, eyesy.yres // 2)`
+- Keep `draw()` function efficient - it's called every frame
+
+### Comments
+- Document knob assignments at the top of the file
+- Use clear, concise comments for complex logic
+- Follow the pattern seen in example modes
+
+### Code Style
+- Use descriptive variable names
+- Keep functions focused and modular
+- Extract complex drawing logic into helper functions
+- Follow existing code patterns in examples/
+
+## Creating New Modes
+
+### For Custom Modes
+1. Create a new folder in `custom/` directory
+2. Name it descriptively (e.g., `custom/my_awesome_mode/`)
+3. Create `main.py` with `setup()` and `draw()` functions
+4. Use `custom/template_mode/main.py` as a starting point
+
+### For Example Modes
+- Follow naming convention: `S - Mode Name` (scopes), `T - Mode Name` (triggers), `U - Mode Name` (utilities)
+- Place in appropriate subdirectory: `examples/scopes/`, `examples/triggers/`, or `examples/utilities/`
+
+## Testing
+
+### Local Test Runner (Recommended)
+Use `tools/eyesy_runner.py` for comprehensive local testing without hardware:
+
+```bash
+# Run with a mode path
+python tools/eyesy_runner.py "examples/scopes/S - Classic Horizontal"
+
+# Or run without arguments (requires tkinter)
+python tools/eyesy_runner.py
+```
+
+**Test Runner Features:**
+- **Enhanced Audio Simulation**: Dynamic patterns with beat-like rhythms, varying frequencies, harmonics, and amplitude modulation
+- **Auto-Trigger Mode**: Simulates MIDI input with automatic triggers (press `M` to toggle)
+- **Pause/Snapshot**: Freeze current frame for inspection (press `P` to toggle)
+- **Screenshot Capture**: Save screenshots without control overlay (press `X`, saves to `screenshots/` folder)
+- **Hot Reload**: Reload mode without restarting (press `L`)
+- **Full EYESY API**: All functions and variables simulated
+
+**Test Runner Controls:**
+- **Q/A** - Knob 1
+- **W/S** - Knob 2
+- **E/D** - Knob 3
+- **R/F** - Color (Knob 4)
+- **T/G** - Background Color (Knob 5)
+- **SPACE** - Toggle Trigger
+- **M** - Toggle Auto-Trigger (MIDI simulation)
+- **P** - Pause/Snapshot (freeze frame)
+- **X** - Take Screenshot
+- **C** - Toggle Auto Clear
+- **H** - Hide/Show Controls
+- **L** - Reload Mode
+- **ESC** - Exit
+
+### Alternative: eyesim Simulator
+Can also use `eyesim` simulator:
+```bash
+eyesim path/to/mode/folder
+eyesim path/to/mode path/to/audio.wav
+```
+
+## Best Practices
+1. **Performance**: Keep `draw()` function fast - avoid heavy computations per frame
+2. **Audio Reactivity**: Use `eyesy.audio_in[]` for scope modes, `eyesy.trig` for trigger modes
+3. **Color Management**: Use `eyesy.color_picker()` functions instead of hardcoded colors
+4. **Resolution Independence**: Use `eyesy.xres` and `eyesy.yres` instead of hardcoded dimensions
+5. **Asset Loading**: Load images/assets in `setup()`, not `draw()`
+6. **Documentation**: Comment knob assignments and complex algorithms
+
+## Common Patterns
+
+### Audio-Reactive Scope
+```python
+def draw(screen, eyesy):
+    eyesy.color_picker_bg(eyesy.knob5)
+    color = eyesy.color_picker(eyesy.knob4)
+    
+    for i in range(len(eyesy.audio_in)):
+        audio_val = eyesy.audio_in[i] / 32768.0
+        x = int((i / len(eyesy.audio_in)) * eyesy.xres)
+        y = int(audio_val * eyesy.yres * 0.5 + eyesy.yres // 2)
+        pygame.draw.circle(screen, color, (x, y), 2)
+```
+
+### Trigger-Based Pattern
+```python
+def draw(screen, eyesy):
+    eyesy.color_picker_bg(eyesy.knob5)
+    
+    if eyesy.trig:
+        color = eyesy.color_picker(eyesy.knob4)
+        pygame.draw.circle(screen, color, (eyesy.xres//2, eyesy.yres//2), 50)
+```
+
+### Loading Images
+```python
+def setup(screen, eyesy):
+    global images
+    images = []
+    import glob
+    for filepath in sorted(glob.glob(eyesy.mode_root + '/Images/*.png')):
+        img = pygame.image.load(filepath)
+        images.append(img)
+```
+
+## When Making Changes
+- Preserve existing code style and patterns
+- Test modes locally using `tools/eyesy_runner.py` before committing
+- Use the test runner's enhanced features (auto-trigger, pause, screenshots) for thorough testing
+- Update documentation if adding new patterns or conventions
+- Follow the folder structure conventions
+- Keep custom modes in `custom/` directory
+- Screenshots are automatically saved to `screenshots/` folder when using test runner
+
+## Resources
+- API Reference: `docs/API_REFERENCE.md`
+- Quick Reference: `docs/QUICK_REFERENCE.md`
+- EYESY OS v3 Docs: https://critterandguitari.github.io/cg-docs/EYESY/ey_os_3/
+

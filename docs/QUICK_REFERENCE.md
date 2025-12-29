@@ -66,4 +66,18 @@ if eyesy.trig:
 - `eyesy.mode_root` - Path to mode folder
 - Load images: `eyesy.mode_root + '/Images/image.png'`
 
+# ## Shift Button (COMMENTED OUT - Experimental)
+# ```python
+# # Check for shift button support
+# if hasattr(eyesy, 'shift') and eyesy.shift:
+#     # Shift+knob feature active
+#     pass
+# ```
+#
+# **Note**: `eyesy.shift` is experimental and only available in the test runner. Not part of official EYESY OS v3 API.
+
+
+
+
+
 

@@ -3,24 +3,20 @@ import random
 import time
 import math
 import pygame.gfxdraw
-
 #Knob1 - x position
 #Knob2 - y position
 #Knob3 - height
 #Knob4 - foreground color
 #Knob5 - background color
-
 def setup(screen, eyesy):
-    pass 
-
+    pass
 def draw(screen, eyesy):
     eyesy.color_picker_bg(eyesy.knob5)
     yr = eyesy.yres
     xr = eyesy.xres
     i = int(yr * 0.25) #int((180*yr)/eyesy.yres)
-    
     for i in range(i):
-        push = abs(int(eyesy.knob3*eyesy.audio_in[i%24]/(yr/2)))    
+        push = abs(int(eyesy.knob3*eyesy.audio_in[i%24]/(yr/2)))
         boing = int(eyesy.knob3*i)+eyesy.audio_in[1]/500
         i = boing
         color = eyesy.color_picker_lfo(eyesy.knob4)
