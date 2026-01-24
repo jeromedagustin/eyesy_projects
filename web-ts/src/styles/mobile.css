@@ -1,0 +1,1262 @@
+/**
+ * EYESY Web - Mobile & Responsive Styles
+ */
+
+/* ============================================
+   CSS Variables for consistent theming
+   ============================================ */
+:root {
+  /* Colors */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2a2a2a;
+  --bg-surface: #3a3a3a;
+  --bg-elevated: #4a4a4a;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #888888;
+  --accent: #4a9eff;
+  --accent-hover: #6cb0ff;
+  --error: #e74c3c;
+  --success: #27ae60;
+  --warning: #f39c12;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* Sidebar */
+  --sidebar-width: 300px;
+  --sidebar-width-mobile: 280px;
+  
+  /* Touch targets (minimum 44px for accessibility) */
+  --touch-target-min: 44px;
+  --slider-height-desktop: 8px;
+  --slider-height-mobile: 16px;
+  --slider-thumb-desktop: 16px;
+  --slider-thumb-mobile: 28px;
+  
+  /* Animation */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+  
+  /* Z-index layers */
+  --z-canvas: 1;
+  --z-controls: 10;
+  --z-header: 20;
+  --z-modal: 100;
+  --z-overlay: 1000;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+/* Prevent pull-to-refresh on mobile */
+body {
+  overscroll-behavior: none;
+}
+
+/* ============================================
+   Layout Structure
+   ============================================ */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  /* Account for safe areas */
+  padding-bottom: env(safe-area-inset-bottom);
+  overflow: hidden; /* Prevent scrolling */
+}
+
+/* On mobile, ensure no wasted space */
+@media (max-width: 768px) {
+  .app-container {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+}
+
+.app-header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--bg-surface);
+  padding: var(--spacing-md);
+  z-index: var(--z-header);
+  flex-shrink: 0;
+}
+
+.app-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  position: relative;
+}
+
+/* On mobile, make main area fill more space */
+@media (max-width: 768px) {
+  .app-main {
+    flex-direction: column;
+  }
+}
+
+.canvas-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  z-index: var(--z-canvas);
+  overflow: hidden;
+}
+
+.canvas-container canvas {
+  /* Maintain 16:9 aspect ratio while fitting container */
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  touch-action: none; /* Enable custom touch handling */
+}
+
+/* ============================================
+   Controls Panel
+   ============================================ */
+.controls-panel {
+  width: var(--sidebar-width);
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--bg-surface);
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex-shrink: 0;
+  z-index: var(--z-controls);
+  transition: transform var(--transition-normal), width var(--transition-normal);
+}
+
+/* Right-handed (default): border on left */
+.controls-panel.right-handed {
+  border-left: 1px solid var(--bg-surface);
+  border-right: none;
+}
+
+/* Left-handed: border on right */
+.controls-panel.left-handed {
+  border-left: none;
+  border-right: 1px solid var(--bg-surface);
+}
+
+.controls-panel .controls-inner {
+  width: 100% !important;
+}
+
+.controls-panel.collapsed {
+  transform: translateX(100%);
+  width: 0;
+  padding: 0;
+  border: none;
+}
+
+/* Left-handed collapsed: slide to left */
+.controls-panel.left-handed.collapsed {
+  transform: translateX(-100%);
+}
+
+/* Mobile controls header (hidden on desktop) */
+.controls-header-mobile {
+  display: none !important;
+}
+
+.controls-header-desktop {
+  display: block;
+}
+
+.controls-content {
+  padding: var(--spacing-md);
+}
+
+/* ============================================
+   Mobile Toggle Button (FAB)
+   ============================================ */
+.controls-toggle {
+  display: none;
+  position: fixed;
+  bottom: 80px; /* Above the mode nav bar */
+  right: var(--spacing-md);
+  left: auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: var(--z-modal);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: transform var(--transition-fast), background var(--transition-fast), opacity var(--transition-fast), right var(--transition-fast), left var(--transition-fast);
+}
+
+/* Right-handed (default): FAB on right */
+.controls-toggle.right-handed {
+  right: var(--spacing-md);
+  left: auto;
+}
+
+/* Left-handed: FAB on left */
+.controls-toggle.left-handed {
+  right: auto;
+  left: var(--spacing-md);
+}
+
+.controls-toggle:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+.controls-toggle:active {
+  transform: scale(0.95);
+}
+
+/* ============================================
+   Sliders - Touch Friendly
+   ============================================ */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: var(--slider-height-desktop);
+  background: var(--bg-surface);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--slider-thumb-desktop);
+  height: var(--slider-thumb-desktop);
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: var(--accent-hover);
+  transform: scale(1.1);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: var(--slider-thumb-desktop);
+  height: var(--slider-thumb-desktop);
+  background: var(--accent);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background: #5a5a5a;
+}
+
+/* ============================================
+   Header Responsive
+   ============================================ */
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.header-info > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-mode-nav {
+  display: none; /* Hidden by default, shown in landscape */
+}
+
+.header-title {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.header-status {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+/* ============================================
+   Touch Overlay (for canvas gestures)
+   ============================================ */
+.touch-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.touch-hint {
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
+
+.touch-hint.visible {
+  opacity: 1;
+}
+
+/* ============================================
+   Mode Navigation (Mobile)
+   ============================================ */
+.mode-nav-mobile {
+  display: none;
+  background: rgba(26, 26, 26, 0.95);
+  padding: var(--spacing-sm) var(--spacing-md);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--bg-surface);
+}
+
+.mode-nav-mobile .mode-nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  max-width: 500px;
+  margin: 0 auto;
+  /* Ensure content doesn't get cut off on devices with safe areas */
+  min-height: 45px;
+}
+
+.mode-nav-mobile .mode-name {
+  flex: 1;
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  font-family: inherit;
+}
+
+.mode-nav-mobile .mode-name:hover {
+  background: rgba(74, 158, 255, 0.1);
+  color: var(--accent);
+}
+
+.mode-nav-mobile .mode-name:active {
+  background: rgba(74, 158, 255, 0.2);
+  transform: scale(0.98);
+}
+
+.mode-nav-btn {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  border: none;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-nav-btn:hover {
+  background: var(--bg-elevated);
+}
+
+.mode-nav-btn:active {
+  background: var(--accent);
+  transform: scale(0.95);
+}
+
+/* ============================================
+   Keyboard Shortcuts Hint
+   ============================================ */
+.keyboard-hints {
+  position: fixed;
+  bottom: var(--spacing-md);
+  left: var(--spacing-md);
+  background: rgba(0, 0, 0, 0.8);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  z-index: var(--z-controls);
+}
+
+/* ============================================
+   RESPONSIVE: Tablet (768px - 1024px)
+   ============================================ */
+@media (max-width: 1024px) {
+  .controls-panel {
+    width: var(--sidebar-width-mobile);
+  }
+  
+  .header-actions .btn span:not(.btn-icon) {
+    display: none; /* Hide button text, show only icons */
+  }
+  
+  .header-actions .btn {
+    padding: var(--spacing-sm);
+    min-width: var(--touch-target-min);
+  }
+}
+
+/* ============================================
+   RESPONSIVE: Landscape Orientation
+   ============================================ */
+@media (orientation: landscape) {
+  /* In landscape, use horizontal layout to maximize canvas space */
+  .app-main {
+    flex-direction: row !important;
+  }
+  
+  /* Respect left-handed layout in landscape */
+  .app-main.left-handed-layout {
+    flex-direction: row-reverse !important;
+  }
+  
+  .app-main.right-handed-layout {
+    flex-direction: row !important;
+  }
+  
+  /* Make canvas larger in landscape - use more of the horizontal space */
+  .canvas-container {
+    flex: 1;
+    min-width: 0;
+    padding: var(--spacing-sm);
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .canvas-container canvas {
+    /* In landscape, prioritize width to fill horizontal space */
+    width: 100% !important;
+    max-width: 100%;
+    height: auto !important;
+    max-height: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+  }
+  
+  /* Show controls side-by-side in landscape instead of overlay */
+  .controls-panel {
+    position: relative !important;
+    transform: none !important;
+    width: var(--sidebar-width-mobile);
+    max-width: 320px;
+    box-shadow: none;
+    border-left: 1px solid var(--bg-surface);
+  }
+  
+  .controls-panel.left-handed {
+    border-left: none;
+    border-right: 1px solid var(--bg-surface);
+  }
+  
+  .controls-panel.collapsed {
+    width: 0;
+    padding: 0;
+    border: none;
+    transform: none !important;
+  }
+  
+  /* Hide the controls toggle FAB in landscape (controls are always visible) */
+  .controls-toggle {
+    display: none !important;
+  }
+  
+  /* Compact header in landscape */
+  .app-header {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    min-height: auto;
+    flex-shrink: 0;
+  }
+  
+  .header-title {
+    font-size: 1rem;
+  }
+  
+  .header-status {
+    font-size: 0.75rem;
+  }
+  
+  /* Ensure header actions are visible in landscape */
+  .header-actions {
+    display: flex !important;
+    gap: var(--spacing-xs);
+  }
+  
+  .header-actions .btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    min-width: 36px;
+    min-height: 32px;
+    font-size: 0.8rem;
+  }
+  
+  /* Hide mode nav bar in landscape - use more space for canvas */
+  .mode-nav-mobile {
+    display: none !important;
+  }
+  
+  /* Hide mode selector dropdown in landscape - use header arrows instead */
+  #mode-selector-container {
+    display: none !important;
+  }
+  
+  /* Show header mode navigation arrows in landscape */
+  .header-mode-nav {
+    display: flex !important;
+  }
+  
+  /* Show mode name in header for landscape */
+  .header-mode-name {
+    display: block !important;
+  }
+  
+  /* Style header info to accommodate navigation arrows */
+  .header-info {
+    display: flex !important;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+  
+  .header-info > div {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Make mode name clickable in landscape to open browser */
+  .header-mode-name {
+    cursor: pointer;
+    transition: color var(--transition-fast), opacity var(--transition-fast);
+  }
+  
+  .header-mode-name:hover {
+    color: var(--accent-hover) !important;
+    opacity: 0.9;
+  }
+  
+  .header-mode-name:active {
+    opacity: 0.7;
+  }
+  
+  /* Remove bottom padding from canvas container in landscape */
+  .canvas-container {
+    padding-bottom: var(--spacing-sm) !important;
+  }
+  
+  /* Compact controls content */
+  .controls-content {
+    padding: var(--spacing-sm);
+  }
+  
+  .knob-group {
+    margin-bottom: var(--spacing-sm) !important;
+  }
+  
+  /* Hide keyboard hints in landscape */
+  .keyboard-hints {
+    display: none;
+  }
+}
+
+/* ============================================
+   RESPONSIVE: Mobile Landscape (max-height 500px) - Legacy support
+   ============================================ */
+@media (max-height: 500px) {
+  .app-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .header-title {
+    font-size: 1.2rem;
+  }
+  
+  .header-status {
+    display: none;
+  }
+  
+  .keyboard-hints {
+    display: none;
+  }
+  
+  /* Smaller controls for landscape */
+  .controls-panel {
+    width: 250px;
+  }
+  
+  .controls-content {
+    padding: var(--spacing-sm);
+  }
+  
+  .knob-group {
+    margin-bottom: var(--spacing-sm) !important;
+  }
+}
+
+/* ============================================
+   RESPONSIVE: Mobile Portrait (max-width 768px, portrait orientation)
+   ============================================ */
+@media (max-width: 768px) and (orientation: portrait) {
+  /* Portrait-specific optimizations for maximum space usage */
+  .app-container {
+    /* Ensure full viewport usage */
+    height: 100vh;
+    height: 100dvh;
+    /* Account for safe areas */
+    padding-bottom: env(safe-area-inset-bottom);
+    /* Allow footer to extend beyond if needed */
+    overflow: visible !important;
+  }
+  
+  .app-main {
+    /* Maximize main content area */
+    flex: 1;
+    min-height: 0;
+  }
+  
+  /* Even more compact header in portrait */
+  .app-header {
+    /* Remove max-height to allow buttons to be visible */
+    padding: 0.15rem var(--spacing-xs);
+    overflow: visible; /* Ensure buttons aren't clipped */
+  }
+  
+  .header-content {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .header-actions {
+    display: flex !important; /* Ensure actions are visible */
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+  
+  .header-title {
+    font-size: 0.75rem;
+  }
+  
+  /* Hide status text completely in portrait to save space */
+  .header-status {
+    display: none !important;
+  }
+  
+  /* Make mode nav compact and ensure proper positioning */
+  .mode-nav-mobile {
+    display: block !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: rgba(26, 26, 26, 0.95) !important;
+    padding: 0.5rem 0.8rem !important;
+    /* Account for device safe areas (iOS home indicator, etc.) */
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)) !important;
+    max-height: none !important;
+    min-height: calc(45px + env(safe-area-inset-bottom)) !important;
+    height: auto !important;
+    z-index: 100 !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid var(--bg-surface);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    /* Ensure footer is not clipped */
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+  }
+  
+  .mode-nav-mobile .mode-nav-content {
+    max-width: 100% !important;
+    gap: var(--spacing-sm) !important;
+  }
+  
+  .mode-nav-mobile .mode-name {
+    font-size: 0.85rem !important;
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+  }
+  
+  .mode-nav-btn {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    font-size: 1.1rem !important;
+  }
+  
+  /* Ensure canvas container doesn't interfere with fixed footer */
+  .canvas-container {
+    position: relative !important;
+    /* Account for footer height + safe area */
+    padding-bottom: calc(50px + env(safe-area-inset-bottom)) !important;
+    overflow: visible !important;
+  }
+  
+  /* Remove any positioning from mode-nav-mobile when inside canvas-container */
+  .canvas-container .mode-nav-mobile {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+  
+  .canvas-container canvas {
+    /* Account for header + footer + safe area */
+    max-height: calc(100vh - 82px - env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Portrait rotate mode - rotate canvas 90 degrees for larger display */
+  .canvas-container.portrait-rotate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    /* Remove all padding to maximize space */
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+    /* Allow canvas to use full container space when rotated */
+    width: 100% !important;
+    height: 100% !important;
+    /* Ensure container uses all available space */
+    min-width: 100%;
+    min-height: 100%;
+    position: relative;
+  }
+
+  .canvas-container.portrait-rotate canvas {
+    /* Rotate 90 degrees clockwise */
+    transform: rotate(90deg) !important;
+    transform-origin: center center;
+    /* When rotated, the canvas should fill the ENTIRE space */
+    /* Remove ALL size constraints */
+    max-width: none !important;
+    max-height: none !important;
+    /* Use actual canvas dimensions, not viewport units */
+    width: auto !important;
+    height: auto !important;
+    /* Allow stretching to fill all space */
+    object-fit: fill !important;
+    /* Remove any margins or padding */
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Position to center the rotated canvas */
+    position: relative;
+  }
+  
+  /* Ensure controls toggle FAB is visible and properly positioned */
+  .controls-toggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    /* Position above footer + safe area */
+    bottom: calc(55px + env(safe-area-inset-bottom)) !important;
+    z-index: var(--z-modal) !important;
+    width: 56px !important;
+    height: 56px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Ensure controls panel is accessible */
+  .controls-panel {
+    z-index: var(--z-overlay) !important;
+  }
+}
+
+/* ============================================
+   RESPONSIVE: Mobile (max-width 768px)
+   ============================================ */
+@media (max-width: 768px) {
+  :root {
+    --slider-height-desktop: var(--slider-height-mobile);
+    --slider-thumb-desktop: var(--slider-thumb-mobile);
+  }
+  
+  .header-title {
+    font-size: 1.1rem;
+  }
+  
+  .header-status {
+    font-size: 0.8rem;
+  }
+  
+  /* Show mobile mode navigation (but hide in landscape via orientation media query) */
+  .mode-nav-mobile {
+    display: block;
+  }
+  
+  /* Hide desktop mode selector on mobile portrait, but show in landscape */
+  @media (orientation: portrait) {
+    #mode-selector-container {
+      display: none;
+    }
+  }
+  
+  /* Show mode selector in landscape (overridden by landscape-specific rules above) */
+  @media (orientation: landscape) {
+    #mode-selector-container {
+      display: block !important;
+    }
+  }
+  
+  /* Show controls toggle button (but hide in landscape via orientation media query) */
+  .controls-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Canvas sizing for mobile portrait - maximize space usage */
+  .canvas-container {
+    padding: 0;
+    align-items: stretch; /* Stretch to fill available height */
+    justify-content: center;
+    /* Reserve minimal space for mode nav overlay at bottom */
+    padding-bottom: 50px; /* Reduced from 60px */
+    /* Use flexbox to fill available space */
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  
+  .canvas-container canvas {
+    /* In portrait, use full width but maintain reasonable aspect ratio */
+    width: 100% !important;
+    height: auto !important; /* Let height adjust based on width */
+    max-width: 100% !important;
+    /* Calculate max height: viewport - ultra-compact header (~35px) - nav bar (50px) */
+    max-height: calc(100vh - 85px) !important;
+    /* Maintain 16:9 base, but allow slight extension if space available */
+    aspect-ratio: 16 / 9; /* Base aspect ratio */
+    object-fit: contain !important; /* Don't stretch, maintain aspect ratio */
+    /* Remove any margins that create empty space */
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Override for landscape: use horizontal layout */
+  @media (orientation: landscape) {
+    .canvas-container {
+      padding: var(--spacing-sm);
+      padding-bottom: var(--spacing-sm) !important;
+      align-items: center;
+    }
+    
+    .canvas-container canvas {
+      /* In landscape, maintain 16:9 and maximize within space */
+      aspect-ratio: 16 / 9;
+      height: auto !important;
+      max-height: calc(100vh - 50px); /* Account for compact header */
+    }
+  }
+  
+  /* Ultra-compact header on mobile portrait to maximize canvas space */
+  .app-header {
+    padding: 0.2rem var(--spacing-xs);
+    min-height: auto;
+    flex-shrink: 0; /* Don't shrink header - we need the buttons */
+    margin: 0;
+    border-bottom: none; /* Remove border to save space */
+    /* Remove max-height and overflow to ensure buttons are visible */
+    overflow: visible; /* Allow buttons to be visible */
+  }
+  
+  .header-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  
+  .header-info {
+    flex: 0 0 auto;
+  }
+  
+  .header-actions {
+    flex: 1 1 auto;
+    display: flex !important; /* Ensure actions are visible */
+    justify-content: flex-end;
+    min-width: 0; /* Allow shrinking if needed */
+  }
+  
+  .header-title {
+    font-size: 0.8rem;
+    margin-bottom: 0;
+    line-height: 1;
+    padding: 0;
+  }
+  
+  .header-status {
+    font-size: 0.6rem;
+    margin-bottom: 0;
+    line-height: 1;
+    padding: 0;
+    /* Hide status in portrait to save space if needed */
+    display: none;
+  }
+  
+  .header-actions {
+    gap: 0.2rem;
+    padding: 0;
+  }
+  
+  .header-actions .btn {
+    padding: 0.2rem;
+    min-width: 30px;
+    min-height: 30px;
+    font-size: 0.75rem;
+  }
+  
+  /* Hide button text labels in portrait, show only icons */
+  .header-actions .btn span:not(.btn-icon) {
+    display: none;
+  }
+  
+  /* Remove any gaps between header and main content */
+  .app-main {
+    margin-top: 0;
+    padding-top: 0;
+  }
+  
+  /* Footer styling is handled in portrait-specific media query above */
+  
+  /* Make controls a slide-over panel */
+  .controls-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: var(--sidebar-width-mobile);
+    max-width: 85vw;
+    z-index: var(--z-overlay);
+    transform: translateX(100%); /* Hidden by default on mobile */
+    transition: transform var(--transition-normal);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Right-handed (default): slide from right */
+  .controls-panel.right-handed {
+    right: 0;
+    left: auto;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    transform: translateX(100%); /* Hidden by default */
+  }
+  
+  .controls-panel.right-handed.open {
+    transform: translateX(0) !important; /* Override default when open */
+  }
+  
+  .controls-panel.right-handed.collapsed {
+    transform: translateX(100%);
+  }
+  
+  /* Left-handed: slide from left */
+  .controls-panel.left-handed {
+    right: auto;
+    left: 0;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+    transform: translateX(-100%); /* Hidden by default */
+  }
+  
+  .controls-panel.left-handed.open {
+    transform: translateX(0) !important; /* Override default when open */
+  }
+  
+  .controls-panel.left-handed.collapsed {
+    transform: translateX(-100%);
+  }
+  
+  /* Fallback for open class without left/right-handed class */
+  .controls-panel.open {
+    transform: translateX(0) !important; /* Override default when open */
+  }
+  
+  .controls-panel.collapsed {
+    transform: translateX(100%);
+  }
+  
+  /* Show mobile header, hide desktop header */
+  .controls-panel .controls-header-mobile {
+    display: flex !important;
+  }
+  
+  .controls-panel .controls-header-desktop {
+    display: none !important;
+  }
+  
+  /* Make controls panel content scrollable */
+  .controls-panel .controls-inner {
+    padding-bottom: 2rem;
+  }
+  
+  /* Compact knob groups on mobile */
+  .controls-panel .knob-group {
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Backdrop for mobile controls */
+  .controls-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: calc(var(--z-overlay) - 1);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    backdrop-filter: blur(2px);
+  }
+  
+  .controls-backdrop.visible {
+    display: block;
+    opacity: 1;
+  }
+  
+  /* Hide keyboard hints on mobile */
+  .keyboard-hints {
+    display: none;
+  }
+  
+  /* Larger touch targets for sliders */
+  input[type="range"] {
+    height: var(--slider-height-mobile);
+    padding: 8px 0;
+  }
+  
+  input[type="range"]::-webkit-slider-thumb {
+    width: var(--slider-thumb-mobile);
+    height: var(--slider-thumb-mobile);
+  }
+  
+  input[type="range"]::-moz-range-thumb {
+    width: var(--slider-thumb-mobile);
+    height: var(--slider-thumb-mobile);
+  }
+  
+  /* Make buttons more touch-friendly */
+  .btn {
+    min-height: 48px;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  /* Compact header on mobile */
+  .header-content {
+    flex-wrap: wrap;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: var(--spacing-sm);
+  }
+  
+  .header-actions .btn {
+    flex: 1;
+    max-width: 80px;
+  }
+}
+
+/* ============================================
+   RESPONSIVE: Small Mobile (max-width 480px)
+   ============================================ */
+@media (max-width: 480px) {
+  .app-header {
+    padding: var(--spacing-sm);
+  }
+  
+  .header-title {
+    font-size: 1rem;
+  }
+  
+  .header-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header-actions .btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.8rem;
+    max-width: 60px;
+  }
+  
+  /* Even larger touch targets */
+  .controls-toggle {
+    width: 64px;
+    height: 64px;
+    font-size: 1.75rem;
+  }
+  
+  .mode-nav-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 1.4rem;
+  }
+}
+
+/* ============================================
+   Dark Mode Scrollbar
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5a;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-elevated) var(--bg-primary);
+}
+
+/* ============================================
+   Accessibility
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --bg-surface: #444;
+    --bg-elevated: #555;
+    --text-muted: #aaa;
+  }
+  
+  .btn {
+    border: 2px solid currentColor;
+  }
+}
+
