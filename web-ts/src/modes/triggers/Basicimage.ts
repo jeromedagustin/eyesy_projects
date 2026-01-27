@@ -31,7 +31,6 @@ export class Basicimage implements Mode {
       .then((images) => {
         this.images = images;
         this.imagesLoaded = true;
-        console.log(`Loaded ${images.length} images`);
       })
       .catch((error) => {
         console.warn('Failed to load images:', error);

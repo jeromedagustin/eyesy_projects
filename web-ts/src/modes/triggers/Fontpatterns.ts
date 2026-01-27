@@ -1,34 +1,39 @@
-import { Mode } from '../base/Mode';
+import { BaseAnimatedMode } from '../base/BaseAnimatedMode';
 import { Canvas } from '../../core/Canvas';
 import { EYESY } from '../../core/EYESY';
 import { createFont, renderText, Font } from '../../core/FontRenderer';
 
 /**
- * T - Font Patterns
- * Ported from Python version
+ * Font - Patterns
+ * Enhanced with audio reactivity and dynamic animations
  * 
- * Knob1 - horizontal offset
+ * Knob1 - horizontal offset / animation speed
  * Knob2 - size
- * Knob3 - font set
+ * Knob3 - font set / pattern variation
  * Knob4 - foreground color
  * Knob5 - background color
  */
-export class Fontpatterns implements Mode {
+export class Fontpatterns extends BaseAnimatedMode {
   private xr = 1280;
   private yr = 720;
   private trigger = false;
   private unistr = String.fromCharCode(0x25a0 + Math.floor(Math.random() * (0x25ff - 0x25a0 + 1)));
   private font: Font | null = null;
+  private smoothedAudioLevel = 0.0;
 
-  setup(canvas: Canvas, eyesy: EYESY): void {
+  protected onSetup(canvas: Canvas, eyesy: EYESY): void {
     this.xr = eyesy.xres;
     this.yr = eyesy.yres;
     this.trigger = false;
     this.unistr = String.fromCharCode(0x25a0 + Math.floor(Math.random() * (0x25ff - 0x25a0 + 1)));
+    this.smoothedAudioLevel = 0.0;
   }
 
-  draw(canvas: Canvas, eyesy: EYESY): void {
+  protected onDraw(canvas: Canvas, eyesy: EYESY, audioLevel: number): void {
     eyesy.color_picker_bg(eyesy.knob5);
+    
+    // Calculate audio reactivity
+    this.smoothedAudioLevel = this.smoothedAudioLevel * 0.85 + audioLevel * 0.15;
     
     const x320 = Math.floor(this.xr * 0.250); // ((320*xr)/1280)
     const x160 = Math.floor(this.xr * 0.125); // ((160*xr)/1280)
@@ -36,16 +41,23 @@ export class Fontpatterns implements Mode {
     const y90 = Math.floor(this.yr * 0.125); // ((90*yr)/720)
     const y45 = Math.floor(this.yr * 0.063); // ((45*yr)/720)
     
-    const shift = Math.floor(eyesy.knob1 * x320 - x160);
-    const size = Math.floor(eyesy.knob2 * x260) + 5;
+    // Add audio-reactive offset animation
+    const baseShift = Math.floor(eyesy.knob1 * x320 - x160);
+    const audioOffset = Math.sin(this.time * 2) * this.smoothedAudioLevel * 50;
+    const shift = baseShift + audioOffset;
+    
+    // Audio-reactive size
+    const baseSize = Math.floor(eyesy.knob2 * x260) + 5;
+    const size = baseSize * (1.0 + this.smoothedAudioLevel * 0.3);
     
     // Create font (recreate if size changed or font family changed)
     const currentFontFamily = eyesy.font_family || 'Arial, sans-serif';
-    if (!this.font || this.font.size !== size || this.font.fontFamily !== currentFontFamily) {
-      this.font = createFont(eyesy.mode_root + '/font.ttf', size, currentFontFamily);
+    if (!this.font || Math.abs(this.font.size - size) > 2 || this.font.fontFamily !== currentFontFamily) {
+      this.font = createFont(eyesy.mode_root + '/font.ttf', Math.floor(size), currentFontFamily);
     }
     
-    const color = eyesy.color_picker_lfo(eyesy.knob4, 0.05); // uniform color
+    // Audio-reactive color pulsing
+    const color = eyesy.color_picker_lfo(eyesy.knob4, 0.05 + this.smoothedAudioLevel * 0.1);
     
     if (eyesy.trig) {
       this.trigger = true;
@@ -71,19 +83,23 @@ export class Fontpatterns implements Mode {
     // Render text once
     const textRender = renderText(this.font, displayText, false, color);
     
-    // Draw text in grid pattern (10 rows x 9 columns)
+    // Draw text in grid pattern (10 rows x 9 columns) with audio-reactive spacing
+    const spacingMod = 1.0 + this.smoothedAudioLevel * 0.1;
     for (let j = 0; j < 10; j++) {
       for (let i = 0; i < 9; i++) {
         const odd = i % 2;
         let x: number;
         let y: number;
         
+        // Add vertical wave effect based on audio
+        const waveOffset = Math.sin(this.time * 3 + j * 0.5) * this.smoothedAudioLevel * 20;
+        
         if (odd === 0) {
           x = (i * x160 + x160 + shift) - x160;
-          y = (j * y90) - y45;
+          y = (j * y90) - y45 + waveOffset;
         } else {
           x = (i * x160 + x160) - x160;
-          y = (j * y90) - y45;
+          y = (j * y90) - y45 + waveOffset;
         }
         
         // Draw text centered at (x, y)

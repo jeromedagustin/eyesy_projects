@@ -1,6 +1,7 @@
 import { Mode } from '../base/Mode';
 import { Canvas } from '../../core/Canvas';
 import { EYESY } from '../../core/EYESY';
+import { AudioScope } from '../utils/AudioScope';
 
 /**
  * S - Breathing Circles

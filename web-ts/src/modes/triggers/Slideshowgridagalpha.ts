@@ -42,7 +42,6 @@ export class Slideshowgridagalpha implements Mode {
       }
       
       this.images = images;
-      console.log(`Loaded ${this.images.length} images for Slideshow Grid-AG-Alpha mode.`);
     } catch (error) {
       console.error('Failed to load images for Slideshow Grid-AG-Alpha mode:', error);
     }

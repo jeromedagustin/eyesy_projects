@@ -54,6 +54,11 @@ import { Foliaangles } from './scopes/Foliaangles';
 import { Foliacurves } from './scopes/Foliacurves';
 import { Fontpatterns } from './triggers/Fontpatterns';
 import { Fontrecedes } from './triggers/Fontrecedes';
+import { FontWave } from './font/FontWave';
+import { FontParticles } from './font/FontParticles';
+import { FontAudioScope } from './font/FontAudioScope';
+import { FontSpiral } from './font/FontSpiral';
+import { FontRain } from './font/FontRain';
 import { FootballScope } from './scopes/FootballScope';
 import { Googlyeyes } from './scopes/Googlyeyes';
 import { Gradientcloud } from './scopes/Gradientcloud';
@@ -127,6 +132,7 @@ import { Timer } from './utilities/Timer';
 import { Trigontraveller } from './triggers/Trigontraveller';
 import { TwoScopes } from './scopes/TwoScopes';
 import { Webcam } from './utilities/Webcam';
+import { WebcamReactive } from './utilities/WebcamReactive';
 
 // LFO-Based modes
 import { LFOCircles } from './lfo/LFOCircles';
@@ -168,6 +174,10 @@ import { Zoomscope } from './scopes/Zoomscope';
 import { RotatingCube } from './3d/RotatingCube';
 import { ParticleField } from './3d/ParticleField';
 import { Geometric3D } from './3d/Geometric3D';
+import { RotatingSphere } from './3d/RotatingSphere';
+import { TorusKnot } from './3d/TorusKnot';
+import { WavePlane } from './3d/WavePlane';
+import { Fireworks3D } from './3d/Fireworks3D';
 
 // Export all modes
 export const modes: ModeInfo[] = [
@@ -1014,6 +1024,81 @@ export const modes: ModeInfo[] = [
     supportsWebcam: false, // Font modes don't make sense with webcam
   },
   {
+    id: 'font-wave',
+    name: 'Font - Wave',
+    category: 'font',
+    mode: FontWave,
+    experimental: false,
+    supportsWebcam: false,
+    knobDescriptions: {
+      knob1: 'Wave Speed',
+      knob2: 'Wave Amplitude',
+      knob3: 'Text Size',
+      knob4: 'Foreground Color',
+      knob5: 'Background Color',
+    },
+  },
+  {
+    id: 'font-particles',
+    name: 'Font - Particles',
+    category: 'font',
+    mode: FontParticles,
+    experimental: false,
+    supportsWebcam: false,
+    knobDescriptions: {
+      knob1: 'Particle Speed',
+      knob2: 'Particle Spread',
+      knob3: 'Text Size',
+      knob4: 'Foreground Color',
+      knob5: 'Background Color',
+    },
+  },
+  {
+    id: 'font-audio-scope',
+    name: 'Font - Audio Scope',
+    category: 'font',
+    mode: FontAudioScope,
+    experimental: false,
+    supportsWebcam: false,
+    knobDescriptions: {
+      knob1: 'Waveform Scale',
+      knob2: 'Character Spacing',
+      knob3: 'Text Size',
+      knob4: 'Foreground Color',
+      knob5: 'Background Color',
+    },
+  },
+  {
+    id: 'font-spiral',
+    name: 'Font - Spiral',
+    category: 'font',
+    mode: FontSpiral,
+    experimental: false,
+    supportsWebcam: false,
+    knobDescriptions: {
+      knob1: 'Rotation Speed',
+      knob2: 'Spiral Tightness',
+      knob3: 'Text Size',
+      knob4: 'Foreground Color',
+      knob5: 'Background Color',
+    },
+  },
+  {
+    id: 'font-rain',
+    name: 'Font - Rain',
+    category: 'font',
+    mode: FontRain,
+    experimental: false,
+    supportsWebcam: false,
+    knobDescriptions: {
+      knob1: 'Fall Speed',
+      knob2: 'Density',
+      knob3: 'Text Size',
+      knob4: 'Foreground Color',
+      knob5: 'Background Color',
+    },
+  },
+  {
     id: 't---image--circle',
     name: 'Image - Circle Overlay',
     category: 'triggers',
@@ -1235,6 +1320,21 @@ export const modes: ModeInfo[] = [
     mode: Webcam,
     experimental: false,
     supportsWebcam: false, // This IS the webcam mode, no need to layer
+  },
+  {
+    id: 'u---webcam-reactive',
+    name: 'Webcam - Reactive Test',
+    category: 'utilities',
+    mode: WebcamReactive,
+    experimental: true,
+    supportsWebcam: false, // Uses webcam internally for motion detection
+    knobDescriptions: {
+      knob1: 'Motion Sensitivity',
+      knob2: 'Particle Density',
+      knob3: 'Particle Size',
+      knob4: 'Foreground Color',
+      knob5: 'Background Color',
+    },
   },
   
   // === LFO-BASED MODES ===
@@ -1635,6 +1735,66 @@ export const modes: ModeInfo[] = [
       knob2: 'Number of Shapes',
       knob3: 'Shape Size',
       knob4: 'Foreground Color',
+      knob5: 'Background Color',
+    },
+  },
+  {
+    id: '3d---rotating-sphere',
+    name: '3D - Rotating Sphere',
+    category: '3d',
+    mode: RotatingSphere,
+    experimental: false,
+    supportsWebcam: true,
+    knobDescriptions: {
+      knob1: 'Rotation Speed (X)',
+      knob2: 'Rotation Speed (Y)',
+      knob3: 'Sphere Size',
+      knob4: 'Foreground Color',
+      knob5: 'Background Color',
+    },
+  },
+  {
+    id: '3d---torus-knot',
+    name: '3D - Torus Knot',
+    category: '3d',
+    mode: TorusKnot,
+    experimental: false,
+    supportsWebcam: true,
+    knobDescriptions: {
+      knob1: 'Rotation Speed',
+      knob2: 'Knot Complexity',
+      knob3: 'Knot Size',
+      knob4: 'Foreground Color',
+      knob5: 'Background Color',
+    },
+  },
+  {
+    id: '3d---wave-plane',
+    name: '3D - Wave Plane',
+    category: '3d',
+    mode: WavePlane,
+    experimental: false,
+    supportsWebcam: true,
+    knobDescriptions: {
+      knob1: 'Wave Speed',
+      knob2: 'Wave Amplitude',
+      knob3: 'Wave Frequency',
+      knob4: 'Foreground Color',
+      knob5: 'Background Color',
+    },
+  },
+  {
+    id: '3d---fireworks',
+    name: '3D - Fireworks',
+    category: '3d',
+    mode: Fireworks3D,
+    experimental: false,
+    supportsWebcam: true,
+    knobDescriptions: {
+      knob1: 'Launch Rate',
+      knob2: 'Spark Budget',
+      knob3: 'Spread / Floatiness',
+      knob4: 'Base Color',
       knob5: 'Background Color',
     },
   },

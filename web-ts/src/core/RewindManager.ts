@@ -29,7 +29,7 @@ export class RewindManager {
   private captureInterval: number = 1; // Capture every N frames (1 = every frame)
   private frameCounter: number = 0;
   private canvas: HTMLCanvasElement | null = null;
-  private gl: WebGLRenderingContext | null = null;
+  private gl: WebGLRenderingContext | WebGL2RenderingContext | null = null;
   private reversePlayback: boolean = false; // True when playing in reverse
   private reverseSpeed: number = 1; // How many frames to step back per animation frame (1 = normal speed)
   private reversePlaybackEnabled: boolean = false; // User-enabled reverse playback mode
@@ -44,8 +44,13 @@ export class RewindManager {
    */
   initialize(canvas: HTMLCanvasElement): void {
     this.canvas = canvas;
-    const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
-    this.gl = gl;
+    // IMPORTANT: Three.js will often create a WebGL2 context on the main canvas.
+    // Calling `getContext('webgl')` first can produce the console error:
+    // "Canvas has an existing context of a different type".
+    // So prefer WebGL2 first, then fall back to WebGL1.
+    const gl2 = canvas.getContext('webgl2') as WebGL2RenderingContext | null;
+    const gl1 = gl2 ? null : (canvas.getContext('webgl') as WebGLRenderingContext | null);
+    this.gl = gl2 || gl1;
   }
 
   /**

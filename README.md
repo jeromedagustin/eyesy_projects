@@ -72,15 +72,7 @@ python tools/eyesy_runner.py
 
 See `tools/README.md` for full documentation and controls.
 
-**Option 2: Automated Test Suite**
-```bash
-# Test all modes automatically
-python tools/test_modes.py
-```
-
-The test suite verifies that all modes can be loaded, initialized, and drawn without errors. See `tools/README_TESTING.md` for details.
-
-**Option 3: eyesim Simulator**
+**Option 2: eyesim Simulator**
 ```bash
 pip install eyesim
 eyesim custom/your_mode_folder
@@ -97,6 +89,63 @@ eyesim custom/your_mode_folder path/to/audio.wav
 2. Find the EYESY's IP address in the WiFi menu
 3. Access the EYESY Editor at `http://<EYESY_IP_ADDRESS>`
 4. Upload your mode folder to the EYESY's `Modes` directory
+
+## Web Version
+
+This repository includes a **web-based version** of EYESY modes that runs entirely in your browser - no hardware required!
+
+### Quick Start
+
+```bash
+cd web-ts
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 in your browser.
+
+### Features
+
+- ✅ **130+ modes** - All factory modes ported to TypeScript
+- ✅ **WebGL rendering** - GPU-accelerated graphics via Three.js
+- ✅ **Full UI** - Controls, mode browser, mobile support
+- ✅ **Real audio** - Microphone input with Web Audio API
+- ✅ **Webcam support** - Live camera feed for webcam modes
+- ✅ **Image upload** - Upload custom images for image modes
+- ✅ **Smooth transitions** - Animated transitions between modes
+- ✅ **Settings persistence** - All settings saved in browser
+- ✅ **Mobile optimized** - Touch gestures, responsive layout
+
+### How It Works
+
+The web version is a **native TypeScript rewrite** (not Python). Modes are TypeScript classes that implement the same EYESY API:
+
+```typescript
+export class MyMode implements Mode {
+  async setup(canvas: Canvas, eyesy: EYESY): Promise<void> {
+    // Initialize
+  }
+
+  draw(canvas: Canvas, eyesy: EYESY): void {
+    // Draw each frame
+    const color = eyesy.color_picker(eyesy.knob4);
+    canvas.circle([x, y], radius, color);
+  }
+}
+```
+
+All modes are bundled at build time and run entirely client-side - no server required!
+
+### Deployment
+
+The web version builds to static files that can be deployed anywhere:
+
+- **Vercel**: `vercel deploy`
+- **Netlify**: Drag `dist/` folder
+- **GitHub Pages**: Push `dist/` to `gh-pages` branch
+- **Any static host**: Upload `dist/` contents
+
+See [`web-ts/README.md`](web-ts/README.md) for full documentation.
 
 ## Resources
 

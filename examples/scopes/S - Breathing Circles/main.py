@@ -68,3 +68,9 @@ def draw(screen, eyesy):
     center_radius = int(max_radius * 0.15 * (1.0 + breathing_amplitude * phase))
     if center_radius > 0:
         pygame.draw.circle(screen, color, (center_x, center_y), center_radius)
+
+
+
+
+
+

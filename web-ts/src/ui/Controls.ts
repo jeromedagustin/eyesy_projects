@@ -26,7 +26,6 @@ export class Controls {
   private onTransitionTypeChange?: (value: string) => void;
   private onLeftHandedChange?: (value: boolean) => void;
   private onPortraitRotateChange?: (value: boolean) => void;
-  private onShowOnlyFavoritesChange?: (value: boolean) => void;
   private onFontFamilyChange?: (value: string) => void;
   private onFontTextChange?: (value: string) => void;
   private onSeizureSafeChange?: (value: boolean) => void;
@@ -56,6 +55,7 @@ export class Controls {
   private onEffectIntensityChange?: (effectName: string, intensity: number) => void;
   private onWebcamEffectEnabledChange?: (effectName: string, enabled: boolean) => void;
   private onWebcamEffectIntensityChange?: (effectName: string, intensity: number) => void;
+  private onEffectsBlendMixChange?: (value: number) => void;
   private onColorGradingBrightnessChange?: (value: number) => void;
   private onColorGradingContrastChange?: (value: number) => void;
   private onColorGradingSaturationChange?: (value: number) => void;
@@ -143,9 +143,6 @@ export class Controls {
     this.onPortraitRotateChange = callback;
   }
 
-  setOnShowOnlyFavoritesChange(callback: (value: boolean) => void) {
-    this.onShowOnlyFavoritesChange = callback;
-  }
 
   setOnFontFamilyChange(callback: (value: string) => void) {
     this.onFontFamilyChange = callback;
@@ -267,12 +264,24 @@ export class Controls {
   }
 
   setOnEffectReset(callback: (effectName: string) => void) {
-    this.onEffectReset = callback;
+    this.onEffectResetToDefault = callback;
   }
 
   setOnResetAllEffects(callback: () => void) {
-    this.onResetAllEffects = callback;
+    this.onResetAllEffectsToDefault = callback;
   }
+
+  setOnRandomizeEffects(callback: () => void) {
+    this.onRandomizeEffects = callback;
+  }
+
+  setOnEffectsBlendMixChange(callback: (value: number) => void) {
+    this.onEffectsBlendMixChange = callback;
+  }
+  
+  private onEffectResetToDefault?: (effectName: string) => void;
+  private onResetAllEffectsToDefault?: () => void;
+  private onRandomizeEffects?: () => void;
   
   onResetAllToDefault?: () => void;
   
@@ -732,6 +741,54 @@ export class Controls {
               Zoom in/out (middle = default)
             </div>
           </div>
+
+          <div class="knob-group" style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <label style="font-size: 0.85rem; color: #ccc;">
+                X Position: <span id="knob9-value">0px</span>
+              </label>
+              <button class="reset-btn" data-knob="9" style="
+                background: #3a3a3a;
+                border: 1px solid #4a4a4a;
+                color: #aaa;
+                padding: 0.2rem 0.5rem;
+                border-radius: 3px;
+                font-size: 0.7rem;
+                cursor: pointer;
+                opacity: 0.6;
+              " title="Reset to center (0px)">↺</button>
+            </div>
+            <input type="range" id="knob9" min="0" max="1" step="0.01" value="0.5" 
+              style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none;"
+              title="Double-click to reset to center (0px)">
+            <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem;">
+              Horizontal offset (middle = center)
+            </div>
+          </div>
+
+          <div class="knob-group" style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <label style="font-size: 0.85rem; color: #ccc;">
+                Y Position: <span id="knob10-value">0px</span>
+              </label>
+              <button class="reset-btn" data-knob="10" style="
+                background: #3a3a3a;
+                border: 1px solid #4a4a4a;
+                color: #aaa;
+                padding: 0.2rem 0.5rem;
+                border-radius: 3px;
+                font-size: 0.7rem;
+                cursor: pointer;
+                opacity: 0.6;
+              " title="Reset to center (0px)">↺</button>
+            </div>
+            <input type="range" id="knob10" min="0" max="1" step="0.01" value="0.5" 
+              style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none;"
+              title="Double-click to reset to center (0px)">
+            <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem;">
+              Vertical offset (middle = center)
+            </div>
+          </div>
         </div>
 
         <!-- Trigger Section -->
@@ -890,6 +947,42 @@ export class Controls {
                 Aim for 50-80% for best results
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Images Section -->
+        <div id="images-section" class="controls-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #3a3a3a;">
+          <div class="section-header" style="
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+          ">Images</div>
+
+          <button id="images-btn" style="
+            width: 100%;
+            padding: 0.75rem;
+            background: #3a3a3a;
+            color: #fff;
+            border: 1px solid #4a4a4a;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+          " title="Upload images">
+            <span id="images-icon">🖼️</span>
+            <span id="images-text">Upload Images (0)</span>
+          </button>
+          <input type="file" id="image-upload" multiple accept="image/*" style="display: none;">
+
+          <div style="font-size: 0.7rem; color: #888; margin-top: 0.5rem;">
+            Used by image/slideshow modes.
           </div>
         </div>
 
@@ -1061,7 +1154,7 @@ export class Controls {
         </div>
 
         <!-- Effects Section -->
-        <div class="controls-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #3a3a3a;">
+        <div id="effects-section" class="controls-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #3a3a3a;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
           <div class="section-header" style="
             font-size: 0.85rem;
@@ -1088,16 +1181,43 @@ export class Controls {
               <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
                 Quick Effects
               </div>
-              <button id="reset-all-effects" style="
-                padding: 0.3rem 0.6rem;
-                background: #555;
-                color: white;
-                border: none;
-                border-radius: 3px;
-                font-size: 0.7rem;
-                cursor: pointer;
-                font-weight: 500;
-              " title="Reset All Effects">Reset All</button>
+              <div style="display: flex; gap: 0.4rem;">
+                <button id="random-effects-quick" style="
+                  padding: 0.3rem 0.6rem;
+                  background: #8b5cf6;
+                  color: white;
+                  border: none;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  font-weight: 500;
+                " title="Randomize All Effects">🎲 Random</button>
+                <button id="reset-all-effects" style="
+                  padding: 0.3rem 0.6rem;
+                  background: #555;
+                  color: white;
+                  border: none;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  font-weight: 500;
+                " title="Reset All Effects">Reset All</button>
+              </div>
+            </div>
+            
+            <!-- Effects Blend/Mix Control (Quick Access) -->
+            <div style="padding: 0.6rem; background: #1a1a1a; border-radius: 4px; margin-bottom: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                <label style="font-size: 0.8rem; color: #ccc; font-weight: 500;">Effects Mix</label>
+                <span id="effects-blend-mix-value-quick" style="font-size: 0.8rem; color: #888;">100%</span>
+              </div>
+              <input type="range" id="effects-blend-mix-quick" min="0" max="1" step="0.01" value="1.0" 
+                style="width: 100%; height: 5px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none; cursor: pointer;"
+                title="Blend between original (0%) and full effects (100%)">
+              <div style="display: flex; justify-content: space-between; margin-top: 0.2rem;">
+                <span style="font-size: 0.65rem; color: #666;">Original</span>
+                <span style="font-size: 0.65rem; color: #666;">Full Effects</span>
+              </div>
             </div>
           
           <!-- Blur Effect -->
@@ -1246,39 +1366,76 @@ export class Controls {
           </div>
           </div>
 
-          <!-- Effects Panel Sidebar -->
+          <!-- Effects Panel Sidebar (slides in from SAME side as controls) -->
           <div id="effects-panel-modal" style="
             display: none;
             visibility: hidden;
             position: fixed;
             top: 0;
-            left: 0;
             bottom: 0;
-            width: 380px;
+            right: 0;
+            left: auto;
+            width: 300px;
             max-width: 85vw;
-            background: #1a1a1a;
-            border-right: 2px solid #4a4a4a;
-            z-index: 9999;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--bg-surface);
+            border-right: none;
+            z-index: var(--z-overlay);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
-            transform: translateX(-100%);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+            transform: translateX(100%);
             transition: transform 0.3s ease-out;
           ">
-            <div style="padding: 1rem; position: sticky; top: 0; background: #1a1a1a; z-index: 10; border-bottom: 1px solid #3a3a3a;">
+            <div style="padding: 1rem; position: sticky; top: 0; background: var(--bg-primary); z-index: 10; border-bottom: 1px solid var(--bg-surface);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2 style="font-size: 1.2rem; margin: 0; color: #fff; font-weight: 600;">Effects Panel</h2>
-                <button id="close-effects-panel" style="
-                  padding: 0.4rem 0.8rem;
-                  background: #555;
-                  color: white;
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex: 1;">
+                  <h2 style="
+                    font-size: 1.2rem;
+                    margin: 0;
+                    color: #fff;
+                    font-weight: 600;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  ">Post-Effects</h2>
+                  <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button class="effects-tab" data-tab="post-effects" style="
+                      padding: 0.4rem 0.8rem;
+                      background: #4a9eff;
+                      color: white;
+                      border: none;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      font-size: 0.8rem;
+                      font-weight: 500;
+                      line-height: 1;
+                      transition: all 0.2s;
+                    ">Effects Panel</button>
+                    <button class="effects-tab" data-tab="webcam-effects" style="
+                      padding: 0.4rem 0.8rem;
+                      background: #3a3a3a;
+                      color: #aaa;
+                      border: none;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      font-size: 0.8rem;
+                      font-weight: 500;
+                      line-height: 1;
+                      transition: all 0.2s;
+                    ">Webcam Effects</button>
+                  </div>
+                </div>
+                <button id="effects-panel-close-btn" style="
+                  background: transparent;
                   border: none;
-                  border-radius: 4px;
-                  cursor: pointer;
-                  font-size: 0.85rem;
-                  font-weight: 500;
+                  color: #aaa;
+                  font-size: 1.5rem;
                   line-height: 1;
-                " title="Close (ESC)">✕</button>
+                  cursor: pointer;
+                  padding: 0.25rem 0.5rem;
+                  opacity: 0.85;
+                " title="Close Effects Panel" aria-label="Close Effects Panel">✕</button>
               </div>
               <input type="text" id="effects-search" placeholder="Search effects..." style="
                 width: 100%;
@@ -1289,9 +1446,25 @@ export class Controls {
                 border-radius: 4px;
                 font-size: 0.85rem;
                 box-sizing: border-box;
+                margin-bottom: 1rem;
               ">
+              <!-- Effects Blend/Mix Control -->
+              <div style="padding: 0.75rem; background: #2a2a2a; border-radius: 4px; margin-top: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                  <label style="font-size: 0.85rem; color: #ccc; font-weight: 500;">Effects Mix</label>
+                  <span id="effects-blend-mix-value" style="font-size: 0.85rem; color: #888;">100%</span>
+                </div>
+                <input type="range" id="effects-blend-mix" min="0" max="1" step="0.01" value="1.0" 
+                  style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none; cursor: pointer;"
+                  title="Blend between original (0%) and full effects (100%)">
+                <div style="display: flex; justify-content: space-between; margin-top: 0.25rem;">
+                  <span style="font-size: 0.7rem; color: #666;">Original</span>
+                  <span style="font-size: 0.7rem; color: #666;">Full Effects</span>
+                </div>
+              </div>
             </div>
             <div style="padding: 1rem 1rem 1rem 1rem;">
+            <div id="post-effects-tab" class="tab-content">
 
           <!-- Color & Tone Effects -->
           <div style="margin-top: 0; padding-top: 0; border-top: none;">
@@ -1921,6 +2094,60 @@ export class Controls {
               </div>
             </div>
             </div>
+            <!-- End Post-Effects Tab -->
+            
+            <div id="webcam-effects-tab" class="tab-content" style="display: none;">
+              <!-- Webcam Effects Content -->
+              <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem; font-weight: 600;">
+                Webcam Effects
+              </div>
+              <div style="font-size: 0.7rem; color: #888; margin-bottom: 1rem;">
+                Apply effects directly to the webcam feed
+              </div>
+              
+              <!-- Quick Webcam Effects -->
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 0.75rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #ccc; cursor: pointer;">
+                  <input type="checkbox" class="webcam-effect-toggle" data-effect="blur" style="cursor: pointer;">
+                  Blur
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #ccc; cursor: pointer;">
+                  <input type="checkbox" class="webcam-effect-toggle" data-effect="grayscale" style="cursor: pointer;">
+                  Grayscale
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #ccc; cursor: pointer;">
+                  <input type="checkbox" class="webcam-effect-toggle" data-effect="sepia" style="cursor: pointer;">
+                  Sepia
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #ccc; cursor: pointer;">
+                  <input type="checkbox" class="webcam-effect-toggle" data-effect="invert" style="cursor: pointer;">
+                  Invert
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #ccc; cursor: pointer;">
+                  <input type="checkbox" class="webcam-effect-toggle" data-effect="pixelation" style="cursor: pointer;">
+                  Pixelation
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #ccc; cursor: pointer;">
+                  <input type="checkbox" class="webcam-effect-toggle" data-effect="vignette" style="cursor: pointer;">
+                  Vignette
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #ccc; cursor: pointer;">
+                  <input type="checkbox" class="webcam-effect-toggle" data-effect="bloom" style="cursor: pointer;">
+                  Bloom
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #ccc; cursor: pointer;">
+                  <input type="checkbox" class="webcam-effect-toggle" data-effect="sharpen" style="cursor: pointer;">
+                  Sharpen
+                </label>
+              </div>
+              
+              <!-- Webcam Effects Intensity -->
+              <div id="webcam-effects-intensity-container" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #3a3a3a;">
+                <div id="webcam-effects-intensity-sliders"></div>
+              </div>
+            </div>
+            <!-- End Webcam Effects Tab -->
+            </div>
             
             <!-- Bottom Buttons -->
             <div style="padding: 1rem; position: sticky; bottom: 0; background: #1a1a1a; z-index: 10; border-top: 1px solid #3a3a3a;">
@@ -1936,9 +2163,9 @@ export class Controls {
                   font-weight: 500;
                   width: 100%;
                 ">Reset Effects</button>
-                <button id="close-effects-panel-bottom" style="
+                <button id="random-effects-panel" style="
                   padding: 0.6rem 2rem;
-                  background: #4a9eff;
+                  background: #8b5cf6;
                   color: white;
                   border: none;
                   border-radius: 4px;
@@ -1946,7 +2173,7 @@ export class Controls {
                   font-size: 0.9rem;
                   font-weight: 500;
                   width: 100%;
-                ">Close Effects Panel</button>
+                ">🎲 Random Effects</button>
               </div>
             </div>
             </div>
@@ -1995,15 +2222,6 @@ export class Controls {
             </label>
             <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem; margin-left: 1.5rem;">
               Rotate animation 90° in portrait mode for larger display
-            </div>
-          </div>
-          <div style="margin-bottom: 1rem;">
-            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #ccc;">
-              <input type="checkbox" id="show-only-favorites" style="cursor: pointer;">
-              Show Only Favorites
-            </label>
-            <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem; margin-left: 1.5rem;">
-              Filter mode browser and navigation to show only favorited modes
             </div>
           </div>
         </div>
@@ -2428,6 +2646,10 @@ export class Controls {
       </div>
     `;
 
+    // FX no longer renders as a separate modal/sidebar. Any legacy FX markup is kept
+    // inert in a <template> to avoid duplicate IDs, and the FX button simply scrolls
+    // this controls panel to the effects section.
+
     // Add slider styling
     const style = document.createElement('style');
     style.textContent = `
@@ -2456,6 +2678,24 @@ export class Controls {
   }
 
   private setupListeners() {
+    // Mobile controls header close button (✕)
+    // Use an event-based close so it works even if other parts of the UI manage panel state.
+    const closeControlsBtn = document.getElementById('close-controls-btn') as HTMLButtonElement | null;
+    if (closeControlsBtn) {
+      closeControlsBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Preferred: tell MobileUI to close (keeps its internal `controlsOpen` in sync)
+        window.dispatchEvent(new Event('eyesy:close-controls'));
+
+        // Fallback: directly close the panel/backdrop in case MobileUI isn't active
+        const controlsPanel = document.querySelector('#controls-container.controls-panel') as HTMLElement | null;
+        controlsPanel?.classList.remove('open');
+        document.querySelector('.controls-backdrop')?.classList.remove('visible');
+      });
+    }
+
     // Knob sliders
     for (let i = 1; i <= 5; i++) {
       const slider = document.getElementById(`knob${i}`) as HTMLInputElement;
@@ -2487,7 +2727,10 @@ export class Controls {
     const knob7Value = document.getElementById('knob7-value')!;
     knob7Slider.addEventListener('input', (e) => {
       const value = parseFloat((e.target as HTMLInputElement).value);
-      // Calculate zoom level: 0.0 = 0.1x, 0.5 = 1.0x, 1.0 = 5.0x
+      // Calculate zoom level for display
+      // For 2D modes: 0.0 = 0.1x, 0.5 = 1.0x, 1.0 = 5.0x (original range)
+      // For 3D modes: Uses exponential curve 0.5x to 2.0x (calculated in Base3DMode)
+      // Display uses 2D range for consistency in UI
       let zoomLevel: number;
       if (value <= 0.5) {
         const t = value / 0.5;
@@ -2519,6 +2762,38 @@ export class Controls {
       knob8Value.textContent = `${speedLevel.toFixed(2)}x`;
       if (this.onKnobChange) {
         this.onKnobChange(8, value);
+      }
+    });
+
+    // Knob 9 - X Position (0.0-1.0, middle = 0.5 = center/0px)
+    const knob9Slider = document.getElementById('knob9') as HTMLInputElement;
+    const knob9Value = document.getElementById('knob9-value')!;
+    knob9Slider.addEventListener('input', (e) => {
+      const value = parseFloat((e.target as HTMLInputElement).value);
+      // Calculate pixel offset: 0.0 = -max, 0.5 = 0, 1.0 = +max
+      const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+      const maxOffset = canvas ? canvas.width * 0.5 : 640; // 50% of canvas width
+      const offset = (value - 0.5) * 2; // -1.0 to +1.0
+      const pixelOffset = Math.round(offset * maxOffset);
+      knob9Value.textContent = `${pixelOffset >= 0 ? '+' : ''}${pixelOffset}px`;
+      if (this.onKnobChange) {
+        this.onKnobChange(9, value);
+      }
+    });
+
+    // Knob 10 - Y Position (0.0-1.0, middle = 0.5 = center/0px)
+    const knob10Slider = document.getElementById('knob10') as HTMLInputElement;
+    const knob10Value = document.getElementById('knob10-value')!;
+    knob10Slider.addEventListener('input', (e) => {
+      const value = parseFloat((e.target as HTMLInputElement).value);
+      // Calculate pixel offset: 0.0 = -max, 0.5 = 0, 1.0 = +max
+      const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+      const maxOffset = canvas ? canvas.height * 0.5 : 480; // 50% of canvas height
+      const offset = (value - 0.5) * 2; // -1.0 to +1.0
+      const pixelOffset = Math.round(offset * maxOffset);
+      knob10Value.textContent = `${pixelOffset >= 0 ? '+' : ''}${pixelOffset}px`;
+      if (this.onKnobChange) {
+        this.onKnobChange(10, value);
       }
     });
 
@@ -2842,11 +3117,8 @@ export class Controls {
     // Reverse playback checkbox
     const reversePlaybackCheckbox = document.getElementById('reverse-playback') as HTMLInputElement;
     if (reversePlaybackCheckbox) {
-      console.log('[REVERSE] Checkbox element found, setting up listener');
       reversePlaybackCheckbox.addEventListener('change', (e) => {
         const checked = (e.target as HTMLInputElement).checked;
-        console.log('[REVERSE] Checkbox change event fired, checked:', checked);
-        console.log('[REVERSE] onReversePlaybackChange callback exists:', !!this.onReversePlaybackChange);
         if (this.onReversePlaybackChange) {
           this.onReversePlaybackChange(checked);
         } else {
@@ -3347,153 +3619,166 @@ export class Controls {
       });
     }, 100);
 
-    // Effects Panel Modal Toggle
+    // Effects Panel (separate UI, but opens from SAME side as controls)
     const effectsPanelToggle = document.getElementById('effects-panel-toggle');
     const effectsPanelModal = document.getElementById('effects-panel-modal');
-    const closeEffectsPanel = document.getElementById('close-effects-panel');
-    const closeEffectsPanelBottom = document.getElementById('close-effects-panel-bottom');
-    const effectsSearch = document.getElementById('effects-search') as HTMLInputElement;
-    
-    // Function to update effects panel position based on left-handed setting
-    const updateEffectsPanelPosition = () => {
+    const effectsSearch = document.getElementById('effects-search') as HTMLInputElement | null;
+
+    // Portal to <body> so it's not trapped by transforms on the controls panel
+    if (effectsPanelModal && effectsPanelModal.parentElement !== document.body) {
+      document.body.appendChild(effectsPanelModal);
+    }
+
+    const getIsLeftHanded = (): boolean => {
+      const container = document.querySelector('#controls-container') as HTMLElement | null;
+      return container?.classList.contains('left-handed') || false;
+    };
+
+    const applyEffectsPanelSide = () => {
       if (!effectsPanelModal) return;
-      
-      const controlsContainer = document.querySelector('#controls-container') as HTMLElement;
-      const isLeftHanded = controlsContainer?.classList.contains('left-handed') || false;
-      
+      const isLeftHanded = getIsLeftHanded();
+
       if (isLeftHanded) {
-        // Left-handed: controls on left, so effects panel on right
+        effectsPanelModal.style.left = '0';
+        effectsPanelModal.style.right = 'auto';
+        effectsPanelModal.style.borderRight = '2px solid #4a4a4a';
+        effectsPanelModal.style.borderLeft = 'none';
+        effectsPanelModal.style.boxShadow = '4px 0 20px rgba(0, 0, 0, 0.5)';
+        if (!effectsPanelModal.classList.contains('open')) {
+          effectsPanelModal.style.transform = 'translateX(-100%)';
+        }
+      } else {
         effectsPanelModal.style.left = 'auto';
         effectsPanelModal.style.right = '0';
         effectsPanelModal.style.borderLeft = '2px solid #4a4a4a';
         effectsPanelModal.style.borderRight = 'none';
         effectsPanelModal.style.boxShadow = '-4px 0 20px rgba(0, 0, 0, 0.5)';
-        // If panel is hidden, keep it hidden off-screen
-        if (effectsPanelModal.style.display === 'none' || !effectsPanelModal.style.display) {
-          effectsPanelModal.style.transform = 'translateX(100%)'; // Hidden by default
-        }
-      } else {
-        // Right-handed (default): controls on right, so effects panel on left
-        effectsPanelModal.style.left = '0';
-        effectsPanelModal.style.right = 'auto';
-        effectsPanelModal.style.borderLeft = 'none';
-        effectsPanelModal.style.borderRight = '2px solid #4a4a4a';
-        effectsPanelModal.style.boxShadow = '4px 0 20px rgba(0, 0, 0, 0.5)';
-        // If panel is hidden, keep it hidden off-screen
-        if (effectsPanelModal.style.display === 'none' || !effectsPanelModal.style.display) {
-          effectsPanelModal.style.transform = 'translateX(-100%)'; // Hidden by default
+        if (!effectsPanelModal.classList.contains('open')) {
+          effectsPanelModal.style.transform = 'translateX(100%)';
         }
       }
     };
-    
-    // Initialize position and ensure panel is hidden
-    if (effectsPanelModal) {
-      effectsPanelModal.style.display = 'none';
-      effectsPanelModal.style.visibility = 'hidden';
-      updateEffectsPanelPosition();
-    }
-    
-    // Watch for left-handed changes (will be set up in setupListeners, but we also watch class changes)
-    // Also watch for class changes on controls container
-    const controlsContainer = document.querySelector('#controls-container') as HTMLElement;
-    if (controlsContainer && effectsPanelModal) {
-      const observer = new MutationObserver(() => {
-        updateEffectsPanelPosition();
-      });
-      observer.observe(controlsContainer, {
-        attributes: true,
-        attributeFilter: ['class']
-      });
-    }
-    
-    // Helper to get current slide direction
-    const getSlideDirection = () => {
-      const container = document.querySelector('#controls-container') as HTMLElement;
-      const isLeftHanded = container?.classList.contains('left-handed') || false;
-      return isLeftHanded ? 'translateX(100%)' : 'translateX(-100%)';
-    };
-    
-    // Helper to close the effects panel
-    const closeEffectsPanelFn = () => {
+
+    const closeEffectsPanel = () => {
       if (!effectsPanelModal) return;
-      // Slide out in the correct direction
-      effectsPanelModal.style.transform = getSlideDirection();
-      // Hide after animation
+      effectsPanelModal.classList.remove('open');
+      applyEffectsPanelSide(); // restores correct hidden transform for current side
+      const backdrop = document.querySelector('.effects-panel-backdrop') as HTMLElement | null;
+      backdrop?.classList.remove('visible');
       setTimeout(() => {
         effectsPanelModal.style.display = 'none';
         effectsPanelModal.style.visibility = 'hidden';
       }, 300);
     };
-    
-    if (effectsPanelToggle && effectsPanelModal) {
-      effectsPanelToggle.addEventListener('click', () => {
-        // Toggle behavior: if panel is open, close it; otherwise open it
-        const isOpen = effectsPanelModal.style.display === 'block' && 
-                      effectsPanelModal.style.transform === 'translateX(0)';
-        
-        if (isOpen) {
-          // Panel is open, close it
-          closeEffectsPanelFn();
-        } else {
-          // Panel is closed, open it
-          updateEffectsPanelPosition(); // Ensure position is correct before opening
-          effectsPanelModal.style.display = 'block';
-          effectsPanelModal.style.visibility = 'visible';
-          // Trigger reflow to ensure display is applied before transform
-          effectsPanelModal.offsetHeight;
-          // Slide in
-          effectsPanelModal.style.transform = 'translateX(0)';
-          // Focus search on open
-          if (effectsSearch) {
-            setTimeout(() => effectsSearch.focus(), 100);
-          }
-        }
-      });
+
+    const openEffectsPanel = () => {
+      if (!effectsPanelModal) return;
+      applyEffectsPanelSide();
+      effectsPanelModal.style.display = 'block';
+      effectsPanelModal.style.visibility = 'visible';
+      // Backdrop (tap outside to close)
+      let backdrop = document.querySelector('.effects-panel-backdrop') as HTMLElement | null;
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'effects-panel-backdrop';
+        backdrop.addEventListener('click', () => closeEffectsPanel());
+        document.body.appendChild(backdrop);
+      }
+      backdrop.classList.add('visible');
+      // Trigger reflow
+      effectsPanelModal.offsetHeight;
+      effectsPanelModal.classList.add('open');
+      effectsPanelModal.style.transform = 'translateX(0)';
+
+      if (effectsSearch) {
+        setTimeout(() => effectsSearch.focus(), 100);
+      }
+    };
+
+    // Keep side in sync with left-handed mode
+    const controlsContainer = document.querySelector('#controls-container') as HTMLElement | null;
+    if (controlsContainer && effectsPanelModal) {
+      const observer = new MutationObserver(() => applyEffectsPanelSide());
+      observer.observe(controlsContainer, { attributes: true, attributeFilter: ['class'] });
     }
-    
-    if (closeEffectsPanel && effectsPanelModal) {
-      closeEffectsPanel.addEventListener('click', (e) => {
+
+    // Toggle button inside Controls
+    if (effectsPanelToggle) {
+      effectsPanelToggle.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        closeEffectsPanelFn();
+        if (!effectsPanelModal) return;
+        const isOpen = effectsPanelModal.classList.contains('open');
+        if (isOpen) closeEffectsPanel();
+        else openEffectsPanel();
       });
     }
-    
-    if (closeEffectsPanelBottom && effectsPanelModal) {
-      closeEffectsPanelBottom.addEventListener('click', (e) => {
+
+    // Close button inside the effects panel header
+    const effectsPanelCloseBtn = document.getElementById('effects-panel-close-btn');
+    if (effectsPanelCloseBtn) {
+      effectsPanelCloseBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        closeEffectsPanelFn();
+        closeEffectsPanel();
       });
     }
-    
+
+    // ESC closes
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && effectsPanelModal && effectsPanelModal.classList.contains('open')) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeEffectsPanel();
+      }
+    });
+
+    // Backdrop click to close (same pattern as controls)
+    if (effectsPanelModal) {
+      effectsPanelModal.addEventListener('click', (e) => {
+        if (e.target === effectsPanelModal) closeEffectsPanel();
+      });
+      // initialize hidden state on correct side
+      effectsPanelModal.style.display = 'none';
+      effectsPanelModal.style.visibility = 'hidden';
+      effectsPanelModal.classList.remove('open');
+      applyEffectsPanelSide();
+    }
+
     // Reset Effects button in effects panel
     const resetEffectsPanelBtn = document.getElementById('reset-effects-panel');
     if (resetEffectsPanelBtn) {
       resetEffectsPanelBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (this.onResetAllEffects) {
-          this.onResetAllEffects();
+        if (this.onResetAllEffectsToDefault) {
+          this.onResetAllEffectsToDefault();
         }
       });
     }
     
-    // Close modal on ESC key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && effectsPanelModal && effectsPanelModal.style.display === 'block') {
+    // Random Effects button in effects panel
+    const randomEffectsPanelBtn = document.getElementById('random-effects-panel');
+    if (randomEffectsPanelBtn) {
+      randomEffectsPanelBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        closeEffectsPanelFn();
-      }
-    });
+        if (this.onRandomizeEffects) {
+          this.onRandomizeEffects();
+        }
+      });
+    }
     
-    // Close modal when clicking outside (on backdrop)
-    if (effectsPanelModal) {
-      effectsPanelModal.addEventListener('click', (e) => {
-        // Only close if clicking directly on the modal background, not on child elements
-        if (e.target === effectsPanelModal) {
-          closeEffectsPanelFn();
+    // Effects Blend Mix slider
+    const effectsBlendMixSlider = document.getElementById('effects-blend-mix') as HTMLInputElement;
+    const effectsBlendMixValue = document.getElementById('effects-blend-mix-value');
+    if (effectsBlendMixSlider && effectsBlendMixValue) {
+      effectsBlendMixSlider.addEventListener('input', (e) => {
+        const value = parseFloat((e.target as HTMLInputElement).value);
+        const percent = Math.round(value * 100);
+        effectsBlendMixValue.textContent = `${percent}%`;
+        if (this.onEffectsBlendMixChange) {
+          this.onEffectsBlendMixChange(value);
         }
       });
     }
@@ -3530,6 +3815,42 @@ export class Controls {
       });
     }
 
+    // Tab switching for effects panel
+    const effectsTabs = document.querySelectorAll('.effects-tab');
+    const postEffectsTabContent = document.getElementById('post-effects-tab');
+    const webcamEffectsTabContent = document.getElementById('webcam-effects-tab');
+    
+    effectsTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const tabName = (tab as HTMLElement).getAttribute('data-tab');
+        
+        // Update tab button styles
+        effectsTabs.forEach((t) => {
+          const isActive = (t as HTMLElement).getAttribute('data-tab') === tabName;
+          if (isActive) {
+            (t as HTMLElement).style.background = '#4a9eff';
+            (t as HTMLElement).style.color = 'white';
+          } else {
+            (t as HTMLElement).style.background = '#3a3a3a';
+            (t as HTMLElement).style.color = '#aaa';
+          }
+        });
+        
+        // Show/hide tab content
+        if (tabName === 'post-effects' && postEffectsTabContent) {
+          postEffectsTabContent.style.display = '';
+          if (webcamEffectsTabContent) {
+            webcamEffectsTabContent.style.display = 'none';
+          }
+        } else if (tabName === 'webcam-effects' && webcamEffectsTabContent) {
+          webcamEffectsTabContent.style.display = '';
+          if (postEffectsTabContent) {
+            postEffectsTabContent.style.display = 'none';
+          }
+        }
+      });
+    });
+
     // Trigger button
     const triggerBtn = document.getElementById('trigger-btn');
     if (triggerBtn) {
@@ -3553,6 +3874,10 @@ export class Controls {
     const autoClearBtn = document.getElementById('auto-clear-btn');
     if (autoClearBtn) {
       autoClearBtn.addEventListener('click', () => {
+        // Don't allow toggling if button is disabled (3D modes)
+        if (autoClearBtn.hasAttribute('disabled')) {
+          return;
+        }
         const currentState = autoClearBtn.classList.contains('active');
         const newState = !currentState;
         if (this.onAutoClearChange) {
@@ -3763,38 +4088,6 @@ export class Controls {
         if (this.onLeftHandedChange) {
           this.onLeftHandedChange(value);
         }
-        // Also update effects panel position when left-handed mode changes
-        const effectsPanelModal = document.getElementById('effects-panel-modal');
-        if (effectsPanelModal) {
-          const updateEffectsPanelPosition = () => {
-            const controlsContainer = document.querySelector('#controls-container') as HTMLElement;
-            const isLeftHanded = controlsContainer?.classList.contains('left-handed') || false;
-            
-            if (isLeftHanded) {
-              // Left-handed: controls on left, so effects panel on right
-              effectsPanelModal.style.left = 'auto';
-              effectsPanelModal.style.right = '0';
-              effectsPanelModal.style.borderLeft = '2px solid #4a4a4a';
-              effectsPanelModal.style.borderRight = 'none';
-              effectsPanelModal.style.boxShadow = '-4px 0 20px rgba(0, 0, 0, 0.5)';
-              if (effectsPanelModal.style.display === 'none' || !effectsPanelModal.style.display) {
-                effectsPanelModal.style.transform = 'translateX(100%)';
-              }
-            } else {
-              // Right-handed (default): controls on right, so effects panel on left
-              effectsPanelModal.style.left = '0';
-              effectsPanelModal.style.right = 'auto';
-              effectsPanelModal.style.borderLeft = 'none';
-              effectsPanelModal.style.borderRight = '2px solid #4a4a4a';
-              effectsPanelModal.style.boxShadow = '4px 0 20px rgba(0, 0, 0, 0.5)';
-              if (effectsPanelModal.style.display === 'none' || !effectsPanelModal.style.display) {
-                effectsPanelModal.style.transform = 'translateX(-100%)';
-              }
-            }
-          };
-          // Wait a bit for the controls panel to update
-          setTimeout(updateEffectsPanelPosition, 50);
-        }
       });
     }
 
@@ -3809,16 +4102,6 @@ export class Controls {
       });
     }
 
-    // Show only favorites checkbox
-    const showOnlyFavoritesCheckbox = document.getElementById('show-only-favorites') as HTMLInputElement;
-    if (showOnlyFavoritesCheckbox) {
-      showOnlyFavoritesCheckbox.addEventListener('change', (e) => {
-        const value = (e.target as HTMLInputElement).checked;
-        if (this.onShowOnlyFavoritesChange) {
-          this.onShowOnlyFavoritesChange(value);
-        }
-      });
-    }
 
     // Seizure-safe mode checkbox with warning dialog
     const seizureSafeCheckbox = document.getElementById('seizure-safe') as HTMLInputElement;
@@ -3874,11 +4157,13 @@ export class Controls {
       1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0,
       6: 0.0, // Rotation: 0°
       7: 0.5, // Zoom: 1.0x
-      8: 0.5  // Speed: 1.0x
+      8: 0.5, // Speed: 1.0x
+      9: 0.5, // X Position: center (0px)
+      10: 0.5 // Y Position: center (0px)
     };
 
     // Double-click handlers for all knobs
-    for (let i = 1; i <= 8; i++) {
+    for (let i = 1; i <= 10; i++) {
       const slider = document.getElementById(`knob${i}`) as HTMLInputElement;
       if (slider) {
         let clickCount = 0;
@@ -3927,8 +4212,8 @@ export class Controls {
     const resetAllEffectsBtn = document.getElementById('reset-all-effects');
     if (resetAllEffectsBtn) {
       resetAllEffectsBtn.addEventListener('click', () => {
-        if (this.onResetAllEffects) {
-          this.onResetAllEffects();
+        if (this.onResetAllEffectsToDefault) {
+          this.onResetAllEffectsToDefault();
         }
       });
     }
@@ -3938,7 +4223,7 @@ export class Controls {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const knobNum = parseInt((btn as HTMLElement).dataset.knob || '0');
-        if (knobNum > 0 && knobNum <= 8) {
+        if (knobNum > 0 && knobNum <= 10) {
           const slider = document.getElementById(`knob${knobNum}`) as HTMLInputElement;
           if (slider) {
             const defaultValue = defaultValues[knobNum];
@@ -3981,8 +4266,8 @@ export class Controls {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const effectName = (btn as HTMLElement).dataset.effect;
-        if (effectName && this.onEffectReset) {
-          this.onEffectReset(effectName);
+        if (effectName && this.onEffectResetToDefault) {
+          this.onEffectResetToDefault(effectName);
         }
       });
     });
@@ -4061,6 +4346,22 @@ export class Controls {
           speedLevel = 1.0 + (t * 2.0);
         }
         valueSpan.textContent = `${speedLevel.toFixed(2)}x`;
+      } else if (knob === 9) {
+        // X Position: display as pixel offset
+        // Get canvas dimensions for accurate display
+        const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+        const maxOffset = canvas ? canvas.width * 0.5 : 640; // 50% of canvas width
+        const offset = (value - 0.5) * 2; // -1.0 to +1.0
+        const pixelOffset = Math.round(offset * maxOffset);
+        valueSpan.textContent = `${pixelOffset >= 0 ? '+' : ''}${pixelOffset}px`;
+      } else if (knob === 10) {
+        // Y Position: display as pixel offset
+        // Get canvas dimensions for accurate display
+        const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+        const maxOffset = canvas ? canvas.height * 0.5 : 480; // 50% of canvas height
+        const offset = (value - 0.5) * 2; // -1.0 to +1.0
+        const pixelOffset = Math.round(offset * maxOffset);
+        valueSpan.textContent = `${pixelOffset >= 0 ? '+' : ''}${pixelOffset}px`;
       } else {
         valueSpan.textContent = value.toFixed(2);
       }
@@ -4405,6 +4706,23 @@ export class Controls {
         autoClearBtn.style.background = '#666';
         if (autoClearIcon) autoClearIcon.textContent = '🎨';
         if (autoClearText) autoClearText.textContent = 'Paint';
+      }
+    }
+  }
+
+  setAutoClearEnabled(enabled: boolean) {
+    const autoClearBtn = document.getElementById('auto-clear-btn');
+    if (autoClearBtn) {
+      if (enabled) {
+        autoClearBtn.removeAttribute('disabled');
+        autoClearBtn.style.opacity = '1';
+        autoClearBtn.style.cursor = 'pointer';
+        autoClearBtn.title = '';
+      } else {
+        autoClearBtn.setAttribute('disabled', 'true');
+        autoClearBtn.style.opacity = '0.5';
+        autoClearBtn.style.cursor = 'not-allowed';
+        autoClearBtn.title = 'Paint Mode is not supported for 3D modes';
       }
     }
   }

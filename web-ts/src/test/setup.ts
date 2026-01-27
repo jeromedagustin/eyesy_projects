@@ -298,6 +298,7 @@ export function createMockCanvasWrapper(): Canvas {
       bezier: () => {},
       setRotation: () => {},
       setZoom: () => {},
+      setCustomCamera: () => null,
       clear: () => {},
       captureFrame: () => {
         // Store a mock texture
@@ -313,7 +314,23 @@ export function createMockCanvasWrapper(): Canvas {
       flush: () => {},
       getWidth: () => 1280,
       getHeight: () => 720,
-      getScene: () => ({} as any),
+      getScene: () => {
+        // Return a proper mock scene for 3D modes
+        return {
+          add: () => {},
+          remove: () => {},
+          background: null,
+        } as any;
+      },
+      getRenderer: () => {
+        // Return a minimal mock renderer for 3D modes
+        return {
+          getContext: () => ({} as any),
+          setSize: () => {},
+          render: () => {},
+          setClearColor: () => {},
+        } as any;
+      },
     } as any as Canvas;
   }
 }

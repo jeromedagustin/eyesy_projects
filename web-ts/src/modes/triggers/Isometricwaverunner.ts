@@ -39,7 +39,6 @@ export class Isometricwaverunner implements Mode {
       const wall = await loadImage(wallPath);
       
       this.images = [grass, wall];
-      console.log(`Loaded ${this.images.length} images for Isometric Wave Runner mode.`);
     } catch (error) {
       console.error('Failed to load images for Isometric Wave Runner mode:', error);
       // Continue with empty images array - mode will skip drawing if no images
@@ -51,14 +50,13 @@ export class Isometricwaverunner implements Mode {
 
   draw(canvas: Canvas, eyesy: EYESY): void {
     eyesy.color_picker_bg(eyesy.knob5);
-    
-    // Safety check: if no images loaded, skip drawing
-    if (this.images.length === 0) {
-      return;
-    }
-    
+
     const tileSize = Math.floor(160 - 64 * eyesy.knob1);
     const tileWidthHalf = tileSize / 2;
+
+    // Trails / feedback: draw previous frame first, then draw new tiles on top.
+    const veilAlpha = Math.floor(eyesy.knob4 * 50) / 255;
+    canvas.blitLastFrame(0, 0, this.xr, this.yr, 1.0 - veilAlpha);
     
     // Calculate animated position based on time
     const l = Math.floor(32 + 32 * Math.sin(eyesy.time * (0.4 + 1 - eyesy.knob1)));
@@ -103,19 +101,45 @@ export class Isometricwaverunner implements Mode {
       if (eyesy.audio_in && eyesy.audio_in.length > 0) {
         const audioIndex = p % eyesy.audio_in.length;
         const audioVal = eyesy.audio_in[audioIndex] || 0;
-        y = k + (audioVal / 32768.0) * 0.01 * eyesy.knob2;
+        // Scale the wave enough to be visible in the web renderer
+        const audioNorm = audioVal / 32768.0; // -1..1
+        y = k + audioNorm * (tileSize * 0.45) * eyesy.knob2;
       }
       
-      // Draw the image
-      const pic = this.images[i];
-      canvas.blitTexture(pic.texture, Math.floor(j), Math.floor(y), pic.width, pic.height);
+      // Draw
+      if (this.images.length > 0) {
+        const pic = this.images[i];
+        canvas.blitTexture(pic.texture, Math.floor(j), Math.floor(y), pic.width, pic.height);
+      } else {
+        // Fallback: draw an isometric tile (diamond) when assets are missing in web build
+        const tileW = tileSize;
+        const tileH = tileSize * 0.5;
+        const cx = j;
+        const cy = y;
+
+        const baseColor: [number, number, number] =
+          pattern.imageIndex === 0 ? [50, 180, 90] : [110, 110, 110];
+
+        const audioBoost = eyesy.audio_in && eyesy.audio_in.length > 0
+          ? Math.min(1, Math.abs((eyesy.audio_in[p % eyesy.audio_in.length] || 0) / 32768.0) * eyesy.knob2)
+          : 0;
+
+        const brighten = (c: number) => Math.max(0, Math.min(255, Math.round(c + 80 * audioBoost)));
+        const fill: [number, number, number] = [brighten(baseColor[0]), brighten(baseColor[1]), brighten(baseColor[2])];
+
+        canvas.polygon(
+          [
+            [cx, cy - tileH / 2],
+            [cx + tileW / 2, cy],
+            [cx, cy + tileH / 2],
+            [cx - tileW / 2, cy],
+          ],
+          fill,
+          0
+        );
+      }
     }
-    
-    // Trails - use feedback system to fade previous frame
-    // The veil effect fades the previous frame by overlaying a semi-transparent background
-    // We'll use blitLastFrame to show the previous frame with reduced opacity
-    const veilAlpha = Math.floor(eyesy.knob4 * 50) / 255;
-    canvas.blitLastFrame(0, 0, this.xr, this.yr, 1.0 - veilAlpha);
+
     canvas.captureFrame();
   }
 

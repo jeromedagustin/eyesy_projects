@@ -62,7 +62,6 @@ export class Spinningdiscs implements Mode {
       }
       
       this.images = images;
-      console.log(`Loaded ${this.images.length} images for Spinning Discs mode.`);
     } catch (error) {
       console.error('Failed to load images for Spinning Discs mode:', error);
       // Continue with empty images array - mode will skip drawing if no images

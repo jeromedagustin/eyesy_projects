@@ -33,6 +33,9 @@ export class MobileUI {
     this.callbacks = callbacks;
     
     this.createMobileElements();
+    this.setupDelegatedControlClose();
+    // Allow other UI components to force-close controls reliably
+    window.addEventListener('eyesy:close-controls', () => this.closeControls());
     this.setupResizeListener();
     this.updateLayout();
     
@@ -43,6 +46,21 @@ export class MobileUI {
         this.closeControls();
       });
     }
+  }
+
+  /**
+   * Ensure the Controls panel close button always works, even if the controls
+   * UI re-renders and recreates the button element.
+   */
+  private setupDelegatedControlClose() {
+    this.container.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement | null;
+      const closeBtn = target?.closest?.('#close-controls-btn');
+      if (closeBtn) {
+        e.preventDefault();
+        this.closeControls();
+      }
+    });
   }
 
   /**
@@ -257,6 +275,20 @@ export class MobileUI {
       this.controlsToggle.style.display = (isMobile && isPortrait) ? 'flex' : 'none';
     }
     
+    // Show/hide FX button on mobile
+    const fxButton = document.getElementById('fx-button');
+    if (fxButton) {
+      // Always show FX button on mobile (positioned by CSS)
+      fxButton.style.display = isMobile ? 'flex' : 'flex';
+    }
+    
+    // Show/hide settings button on mobile
+    const settingsButton = document.getElementById('settings-button');
+    if (settingsButton) {
+      // Always show settings button on mobile (positioned by CSS)
+      settingsButton.style.display = isMobile ? 'flex' : 'flex';
+    }
+    
     // Handle controls visibility based on orientation
     const controlsPanel = this.container.querySelector('.controls-panel') as HTMLElement;
     if (controlsPanel) {
@@ -376,6 +408,30 @@ export class MobileUI {
     } else {
       this.controlsToggle.classList.add('right-handed');
       this.controlsToggle.classList.remove('left-handed');
+    }
+    
+    // Also update FX button position
+    const fxButton = document.getElementById('fx-button');
+    if (fxButton) {
+      if (leftHanded) {
+        fxButton.classList.add('left-handed');
+        fxButton.classList.remove('right-handed');
+      } else {
+        fxButton.classList.add('right-handed');
+        fxButton.classList.remove('left-handed');
+      }
+    }
+    
+    // Also update settings button position
+    const settingsButton = document.getElementById('settings-button');
+    if (settingsButton) {
+      if (leftHanded) {
+        settingsButton.classList.add('left-handed');
+        settingsButton.classList.remove('right-handed');
+      } else {
+        settingsButton.classList.add('right-handed');
+        settingsButton.classList.remove('left-handed');
+      }
     }
   }
 

@@ -110,7 +110,7 @@ export class FontRenderer {
       };
     }
 
-    // Set font properties
+    // Set font properties for measurement
     context.font = `${font.size}px ${font.fontFamily}`;
     context.textAlign = 'left';
     context.textBaseline = 'top';
@@ -139,16 +139,20 @@ export class FontRenderer {
       };
     }
     
-    // Clear canvas
+    // Clear canvas with transparent background
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Set text rendering properties
     ctx.imageSmoothingEnabled = antialiasing;
     ctx.imageSmoothingQuality = antialiasing ? 'high' : 'low';
     
-    // Draw text
-    ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+    // Re-set font properties (must be done after getting new context)
     ctx.font = `${font.size}px ${font.fontFamily}`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    
+    // Draw text with proper color
+    ctx.fillStyle = `rgb(${Math.max(0, Math.min(255, color[0]))}, ${Math.max(0, Math.min(255, color[1]))}, ${Math.max(0, Math.min(255, color[2]))})`;
     ctx.fillText(text, 2, 2); // Add small padding
     
     // Create Three.js texture from canvas
@@ -178,7 +182,7 @@ export class FontRenderer {
       
       const texture = new THREE.Texture(canvas);
       texture.needsUpdate = true;
-      texture.flipY = false; // Match pygame's coordinate system
+      texture.flipY = true; // HTML canvas has origin at top-left, Three.js expects bottom-left
       
       // Validate texture was created successfully
       if (!texture || !texture.image) {

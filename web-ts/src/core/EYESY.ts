@@ -11,6 +11,8 @@ export interface EYESY {
   knob6?: number; // Web-only: Rotation (0-360 degrees)
   knob7?: number; // Web-only: Zoom (0.0 = zoom out, 0.5 = default, 1.0 = zoom in)
   knob8?: number; // Web-only: Animation Speed (0.0 = slowest, 0.5 = normal, 1.0 = fastest)
+  knob9?: number; // Web-only: X Position offset (-1.0 to 1.0, 0.5 = center/no offset)
+  knob10?: number; // Web-only: Y Position offset (-1.0 to 1.0, 0.5 = center/no offset)
 
   // Display
   xres: number;
@@ -68,6 +70,8 @@ export class EYESYImpl implements EYESY {
   knob6 = 0.0; // Web-only: Rotation (0.0 = 0°, 1.0 = 360°)
   knob7 = 0.5; // Web-only: Zoom (0.5 = default/1.0x zoom)
   knob8 = 0.45; // Web-only: Animation Speed (0.45 = ~0.63x default, 0.5 = normal/1.0x speed)
+  knob9 = 0.5; // Web-only: X Position (0.5 = center/no offset, 0.0 = left, 1.0 = right)
+  knob10 = 0.5; // Web-only: Y Position (0.5 = center/no offset, 0.0 = top, 1.0 = bottom)
   
   // Seizure safety filter (optional, set by App)
   private seizureSafetyFilter: ((color: [number, number, number], previousColor?: [number, number, number]) => [number, number, number]) | null = null;

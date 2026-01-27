@@ -178,3 +178,9 @@ def draw(screen, eyesy):
     for flake in snowflakes:
         flake.update(wind_strength, speed_multiplier)
         flake.draw(screen, color, flake_size, style_factor)
+
+
+
+
+
+

@@ -1,0 +1,1183 @@
+{
+  "modes": [
+    {
+      "id": "s---0-arrival-scope",
+      "name": "S - 0 Arrival Scope",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---0-arrival-scope.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---0-joy-division",
+      "name": "S - 0 Joy Division",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---0-joy-division.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---a-zach-reactive",
+      "name": "S - A ZACH Reactive",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---a-zach-reactive.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---a-zach-spiral",
+      "name": "S - A Zach Spiral",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---a-zach-spiral.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---aa-selector",
+      "name": "S - AA Selector",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---aa-selector.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---amp-color",
+      "name": "S - Amp Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---amp-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---amp-color---5gon-filled",
+      "name": "S - Amp Color - 5gon Filled",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---amp-color---5gon-filled.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---amp-color---5gon-outlines",
+      "name": "S - Amp Color - 5gon Outlines",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---amp-color---5gon-outlines.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---amp-color---circles",
+      "name": "S - Amp Color - Circles",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---amp-color---circles.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---amp-color---rectangles",
+      "name": "S - Amp Color - Rectangles",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---amp-color---rectangles.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---aquarium",
+      "name": "S - Aquarium",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---aquarium.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---arcway",
+      "name": "S - Arcway",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---arcway.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---arcway-black",
+      "name": "S - Arcway Black",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---arcway-black.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---audio-printer",
+      "name": "S - Audio Printer",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---audio-printer.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---bezier-h-scope",
+      "name": "S - Bezier H Scope",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---bezier-h-scope.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---bezier-v-scope",
+      "name": "S - Bezier V Scope",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---bezier-v-scope.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---bits-horizontal",
+      "name": "S - Bits Horizontal",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---bits-horizontal.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---bits-vertical",
+      "name": "S - Bits Vertical",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---bits-vertical.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---boids",
+      "name": "S - Boids",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---boids.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---bouncing-bars-lfo",
+      "name": "S - Bouncing Bars LFO",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---bouncing-bars-lfo.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---breathing-circles",
+      "name": "S - Breathing Circles",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---breathing-circles.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---breezy-feather-lfo",
+      "name": "S - Breezy Feather LFO",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---breezy-feather-lfo.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---circle-row---lfo",
+      "name": "S - Circle Row - LFO",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---circle-row---lfo.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---circle-scope",
+      "name": "S - Circle Scope",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---circle-scope.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---circle-scope---image",
+      "name": "S - Circle Scope - Image",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---circle-scope---image.py",
+      "has_assets": true,
+      "assets_path": "assets/s---circle-scope---image"
+    },
+    {
+      "id": "s---circle-scope---opposite-colors",
+      "name": "S - Circle Scope - Opposite Colors",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---circle-scope---opposite-colors.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---circular-trigon-field",
+      "name": "S - Circular Trigon Field",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---circular-trigon-field.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---classic-horizontal",
+      "name": "S - Classic Horizontal",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---classic-horizontal.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---classic-vertical",
+      "name": "S - Classic Vertical",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---classic-vertical.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---concentric",
+      "name": "S - Concentric",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---concentric.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---cone-scope",
+      "name": "S - Cone Scope",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---cone-scope.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---connected-scope",
+      "name": "S - Connected Scope",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---connected-scope.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---dancing-circle---image",
+      "name": "S - Dancing Circle - Image",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---dancing-circle---image.py",
+      "has_assets": true,
+      "assets_path": "assets/s---dancing-circle---image"
+    },
+    {
+      "id": "s---five-lines-spin",
+      "name": "S - Five Lines Spin",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---five-lines-spin.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---folia-angles",
+      "name": "S - Folia Angles",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---folia-angles.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---folia-curves",
+      "name": "S - Folia Curves",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---folia-curves.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---football-scope",
+      "name": "S - Football Scope",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---football-scope.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---googly-eyes",
+      "name": "S - Googly Eyes",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---googly-eyes.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---gradient-cloud",
+      "name": "S - Gradient Cloud",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---gradient-cloud.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---gradient-column",
+      "name": "S - Gradient Column",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---gradient-column.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---gradient-friend",
+      "name": "S - Gradient Friend",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---gradient-friend.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-circles---column-color",
+      "name": "S - Grid Circles - Column Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-circles---column-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-circles---outlined",
+      "name": "S - Grid Circles - Outlined",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-circles---outlined.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-circles---outlined-column-color",
+      "name": "S - Grid Circles - Outlined Column Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-circles---outlined-column-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-circles---patchwork-color",
+      "name": "S - Grid Circles - Patchwork Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-circles---patchwork-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-circles---uniform-color",
+      "name": "S - Grid Circles - Uniform Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-circles---uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-polygons---column-color",
+      "name": "S - Grid Polygons - Column Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-polygons---column-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-polygons---patchwork-color",
+      "name": "S - Grid Polygons - Patchwork Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-polygons---patchwork-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-polygons---uniform-color",
+      "name": "S - Grid Polygons - Uniform Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-polygons---uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-slide-square---filled-column-color",
+      "name": "S - Grid Slide Square - Filled Column Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-slide-square---filled-column-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-slide-square---filled-patchwork-color",
+      "name": "S - Grid Slide Square - Filled Patchwork Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-slide-square---filled-patchwork-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-slide-square---filled-uniform-color",
+      "name": "S - Grid Slide Square - Filled Uniform Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-slide-square---filled-uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-slide-square---unfilled-column-color",
+      "name": "S - Grid Slide Square - Unfilled Column Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-slide-square---unfilled-column-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-slide-square---unfilled-patchwork-color",
+      "name": "S - Grid Slide Square - Unfilled Patchwork Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-slide-square---unfilled-patchwork-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-slide-square---unfilled-uniform-color",
+      "name": "S - Grid Slide Square - Unfilled Uniform Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-slide-square---unfilled-uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-triangles---filled-column-color",
+      "name": "S - Grid Triangles - Filled Column Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-triangles---filled-column-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-triangles---filled-patchwork-color",
+      "name": "S - Grid Triangles - Filled Patchwork Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-triangles---filled-patchwork-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-triangles---filled-uniform-color",
+      "name": "S - Grid Triangles - Filled Uniform Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-triangles---filled-uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-triangles---unfilled-column-color",
+      "name": "S - Grid Triangles - Unfilled Column Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-triangles---unfilled-column-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-triangles---unfilled-patchwork-color",
+      "name": "S - Grid Triangles - Unfilled Patchwork Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-triangles---unfilled-patchwork-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---grid-triangles---unfilled-uniform-color",
+      "name": "S - Grid Triangles - Unfilled Uniform Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---grid-triangles---unfilled-uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---h-circles---image",
+      "name": "S - H Circles - Image",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---h-circles---image.py",
+      "has_assets": true,
+      "assets_path": "assets/s---h-circles---image"
+    },
+    {
+      "id": "s---horiz-2xlfo",
+      "name": "S - Horiz 2xLFO",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---horiz-2xlfo.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---horizontal--trails",
+      "name": "S - Horizontal + Trails",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---horizontal--trails.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---left--right-scopes",
+      "name": "S - Left & Right Scopes",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---left--right-scopes.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---line-bounce-four---lfo-alternate",
+      "name": "S - Line Bounce Four - LFO Alternate",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---line-bounce-four---lfo-alternate.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---line-bounce-two---lfo-alternate",
+      "name": "S - Line Bounce Two - LFO Alternate",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---line-bounce-two---lfo-alternate.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---line-traveller",
+      "name": "S - Line Traveller",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---line-traveller.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---mess-a-sketch",
+      "name": "S - Mess A Sketch",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---mess-a-sketch.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---mirror-grid",
+      "name": "S - Mirror Grid",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---mirror-grid.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---mirror-grid---inverse",
+      "name": "S - Mirror Grid - Inverse",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---mirror-grid---inverse.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---nested-ellipses---filled",
+      "name": "S - Nested Ellipses - Filled",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---nested-ellipses---filled.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---nested-ellipses---outlines",
+      "name": "S - Nested Ellipses - Outlines",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---nested-ellipses---outlines.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---oscilloscope",
+      "name": "S - Oscilloscope",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---oscilloscope.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---perspective-lines",
+      "name": "S - Perspective Lines",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---perspective-lines.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---radial-scope---rotate-stepped-color",
+      "name": "S - Radial Scope - Rotate Stepped Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---radial-scope---rotate-stepped-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---radial-scope---rotate-uniform-color",
+      "name": "S - Radial Scope - Rotate Uniform Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---radial-scope---rotate-uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---radiating-square---stepped-color",
+      "name": "S - Radiating Square - Stepped Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---radiating-square---stepped-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---radiating-square---uniform-color",
+      "name": "S - Radiating Square - Uniform Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---radiating-square---uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---rain",
+      "name": "S - Rain",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---rain.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---snow",
+      "name": "S - Snow",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---snow.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---sound-jaws---stepped-color",
+      "name": "S - Sound Jaws - Stepped Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---sound-jaws---stepped-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---sound-jaws---uniform-color",
+      "name": "S - Sound Jaws - Uniform Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---sound-jaws---uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---spinning-discs",
+      "name": "S - Spinning Discs",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---spinning-discs.py",
+      "has_assets": true,
+      "assets_path": "assets/s---spinning-discs"
+    },
+    {
+      "id": "s---square-shadows---uniform-color",
+      "name": "S - Square Shadows - Uniform Color",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---square-shadows---uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---surf-waves",
+      "name": "S - Surf Waves",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---surf-waves.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---three-scopes",
+      "name": "S - Three Scopes",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---three-scopes.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---two-scopes",
+      "name": "S - Two Scopes",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---two-scopes.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---x-scope",
+      "name": "S - X Scope",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---x-scope.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "s---zoom-scope",
+      "name": "S - Zoom Scope",
+      "category": "scopes",
+      "source": "examples",
+      "path": "modes/s---zoom-scope.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---10-print",
+      "name": "T - 10 Print",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---10-print.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---ball-of-mirrors",
+      "name": "T - Ball of Mirrors",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---ball-of-mirrors.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---ball-of-mirrors---trails",
+      "name": "T - Ball of Mirrors - Trails",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---ball-of-mirrors---trails.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---basic-image",
+      "name": "T - Basic Image",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---basic-image.py",
+      "has_assets": true,
+      "assets_path": "assets/t---basic-image"
+    },
+    {
+      "id": "t---bezier-cousins---trails",
+      "name": "T - Bezier Cousins - Trails",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---bezier-cousins---trails.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---bits-h---row-color",
+      "name": "T - Bits H - Row Color",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---bits-h---row-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---bits-h---uniform-color",
+      "name": "T - Bits H - Uniform Color",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---bits-h---uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---bits-v---column-color",
+      "name": "T - Bits V - Column Color",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---bits-v---column-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---bits-v---uniform-color",
+      "name": "T - Bits V - Uniform Color",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---bits-v---uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---bom-reckies-trans-lfos",
+      "name": "T - BoM Reckies Trans LFOs",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---bom-reckies-trans-lfos.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---density-units",
+      "name": "T - Density Units",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---density-units.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---draws-hashmarks---angled-stepped-color",
+      "name": "T - Draws Hashmarks - Angled Stepped Color",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---draws-hashmarks---angled-stepped-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---draws-hashmarks---angled-uniform-color",
+      "name": "T - Draws Hashmarks - Angled Uniform Color",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---draws-hashmarks---angled-uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---draws-hashmarks---stepped-color",
+      "name": "T - Draws Hashmarks - Stepped Color",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---draws-hashmarks---stepped-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---draws-hashmarks---uniform-color",
+      "name": "T - Draws Hashmarks - Uniform Color",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---draws-hashmarks---uniform-color.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---font-patterns",
+      "name": "T - Font Patterns",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---font-patterns.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---font-recedes",
+      "name": "T - Font Recedes",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---font-recedes.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---image--circle",
+      "name": "T - Image + Circle",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---image--circle.py",
+      "has_assets": true,
+      "assets_path": "assets/t---image--circle"
+    },
+    {
+      "id": "t---isometric-wave",
+      "name": "T - Isometric Wave",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---isometric-wave.py",
+      "has_assets": true,
+      "assets_path": "assets/t---isometric-wave"
+    },
+    {
+      "id": "t---isometric-wave-runner",
+      "name": "T - Isometric Wave Runner",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---isometric-wave-runner.py",
+      "has_assets": true,
+      "assets_path": "assets/t---isometric-wave-runner"
+    },
+    {
+      "id": "t---line-rotate---trails",
+      "name": "T - Line Rotate - Trails",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---line-rotate---trails.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---midi-grid",
+      "name": "T - MIDI Grid",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---midi-grid.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---midi-note-printer",
+      "name": "T - MIDI Note Printer",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---midi-note-printer.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---magnify-cloud---lfo",
+      "name": "T - Magnify Cloud - LFO",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---magnify-cloud---lfo.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---marching-four---image",
+      "name": "T - Marching Four - Image",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---marching-four---image.py",
+      "has_assets": true,
+      "assets_path": "assets/t---marching-four---image"
+    },
+    {
+      "id": "t---migrating-circle-grids",
+      "name": "T - Migrating Circle Grids",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---migrating-circle-grids.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---origami-triangles",
+      "name": "T - Origami Triangles",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---origami-triangles.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---reckie",
+      "name": "T - Reckie",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---reckie.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---slideshow-grid-ag-alpha",
+      "name": "T - Slideshow Grid-AG-Alpha",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---slideshow-grid-ag-alpha.py",
+      "has_assets": true,
+      "assets_path": "assets/t---slideshow-grid-ag-alpha"
+    },
+    {
+      "id": "t---spiral-alley",
+      "name": "T - Spiral Alley",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---spiral-alley.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---tiles---filled",
+      "name": "T - Tiles - Filled",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---tiles---filled.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---tiles---outlines",
+      "name": "T - Tiles - Outlines",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---tiles---outlines.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---trigon-traveller",
+      "name": "T - Trigon Traveller",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---trigon-traveller.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "t---woven-feedback",
+      "name": "T - Woven Feedback",
+      "category": "triggers",
+      "source": "examples",
+      "path": "modes/t---woven-feedback.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "u---timer",
+      "name": "U - Timer",
+      "category": "utilities",
+      "source": "examples",
+      "path": "modes/u---timer.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "u---webcam",
+      "name": "U - Webcam",
+      "category": "utilities",
+      "source": "examples",
+      "path": "modes/u---webcam.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "dancing-animals",
+      "name": "dancing_animals",
+      "category": "custom",
+      "source": "custom",
+      "path": "modes/dancing-animals.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "dancing-character",
+      "name": "dancing_character",
+      "category": "custom",
+      "source": "custom",
+      "path": "modes/dancing-character.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "musical-staff",
+      "name": "musical_staff",
+      "category": "custom",
+      "source": "custom",
+      "path": "modes/musical-staff.py",
+      "has_assets": false,
+      "assets_path": null
+    },
+    {
+      "id": "template-mode",
+      "name": "template_mode",
+      "category": "custom",
+      "source": "custom",
+      "path": "modes/template-mode.py",
+      "has_assets": false,
+      "assets_path": null
+    }
+  ],
+  "categories": {
+    "scopes": "Audio-reactive scope modes",
+    "triggers": "Trigger-based pattern modes",
+    "utilities": "Utility modes",
+    "mixed": "Mixed or experimental modes",
+    "custom": "Custom user modes"
+  },
+  "version": "1.0.0",
+  "build_date": "1767848208.2727726"
+}

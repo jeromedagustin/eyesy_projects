@@ -46,7 +46,6 @@ export class Imagecircle implements Mode {
       }
       
       this.images = images;
-      console.log(`Loaded ${this.images.length} images for Image + Circle mode.`);
     } catch (error) {
       console.error('Failed to load images for Image + Circle mode:', error);
       // Continue with empty images array - mode will skip drawing if no images

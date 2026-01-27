@@ -19,7 +19,19 @@ describe('Mode Loading', () => {
       expect(mode).toHaveProperty('mode');
       expect(typeof mode.id).toBe('string');
       expect(typeof mode.name).toBe('string');
-      expect(['scopes', 'triggers', 'utilities', 'custom']).toContain(mode.category);
+      expect([
+        'scopes',
+        'triggers',
+        'utilities',
+        'custom',
+        'lfo',
+        'time',
+        'noise',
+        'geometric',
+        'pattern',
+        '3d',
+        'font',
+      ]).toContain(mode.category);
       expect(typeof mode.mode).toBe('function');
     });
   });
@@ -152,6 +164,7 @@ describe('Mode Categories', () => {
     expect(utilityModes.length).toBeGreaterThan(0);
   });
 });
+
 
 
 

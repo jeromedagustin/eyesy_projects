@@ -210,3 +210,4 @@ These effects are already implemented and can be used for webcam:
 - Effects should be composable (can stack multiple effects)
 
 
+

@@ -49,7 +49,6 @@ export class Marchingfourimage implements Mode {
       }
       
       this.images = images;
-      console.log(`Loaded ${this.images.length} images for Marching Four - Image mode.`);
     } catch (error) {
       console.error('Failed to load images for Marching Four - Image mode:', error);
     }

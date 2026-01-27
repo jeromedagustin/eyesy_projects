@@ -8,8 +8,12 @@ export class ModeBrowser {
   private modes: ModeInfo[] = [];
   private onModeSelect?: (mode: ModeInfo) => void;
   private onFavoriteToggle?: (modeId: string, isFavorite: boolean) => void;
+  private onShowOnlyFavoritesChange?: (showOnlyFavorites: boolean) => void;
+  private onEnableFeaturePrompt?: (mode: ModeInfo, reason: string) => void;
   private favorites: Set<string> = new Set();
+  private showOnlyFavorites = false;
   private isVisible = false;
+  private disabledModeClickCounts: Map<string, number> = new Map();
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -31,6 +35,23 @@ export class ModeBrowser {
 
   setFavorites(favorites: string[]) {
     this.favorites = new Set(favorites);
+    this.updateGrid();
+  }
+
+  setOnShowOnlyFavoritesChange(callback: (showOnlyFavorites: boolean) => void) {
+    this.onShowOnlyFavoritesChange = callback;
+  }
+
+  setOnEnableFeaturePrompt(callback: (mode: ModeInfo, reason: string) => void) {
+    this.onEnableFeaturePrompt = callback;
+  }
+
+  setShowOnlyFavorites(showOnlyFavorites: boolean) {
+    this.showOnlyFavorites = showOnlyFavorites;
+    const checkbox = document.getElementById('browser-show-only-favorites') as HTMLInputElement;
+    if (checkbox) {
+      checkbox.checked = showOnlyFavorites;
+    }
     this.updateGrid();
   }
 
@@ -118,17 +139,23 @@ export class ModeBrowser {
         <div style="max-width: 1400px; margin: 0 auto;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
             <h2 style="font-size: 1.5rem; margin: 0;">Mode Browser</h2>
-            <button id="close-browser" style="
-              padding: 0.75rem 1.5rem;
-              background: #4a9eff;
-              color: white;
-              border: none;
-              border-radius: 4px;
-              cursor: pointer;
-              font-size: 1rem;
-              min-height: 44px;
-              touch-action: manipulation;
-            ">Close (ESC)</button>
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: #ccc; cursor: pointer;">
+                <input type="checkbox" id="browser-show-only-favorites" style="cursor: pointer;">
+                Show Only Favorites
+              </label>
+              <button id="close-browser" style="
+                padding: 0.75rem 1.5rem;
+                background: #4a9eff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 1rem;
+                min-height: 44px;
+                touch-action: manipulation;
+              ">Close (ESC)</button>
+            </div>
           </div>
           <div id="mode-grid" style="
             display: grid;
@@ -145,6 +172,20 @@ export class ModeBrowser {
     const closeBtn = document.getElementById('close-browser');
     closeBtn?.addEventListener('click', () => this.hide());
 
+    // Show only favorites checkbox
+    const showOnlyFavoritesCheckbox = document.getElementById('browser-show-only-favorites') as HTMLInputElement;
+    if (showOnlyFavoritesCheckbox) {
+      showOnlyFavoritesCheckbox.checked = this.showOnlyFavorites;
+      showOnlyFavoritesCheckbox.addEventListener('change', (e) => {
+        const value = (e.target as HTMLInputElement).checked;
+        this.showOnlyFavorites = value;
+        this.updateGrid();
+        if (this.onShowOnlyFavoritesChange) {
+          this.onShowOnlyFavoritesChange(value);
+        }
+      });
+    }
+
     // Close on ESC
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.isVisible) {
@@ -155,15 +196,39 @@ export class ModeBrowser {
     this.updateGrid();
   }
 
+  private formatCategoryName(category: string): string {
+    // Map category IDs to display names
+    const categoryNames: Record<string, string> = {
+      '3d': '3D',
+      'scopes': 'Scopes',
+      'triggers': 'Triggers',
+      'lfo': 'LFO-Based',
+      'time': 'Time-Based',
+      'noise': 'Noise-Based',
+      'geometric': 'Geometric',
+      'pattern': 'Pattern',
+      'utilities': 'Utilities',
+      'font': 'Font Modes',
+    };
+    
+    return categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
+  }
+
   private updateGrid() {
     const grid = document.getElementById('mode-grid');
     if (!grid) return;
 
     grid.innerHTML = '';
 
+    // Filter modes if showOnlyFavorites is enabled
+    let filteredModes = this.modes;
+    if (this.showOnlyFavorites && this.favorites.size > 0) {
+      filteredModes = this.modes.filter(mode => this.favorites.has(mode.id));
+    }
+
     // Group by category
     const categories = new Map<string, ModeInfo[]>();
-    this.modes.forEach(mode => {
+    filteredModes.forEach(mode => {
       if (!categories.has(mode.category)) {
         categories.set(mode.category, []);
       }
@@ -196,7 +261,9 @@ export class ModeBrowser {
       `;
       
       const categoryTitle = document.createElement('h3');
-      categoryTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+      // Format category name for display
+      const categoryDisplayName = this.formatCategoryName(category);
+      categoryTitle.textContent = categoryDisplayName;
       categoryTitle.style.cssText = 'margin: 0; font-size: 1.2rem; color: #4a9eff; font-weight: 600;';
       
       const expandIcon = document.createElement('span');
@@ -415,6 +482,33 @@ export class ModeBrowser {
 
         card.addEventListener('click', () => {
           if (isDisabled) {
+            // Track clicks on disabled modes
+            const currentCount = (this.disabledModeClickCounts.get(mode.id) || 0) + 1;
+            this.disabledModeClickCounts.set(mode.id, currentCount);
+            
+            // After 3 clicks, prompt to enable the required feature
+            if (currentCount >= 3) {
+              // Reset counter
+              this.disabledModeClickCounts.set(mode.id, 0);
+              
+              // Determine what feature needs to be enabled
+              let featureReason = '';
+              const nameLower = mode.name.toLowerCase();
+              if (nameLower.startsWith('image -') || nameLower.includes('slideshow')) {
+                featureReason = 'images';
+              } else if (nameLower.startsWith('webcam')) {
+                featureReason = 'webcam';
+              } else if (mode.category === 'scopes') {
+                featureReason = 'microphone';
+              } else {
+                featureReason = 'permission';
+              }
+              
+              // Call callback to show prompt
+              if (this.onEnableFeaturePrompt) {
+                this.onEnableFeaturePrompt(mode, featureReason);
+              }
+            }
             return; // Don't allow clicking disabled modes
           }
           if (this.onModeSelect) {

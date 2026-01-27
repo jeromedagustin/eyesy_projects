@@ -25,6 +25,7 @@ export class EffectManager {
   private width: number;
   private height: number;
   private renderer: THREE.WebGLRenderer | null = null;
+  private blendMix: number = 1.0; // 0.0 = original, 1.0 = full effects
 
   constructor(renderer: THREE.WebGLRenderer, width: number, height: number) {
     this.renderer = renderer;
@@ -135,6 +136,20 @@ export class EffectManager {
     if (effect) {
       effect.intensity = Math.max(0, Math.min(1, intensity));
     }
+  }
+
+  /**
+   * Set overall blend mix (0.0 = original, 1.0 = full effects)
+   */
+  setBlendMix(mix: number): void {
+    this.blendMix = Math.max(0, Math.min(1, mix));
+  }
+
+  /**
+   * Get overall blend mix
+   */
+  getBlendMix(): number {
+    return this.blendMix;
   }
 
   /**

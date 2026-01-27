@@ -117,3 +117,4 @@ The `AudioScope` utility automatically:
 3. Add frequency-domain helpers if needed (FFT-based reactivity)
 
 
+

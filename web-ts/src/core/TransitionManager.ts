@@ -615,17 +615,9 @@ export class TransitionManager {
     const oldAlpha = this.easeOutCubic(1.0 - progress);
     const newAlpha = this.easeInCubic(progress);
     
-    console.log('renderFade:', {
-      progress: progress.toFixed(3),
-      oldAlpha: oldAlpha.toFixed(3),
-      newAlpha: newAlpha.toFixed(3),
-      hasFromFrame: !!this.fromFrameTexture,
-      hasNewFrame: !!newFrameTexture
-    });
-    
     // Always draw old frame first (background) - this ensures we see the transition even if new frame isn't ready
     if (oldAlpha > 0 && this.fromFrameTexture) {
-      const blitSuccess = this.safeBlitTexture(
+      this.safeBlitTexture(
         canvas,
         this.fromFrameTexture,
         0,
@@ -634,12 +626,11 @@ export class TransitionManager {
         canvas.getHeight(),
         oldAlpha
       );
-      console.log('Blit old frame:', blitSuccess ? 'success' : 'failed');
     }
     
     // Draw new frame on top (fading in) if available
     if (newFrameTexture && newAlpha > 0) {
-      const blitSuccess = this.safeBlitTexture(
+      this.safeBlitTexture(
         canvas,
         newFrameTexture,
         0,
@@ -648,7 +639,6 @@ export class TransitionManager {
         canvas.getHeight(),
         newAlpha
       );
-      console.log('Blit new frame:', blitSuccess ? 'success' : 'failed');
     }
   }
 

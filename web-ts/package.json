@@ -10,6 +10,8 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:performance": "vitest run performance.test.ts",
+    "test:performance:report": "vitest run performance.test.ts && cat performance-reports/summary.md",
     "port-mode": "tsx tools/port-mode.ts",
     "scan-modes": "tsx tools/batch-port.ts",
     "auto-port": "tsx tools/auto-port.ts",

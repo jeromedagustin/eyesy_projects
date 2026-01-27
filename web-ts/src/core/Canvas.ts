@@ -26,19 +26,16 @@ export class Canvas {
    */
   private isValidTexture(texture: THREE.Texture | null | undefined, logDetails = false): boolean {
     if (!texture) {
-      if (logDetails) console.log('[Canvas] isValidTexture: texture is null/undefined');
       return false;
     }
     
     // Check if texture is disposed (check for uuid which should always exist)
     if ((texture as any).uuid === undefined) {
-      if (logDetails) console.log('[Canvas] isValidTexture: texture has no uuid (disposed?)', texture);
       return false;
     }
     
     // Check if texture has an image
     if (!texture.image) {
-      if (logDetails) console.log('[Canvas] isValidTexture: texture has no image', { textureId: texture.uuid });
       return false;
     }
     
@@ -808,6 +805,25 @@ export class Canvas {
   }
 
   /**
+   * Set position offset (web-only feature)
+   * Translates the foreground group
+   * @param xOffset 0.5 = center (0), 0.0 = left (-max), 1.0 = right (+max)
+   * @param yOffset 0.5 = center (0), 0.0 = top (-max), 1.0 = bottom (+max)
+   */
+  setPosition(xOffset: number, yOffset: number): void {
+    // Map 0.0-1.0 to -max to +max, with 0.5 = 0 (center)
+    // Use screen dimensions for max offset (allow up to 50% of screen size)
+    const maxX = this.width * 0.5;
+    const maxY = this.height * 0.5;
+    
+    // Convert 0.0-1.0 to -max to +max, with 0.5 = 0
+    const x = (xOffset - 0.5) * 2 * maxX; // -maxX to +maxX
+    const y = -(yOffset - 0.5) * 2 * maxY; // -maxY to +maxY (flip Y for Three.js)
+    
+    this.foregroundGroup.position.set(x, y, 0);
+  }
+
+  /**
    * Capture the current frame to a texture (for feedback/trails effects)
    * This should be called at the end of draw(), after all drawing is complete
    */
@@ -830,7 +846,6 @@ export class Canvas {
       // Final validation pass before render
       const hadInvalid = this.cleanupInvalidTextures();
       if (hadInvalid) {
-        console.log('[Canvas] captureFrame: Found and cleaned invalid textures before render');
       }
       
       // Log scene state before render with detailed texture info
@@ -926,10 +941,6 @@ export class Canvas {
       });
       
       if (textureCount > 0) {
-        console.log(`[Canvas] captureFrame: Rendering scene with ${meshCount} meshes, ${textureCount} textures`);
-        console.log('[Canvas] captureFrame: Texture details:', textureDetails);
-      } else {
-        console.log(`[Canvas] captureFrame: Rendering scene with ${meshCount} meshes, ${textureCount} textures`);
       }
       
       // Final safety check: ensure all textures are valid before render
@@ -1507,7 +1518,8 @@ export class Canvas {
       }
 
       textureClone.needsUpdate = true;
-      textureClone.flipY = false;
+      // Don't override flipY - use the value from the original texture (FontRenderer sets it correctly)
+      // textureClone.flipY = false;
 
       // Create plane geometry for the text
       const geometry = new THREE.PlaneGeometry(width, height);
@@ -1669,34 +1681,63 @@ export class Canvas {
       this.effectsRenderTarget.setSize(width, height);
     }
 
-    // Temporarily adjust camera for render target size if different
-    const oldLeft = this.camera.left;
-    const oldRight = this.camera.right;
-    const oldTop = this.camera.top;
-    const oldBottom = this.camera.bottom;
+    // Get the active camera (custom camera for 3D modes, or default orthographic camera)
+    const activeCamera = this.getActiveCamera();
     
-    if (width !== this.width || height !== this.height) {
-      this.camera.left = -width / 2;
-      this.camera.right = width / 2;
-      this.camera.top = height / 2;
-      this.camera.bottom = -height / 2;
-      this.camera.updateProjectionMatrix();
+    // Temporarily adjust camera for render target size if different
+    // Only adjust if using the default orthographic camera (3D modes use perspective cameras)
+    let oldLeft: number | undefined;
+    let oldRight: number | undefined;
+    let oldTop: number | undefined;
+    let oldBottom: number | undefined;
+    let oldAspect: number | undefined;
+    
+    if (activeCamera === this.camera && activeCamera instanceof THREE.OrthographicCamera) {
+      oldLeft = this.camera.left;
+      oldRight = this.camera.right;
+      oldTop = this.camera.top;
+      oldBottom = this.camera.bottom;
+      
+      if (width !== this.width || height !== this.height) {
+        this.camera.left = -width / 2;
+        this.camera.right = width / 2;
+        this.camera.top = height / 2;
+        this.camera.bottom = -height / 2;
+        this.camera.updateProjectionMatrix();
+      }
+    } else if (activeCamera instanceof THREE.PerspectiveCamera) {
+      // For perspective cameras (3D modes), update aspect ratio if dimensions changed
+      oldAspect = activeCamera.aspect;
+      if (width !== this.width || height !== this.height) {
+        const aspect = width / height;
+        activeCamera.aspect = aspect;
+        activeCamera.updateProjectionMatrix();
+      }
     }
 
-    // Render current scene to render target
+    // Render current scene to render target using the active camera
     const oldRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.effectsRenderTarget);
     this.renderer.clear();
-    this.renderer.render(this.scene, this.camera);
+    this.renderer.render(this.scene, activeCamera);
     this.renderer.setRenderTarget(oldRenderTarget);
 
     // Restore camera if we changed it
-    if (width !== this.width || height !== this.height) {
-      this.camera.left = oldLeft;
-      this.camera.right = oldRight;
-      this.camera.top = oldTop;
-      this.camera.bottom = oldBottom;
-      this.camera.updateProjectionMatrix();
+    if (activeCamera === this.camera && activeCamera instanceof THREE.OrthographicCamera && 
+        oldLeft !== undefined && oldRight !== undefined && oldTop !== undefined && oldBottom !== undefined) {
+      if (width !== this.width || height !== this.height) {
+        this.camera.left = oldLeft;
+        this.camera.right = oldRight;
+        this.camera.top = oldTop;
+        this.camera.bottom = oldBottom;
+        this.camera.updateProjectionMatrix();
+      }
+    } else if (activeCamera instanceof THREE.PerspectiveCamera && oldAspect !== undefined) {
+      // Restore aspect ratio for perspective camera
+      if (width !== this.width || height !== this.height) {
+        activeCamera.aspect = oldAspect;
+        activeCamera.updateProjectionMatrix();
+      }
     }
 
     const texture = this.effectsRenderTarget.texture;
@@ -1783,6 +1824,73 @@ export class Canvas {
     // Clean up temporary geometry and material
     geometry.dispose();
     material.dispose();
+  }
+
+  /**
+   * Blend two textures together and render to screen
+   * @param originalTexture The original texture (no effects)
+   * @param processedTexture The processed texture (with effects)
+   * @param mix The blend mix (0.0 = original, 1.0 = processed)
+   */
+  renderBlendedTextures(originalTexture: THREE.Texture, processedTexture: THREE.Texture, mix: number): void {
+    if (!originalTexture || !processedTexture) {
+      console.warn('[Canvas] renderBlendedTextures: Missing textures');
+      return;
+    }
+
+    // Ensure textures are updated
+    originalTexture.needsUpdate = true;
+    originalTexture.flipY = false;
+    processedTexture.needsUpdate = true;
+    processedTexture.flipY = false;
+
+    // Create shader material for blending
+    const blendMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        tOriginal: { value: originalTexture },
+        tProcessed: { value: processedTexture },
+        mix: { value: mix },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D tOriginal;
+        uniform sampler2D tProcessed;
+        uniform float mix;
+        varying vec2 vUv;
+        void main() {
+          vec4 original = texture2D(tOriginal, vUv);
+          vec4 processed = texture2D(tProcessed, vUv);
+          gl_FragColor = mix(original, processed, mix);
+        }
+      `,
+    });
+
+    // Create fullscreen quad
+    const geometry = new THREE.PlaneGeometry(this.width, this.height);
+    const mesh = new THREE.Mesh(geometry, blendMaterial);
+    mesh.position.set(0, 0, 0);
+    
+    // Create temporary scene
+    const tempScene = new THREE.Scene();
+    tempScene.add(mesh);
+    
+    // Render to screen
+    const oldRenderTarget = this.renderer.getRenderTarget();
+    this.renderer.setRenderTarget(null);
+    this.renderer.clearColor();
+    this.renderer.clear(true, true, true);
+    this.renderer.render(tempScene, this.camera);
+    this.renderer.setRenderTarget(oldRenderTarget);
+    
+    // Clean up
+    geometry.dispose();
+    blendMaterial.dispose();
   }
 
   /**

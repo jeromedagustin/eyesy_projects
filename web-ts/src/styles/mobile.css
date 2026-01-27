@@ -99,7 +99,8 @@ body {
 .app-header {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--bg-surface);
-  padding: var(--spacing-md);
+  /* Tighter header (more canvas space) */
+  padding: var(--spacing-sm) var(--spacing-md);
   z-index: var(--z-header);
   flex-shrink: 0;
 }
@@ -327,37 +328,114 @@ input[type="range"]::-moz-range-thumb {
   justify-content: space-between;
   align-items: center;
   gap: var(--spacing-md);
+  flex-wrap: nowrap;
 }
 
 .header-info {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  min-width: 260px;
 }
 
-.header-info > div {
+.header-info-text {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .header-mode-nav {
   display: none; /* Hidden by default, shown in landscape */
 }
 
+.header-mode-nav-btn {
+  min-width: 36px;
+  min-height: 36px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
 .header-title {
-  font-size: 1.5rem;
+  font-size: 1.15rem;
+  line-height: 1.1;
   margin: 0;
 }
 
 .header-status {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+.header-topline {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.header-subline {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.header-mode-name {
+  display: none; /* Shown in landscape via App logic */
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 340px;
+  cursor: pointer;
+}
+
+.header-favorite-btn {
+  display: none; /* Shown in landscape via App logic */
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  min-width: 28px;
+  min-height: 28px;
+  transition: transform var(--transition-fast);
+}
+
+.header-favorite-btn:active {
+  transform: scale(0.92);
 }
 
 .header-actions {
   display: flex;
   gap: var(--spacing-sm);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px; /* prevents scrollbar overlap on some browsers */
+  scrollbar-width: thin;
+}
+
+.header-actions .btn {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+/* Hide header button labels sooner so header stays one line */
+@media (max-width: 1400px) {
+  .header-actions .btn span:not(.btn-icon) {
+    display: none;
+  }
+  .header-actions .btn {
+    padding: var(--spacing-sm);
+    min-width: var(--touch-target-min);
+  }
 }
 
 /* ============================================
@@ -728,7 +806,7 @@ input[type="range"]::-moz-range-thumb {
   
   .header-content {
     display: flex !important;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0.25rem;
   }
@@ -738,6 +816,9 @@ input[type="range"]::-moz-range-thumb {
     flex: 1 1 auto;
     justify-content: flex-end;
     min-width: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
   
   .header-title {
@@ -846,6 +927,8 @@ input[type="range"]::-moz-range-thumb {
     height: auto !important;
     /* Allow stretching to fill all space */
     object-fit: fill !important;
+    /* Don't let aspect-ratio rules constrain the rotated element sizing */
+    aspect-ratio: auto !important;
     /* Remove any margins or padding */
     margin: 0 !important;
     padding: 0 !important;
@@ -972,20 +1055,26 @@ input[type="range"]::-moz-range-thumb {
   
   .header-content {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0.3rem;
   }
   
   .header-info {
-    flex: 0 0 auto;
+    /* Allow title area to shrink so all action buttons can fit */
+    flex: 1 1 auto;
+    min-width: 0 !important;
   }
   
   .header-actions {
-    flex: 1 1 auto;
+    /* Keep actions at intrinsic width so we don't lose buttons */
+    flex: 0 0 auto;
     display: flex !important; /* Ensure actions are visible */
     justify-content: flex-end;
     min-width: 0; /* Allow shrinking if needed */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
   
   .header-title {
@@ -993,6 +1082,9 @@ input[type="range"]::-moz-range-thumb {
     margin-bottom: 0;
     line-height: 1;
     padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .header-status {
@@ -1074,6 +1166,7 @@ input[type="range"]::-moz-range-thumb {
   .controls-panel.left-handed.collapsed {
     transform: translateX(-100%);
   }
+  }
   
   /* Fallback for open class without left/right-handed class */
   .controls-panel.open {
@@ -1152,18 +1245,279 @@ input[type="range"]::-moz-range-thumb {
   
   /* Compact header on mobile */
   .header-content {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
   
   .header-actions {
-    width: 100%;
-    justify-content: space-between;
-    margin-top: var(--spacing-sm);
+    width: auto;
+    justify-content: flex-end;
+    margin-top: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
   
   .header-actions .btn {
-    flex: 1;
-    max-width: 80px;
+    flex: 0 0 auto;
+    max-width: none;
+    white-space: nowrap;
+  }
+  
+  /* FX button - ensure it's visible and positioned correctly on mobile */
+  #fx-button {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 80px !important; /* Above the mode nav bar */
+    left: var(--spacing-md) !important;
+    width: 56px !important;
+    height: 56px !important;
+    z-index: var(--z-modal) !important;
+    font-size: 1.5rem !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+    line-height: 1 !important;
+  }
+  
+  /* Left-handed: FX button on right */
+  body.left-handed #fx-button {
+    left: auto !important;
+    right: var(--spacing-md) !important;
+  }
+  
+  /* Settings button - ensure it's visible and positioned correctly on mobile */
+  #settings-button {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 80px !important; /* Above the mode nav bar */
+    right: var(--spacing-md) !important;
+    width: 56px !important;
+    height: 56px !important;
+    z-index: var(--z-modal) !important;
+    font-size: 1.5rem !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+    background: #666 !important;
+  }
+  
+  /* Left-handed: Settings button on left */
+  body.left-handed #settings-button {
+    right: auto !important;
+    left: var(--spacing-md) !important;
+  }
+  
+  /* Hide the controls-toggle FAB on mobile since we're using settings-button instead */
+  .controls-toggle {
+    display: none !important;
+  }
+  
+  /* Effects Panel - Mobile Styles (match controls panel) */
+  #effects-panel-modal {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    bottom: 0 !important;
+    width: var(--sidebar-width-mobile) !important;
+    max-width: 85vw !important;
+    z-index: var(--z-overlay) !important;
+    transform: translateX(100%) !important; /* Hidden by default on mobile */
+    transition: transform var(--transition-normal) !important;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+  
+  /* Right-handed (default): slide from right */
+  #effects-panel-modal.right-handed {
+    right: 0 !important;
+    left: auto !important;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3) !important;
+    transform: translateX(100%) !important; /* Hidden by default */
+  }
+  
+  #effects-panel-modal.right-handed.open {
+    transform: translateX(0) !important; /* Override default when open */
+  }
+  
+  /* Left-handed: slide from left */
+  #effects-panel-modal.left-handed {
+    right: auto !important;
+    left: 0 !important;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3) !important;
+    transform: translateX(-100%) !important; /* Hidden by default */
+  }
+  
+  #effects-panel-modal.left-handed.open {
+    transform: translateX(0) !important; /* Override default when open */
+  }
+  
+  /* Fallback for open class without left/right-handed class */
+  #effects-panel-modal.open {
+    transform: translateX(0) !important; /* Override default when open */
+  }
+  
+  /* Effects panel header - compact on mobile */
+  #effects-panel-modal > div:first-child {
+    padding: var(--spacing-md) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+  }
+  
+  #effects-panel-modal h2 {
+    font-size: 1rem !important;
+    margin: 0 !important;
+  }
+  
+  /* Effects panel tabs - smaller on mobile */
+  #effects-panel-modal .effects-tab {
+    padding: 0.3rem 0.6rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  /* Effects panel content - better spacing */
+  #effects-panel-modal > div:not(:first-child) {
+    padding: var(--spacing-md) !important;
+    display: block !important; /* Ensure content div is visible */
+  }
+  
+  /* Ensure tab content is visible on mobile */
+  #effects-panel-modal .tab-content {
+    display: block !important;
+  }
+  
+  #effects-panel-modal #post-effects-tab {
+    display: block !important;
+  }
+  
+  /* Effects panel backdrop (same as controls backdrop) */
+  .effects-panel-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: calc(var(--z-overlay) - 1);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    backdrop-filter: blur(2px);
+  }
+  
+  .effects-panel-backdrop.visible {
+    display: block;
+    opacity: 1;
+  }
+  
+  /* Make effects panel content touch-friendly */
+  #effects-panel-modal button {
+    min-height: 48px !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+  }
+  
+  #effects-panel-modal input[type="range"] {
+    height: var(--slider-height-mobile) !important;
+    padding: 8px 0 !important;
+  }
+  
+  #effects-panel-modal input[type="range"]::-webkit-slider-thumb {
+    width: var(--slider-thumb-mobile) !important;
+    height: var(--slider-thumb-mobile) !important;
+  }
+  
+  #effects-panel-modal input[type="range"]::-moz-range-thumb {
+    width: var(--slider-thumb-mobile) !important;
+    height: var(--slider-thumb-mobile) !important;
+  }
+  
+  /* Compact spacing in effects panel on mobile */
+  #effects-panel-modal .effect-card {
+    padding: var(--spacing-md) !important;
+    margin-bottom: var(--spacing-sm) !important;
+  }
+  
+  /* Effect controls - better spacing on mobile */
+  #effects-panel-modal .effect-controls {
+    gap: var(--spacing-sm) !important;
+  }
+  
+  /* Search input - touch-friendly */
+  #effects-panel-modal #effects-search {
+    min-height: 48px !important;
+    font-size: 1rem !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+  }
+  
+  /* Section headers - compact */
+  #effects-panel-modal [data-effect-section] h3 {
+    font-size: 0.9rem !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+    margin: var(--spacing-md) 0 var(--spacing-sm) 0 !important;
+  }
+  
+  /* Ensure proper scrolling container */
+  #effects-panel-modal {
+    height: 100vh !important;
+    max-height: 100vh !important;
+  }
+
+/* ============================================
+   Desktop: Effects Panel (outside mobile media query)
+   ============================================ */
+/* Ensure "open" always brings the panel on-screen (all breakpoints) */
+#effects-panel-modal.open {
+  transform: translateX(0) !important;
+}
+
+/* Ensure effects panel is visible on desktop when open */
+@media (min-width: 769px) {
+  #effects-panel-modal[data-open="true"] {
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  /* Ensure tab content is visible on desktop */
+  #effects-panel-modal .tab-content {
+    display: block !important;
+  }
+  
+  #effects-panel-modal #post-effects-tab {
+    display: block !important;
+  }
+  
+  #effects-panel-modal #webcam-effects-tab {
+    display: none !important; /* Hidden by default, shown when tab is clicked */
+  }
+  
+  /* Ensure content wrapper div is visible */
+  #effects-panel-modal > div:nth-child(2) {
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  /* Ensure all content sections are visible */
+  #effects-panel-modal [data-effect-section] {
+    display: block !important;
+  }
+  
+  /* Ensure effect cards are visible */
+  #effects-panel-modal [data-effect-name] {
+    display: block !important;
+  }
+  
+  /* Ensure content wrapper and tab content are visible */
+  #effects-panel-modal > div:nth-child(2),
+  #effects-panel-modal > div:nth-child(2) > div {
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  /* But allow specific hiding for webcam tab when it has inline style */
+  #effects-panel-modal #webcam-effects-tab[style*="display: none"] {
+    display: none !important;
   }
 }
 
@@ -1182,12 +1536,14 @@ input[type="range"]::-moz-range-thumb {
   .header-info {
     display: flex;
     flex-direction: column;
+    /* Override desktop min-width so actions don't get clipped */
+    min-width: 0;
   }
   
   .header-actions .btn {
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: 0.8rem;
-    max-width: 60px;
+    max-width: none;
   }
   
   /* Even larger touch targets */

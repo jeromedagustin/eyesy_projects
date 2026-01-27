@@ -2,6 +2,7 @@ import { Mode } from '../base/Mode';
 import { Canvas } from '../../core/Canvas';
 import { EYESY } from '../../core/EYESY';
 import { loadImage, LoadedImage, getImagePath } from '../../core/imageUtils';
+import { AudioScope } from '../utils/AudioScope';
 
 /**
  * S - Circle Scope - Image

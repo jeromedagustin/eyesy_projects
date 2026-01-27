@@ -262,6 +262,15 @@ export class ModeGrouper {
         category: 'pattern',
       },
       
+      // === 3D MODES ===
+      {
+        id: '3d-modes',
+        name: '🎲 3D',
+        priority: 29,
+        keywords: ['3d', '3d -'],
+        category: '3d',
+      },
+      
       // === IMAGE & VIDEO MODES (at end) ===
       {
         id: 'image-modes',
@@ -367,6 +376,9 @@ export class ModeGrouper {
           if (idx >= 0) groups[idx].modes.push(mode);
         } else if (category === 'pattern') {
           const idx = findGroupIndex('pattern-modes');
+          if (idx >= 0) groups[idx].modes.push(mode);
+        } else if (category === '3d') {
+          const idx = findGroupIndex('3d-modes');
           if (idx >= 0) groups[idx].modes.push(mode);
         }
       }

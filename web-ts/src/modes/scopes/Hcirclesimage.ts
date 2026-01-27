@@ -37,7 +37,6 @@ export class Hcirclesimage implements Mode {
       }
       
       this.images = images;
-      console.log(`Loaded ${this.images.length} images for H Circles - Image mode.`);
     } catch (error) {
       console.error('Failed to load images for H Circles - Image mode:', error);
     }

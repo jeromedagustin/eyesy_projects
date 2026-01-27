@@ -773,172 +773,65 @@ export class App {
           to { transform: rotate(360deg); }
         }
       </style>
-      <div class="app-container" style="display: flex; flex-direction: column; height: 100vh; height: 100dvh;">
-        <div class="app-header" style="padding: 1rem; background: #2a2a2a; border-bottom: 1px solid #3a3a3a;">
-          <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-            <div class="header-info" style="display: flex; align-items: center; gap: 0.5rem;">
-              <button id="prev-mode-header-btn" class="btn btn-secondary header-mode-nav" style="
-                display: none;
-                padding: 0.4rem;
-                background: #666;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 1rem;
-                min-width: 36px;
-                min-height: 36px;
-                align-items: center;
-                justify-content: center;
-              " aria-label="Previous mode">◀</button>
-              <div>
-                <h1 class="header-title" style="font-size: 1.5rem; margin: 0 0 0.25rem 0;">EYESY Web</h1>
-                <div class="header-status" style="font-size: 0.9rem; color: #aaa;" id="status">Ready</div>
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.1rem;">
-                  <div id="header-mode-name" class="header-mode-name" style="
-                    display: none;
-                    font-size: 0.85rem;
-                    color: var(--accent, #4a9eff);
-                    font-weight: 500;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    max-width: 300px;
-                  "></div>
-                  <button id="header-favorite-btn" class="header-mode-nav" style="
-                    display: none;
-                    background: none;
-                    border: none;
-                    font-size: 1.2rem;
-                    cursor: pointer;
-                    padding: 0.25rem;
-                    line-height: 1;
-                    transition: transform 0.2s;
-                    min-width: 28px;
-                    min-height: 28px;
-                  " aria-label="Toggle favorite" title="Toggle favorite">🤍</button>
+      <div class="app-container">
+        <div class="app-header">
+          <div class="header-content">
+            <div class="header-info">
+              <button
+                id="prev-mode-header-btn"
+                class="btn btn-secondary header-mode-nav header-mode-nav-btn"
+                aria-label="Previous mode"
+                title="Previous mode"
+              >◀</button>
+              <div class="header-info-text">
+                <div class="header-topline">
+                  <h1 class="header-title">EYESY Web</h1>
+                  <div class="header-status" id="status">Ready</div>
+                </div>
+                <div class="header-subline">
+                  <button
+                    id="header-favorite-btn"
+                    class="header-mode-nav header-favorite-btn"
+                    aria-label="Toggle favorite"
+                    title="Toggle favorite"
+                  >🤍</button>
+                  <div id="header-mode-name" class="header-mode-name"></div>
                 </div>
               </div>
-              <button id="next-mode-header-btn" class="btn btn-secondary header-mode-nav" style="
-                display: none;
-                padding: 0.4rem;
-                background: #666;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 1rem;
-                min-width: 36px;
-                min-height: 36px;
-                align-items: center;
-                justify-content: center;
-              " aria-label="Next mode">▶</button>
+              <button
+                id="next-mode-header-btn"
+                class="btn btn-secondary header-mode-nav header-mode-nav-btn"
+                aria-label="Next mode"
+                title="Next mode"
+              >▶</button>
             </div>
-            <div class="header-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              <button id="mic-btn" class="btn btn-secondary" style="
-                padding: 0.5rem 1rem;
-                background: #666;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.9rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                min-height: 44px;
-              ">
+            <div class="header-actions">
+              <button id="mic-btn" class="btn btn-secondary" title="Enable microphone" aria-label="Enable microphone">
                 <span id="mic-icon" class="btn-icon">🎤</span>
                 <span id="mic-text">Enable Mic</span>
               </button>
-              <button id="webcam-btn" class="btn btn-secondary" style="
-                padding: 0.5rem 1rem;
-                background: #666;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.9rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                min-height: 44px;
-              ">
+              <button id="webcam-btn" class="btn btn-secondary" title="Enable webcam" aria-label="Enable webcam">
                 <span id="webcam-icon" class="btn-icon">📷</span>
                 <span id="webcam-text">Enable Webcam</span>
               </button>
-              <button id="images-btn" class="btn btn-secondary" style="
-                padding: 0.5rem 1rem;
-                background: #666;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.9rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                min-height: 44px;
-              ">
-                <span id="images-icon" class="btn-icon">🖼️</span>
-                <span id="images-text">Upload Images (0)</span>
+              <button id="browser-btn" class="btn btn-primary" title="Browse modes (B)" aria-label="Browse modes">
+                <span class="btn-icon">🧭</span>
+                <span>Browse Modes (B)</span>
               </button>
-              <input type="file" id="image-upload" multiple accept="image/*" style="display: none;">
-              <button id="browser-btn" class="btn btn-primary" style="
-                padding: 0.5rem 1rem;
-                background: #4a9eff;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.9rem;
-                min-height: 44px;
-              ">Browse Modes (B)</button>
-              <button id="pause-btn" class="btn btn-secondary" style="
-                padding: 0.5rem 1rem;
-                background: #666;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.9rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                min-height: 44px;
-              " title="Pause animation (P)">
+              <button id="pause-btn" class="btn btn-secondary" title="Pause animation (P)" aria-label="Pause">
                 <span id="pause-icon" class="btn-icon">⏸</span>
                 <span id="pause-text">Pause</span>
               </button>
-              <button id="screenshot-btn" class="btn btn-secondary" style="
-                padding: 0.5rem 1rem;
-                background: #666;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.9rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                min-height: 44px;
-              " title="Save screenshot (S)">
-                <span class="btn-icon">📷</span>
+              <button id="screenshot-btn" class="btn btn-secondary" title="Save screenshot (S)" aria-label="Screenshot">
+                <span class="btn-icon">📸</span>
                 <span>Screenshot</span>
               </button>
-              <button id="auto-clear-btn" class="btn btn-secondary" style="
-                padding: 0.5rem 1rem;
-                background: #666;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.9rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                min-height: 44px;
-              " title="Toggle auto clear (clear canvas each frame)">
+              <button
+                id="auto-clear-btn"
+                class="btn btn-secondary"
+                title="Toggle auto clear (C)"
+                aria-label="Toggle auto clear"
+              >
                 <span id="auto-clear-icon" class="btn-icon">🔄</span>
                 <span id="auto-clear-text">Auto Clear</span>
               </button>
@@ -949,6 +842,27 @@ export class App {
         <div class="app-main" style="display: flex; flex: 1; overflow: hidden; min-height: 0;">
           <div class="canvas-container" style="flex: 1; display: flex; align-items: center; justify-content: center; background: #000; min-width: 0; min-height: 0; position: relative; overflow: hidden;">
             <canvas id="canvas" style="max-width: 100%; max-height: 100%; touch-action: none;"></canvas>
+            <button id="settings-button" style="
+              position: absolute;
+              bottom: 1rem;
+              right: 1rem;
+              width: 48px;
+              height: 48px;
+              background: #666;
+              color: white;
+              border: none;
+              border-radius: 50%;
+              cursor: pointer;
+              font-size: 1.5rem;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 100;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+              transition: all 0.2s ease;
+            " title="Toggle Controls Panel" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 12px rgba(102, 102, 102, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.3)';">
+              ⚙️
+            </button>
           </div>
           <div id="controls-container" class="controls-panel" style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;"></div>
         </div>
@@ -1031,47 +945,35 @@ export class App {
     const isRotated = isPortrait && this.portraitRotate;
     
     if (isPortrait && isRotated) {
-      // When rotated in portrait: calculate dimensions to match landscape appearance
-      // After 90deg rotation: canvas width becomes visual height, canvas height becomes visual width
-      // We want the rotated canvas to look exactly like it does in landscape mode
-      
-      // In landscape mode, the calculation is:
-      // - targetWidth = availableWidth
-      // - targetHeight = availableWidth * (9/16)
-      // - If targetHeight <= availableHeight: use targetWidth and targetHeight
-      // - Otherwise: height = availableHeight, width = availableHeight * (16/9)
-      
-      // When rotated 90deg in portrait, we need to swap dimensions:
-      // - Visual width (after rotation) should match what landscape width would be
-      // - Visual height (after rotation) should match what landscape height would be
-      // - So: canvas height = landscape width, canvas width = landscape height
-      
+      // Portrait rotate mode is intended to use *more* of the screen by treating
+      // the device's vertical space as the landscape width.
+      //
+      // Because the canvas element is rotated 90deg in CSS:
+      // - Rotated visual width  == canvas.height
+      // - Rotated visual height == canvas.width
+      //
+      // So we choose a landscape-sized (canvas.width x canvas.height) that fits:
+      // - canvas.height <= availableWidth
+      // - canvas.width  <= maxVisualHeight
       const baseAspect = 1280 / 720; // 16:9
       
-      // Calculate as if we're in landscape (using portrait's available dimensions)
-      // In portrait, availableWidth is the screen width (narrow)
-      // After rotation, we want to use the full screen width as visual width
-      const targetVisualWidth = Math.floor(availableWidth); // Use full screen width
-      const targetVisualHeight = Math.floor(targetVisualWidth / baseAspect); // Calculate height for 16:9
-      
-      // Check if we have enough vertical space
       const headerHeight = document.querySelector('.app-header')?.getBoundingClientRect().height || 40;
       const navHeight = document.querySelector('.mode-nav-mobile')?.getBoundingClientRect().height || 50;
-      const maxVisualHeight = window.innerHeight - headerHeight - navHeight;
+      const maxVisualHeight = Math.min(availableHeight, window.innerHeight - headerHeight - navHeight);
+      const maxVisualWidth = Math.min(availableWidth, window.innerWidth);
       
-      if (targetVisualHeight <= maxVisualHeight) {
-        // We have enough space - use calculated dimensions
-        // After rotation: canvas height = visual width, canvas width = visual height
-        newHeight = targetVisualWidth;  // Canvas height becomes visual width
-        newWidth = targetVisualHeight;   // Canvas width becomes visual height
-      } else {
-        // Height is the constraint - use available vertical space
-        const constrainedVisualHeight = Math.floor(maxVisualHeight);
-        const constrainedVisualWidth = Math.floor(constrainedVisualHeight * baseAspect);
-        // After rotation: canvas height = visual width, canvas width = visual height
-        newHeight = constrainedVisualWidth;
-        newWidth = constrainedVisualHeight;
+      // Start by using all available vertical space as "landscape width"
+      let landscapeWidth = Math.floor(maxVisualHeight);
+      let landscapeHeight = Math.floor(landscapeWidth / baseAspect);
+      
+      // If the required landscape height would exceed the portrait width, fit to width instead
+      if (landscapeHeight > maxVisualWidth) {
+        landscapeHeight = Math.floor(maxVisualWidth);
+        landscapeWidth = Math.floor(landscapeHeight * baseAspect);
       }
+      
+      newWidth = landscapeWidth;   // canvas.width  -> rotated height
+      newHeight = landscapeHeight; // canvas.height -> rotated width
     } else if (isPortrait) {
       // In portrait (not rotated): use full width, but maintain aspect ratio
       // Only extend height if there's extra space, don't force stretching
@@ -1213,6 +1115,20 @@ export class App {
           this.eyesy.knob8 = value;
           // Speed is applied in the animation loop via deltaTime multiplier
           break;
+        case 9:
+          this.eyesy.knob9 = value;
+          // Apply X position immediately
+          if (this.eyesy.knob10 !== undefined) {
+            this.canvasWrapper.setPosition(value, this.eyesy.knob10);
+          }
+          break;
+        case 10:
+          this.eyesy.knob10 = value;
+          // Apply Y position immediately
+          if (this.eyesy.knob9 !== undefined) {
+            this.canvasWrapper.setPosition(this.eyesy.knob9, value);
+          }
+          break;
       }
       // Save settings when knobs change (debounced)
       this.debouncedSaveSettings();
@@ -1332,13 +1248,6 @@ export class App {
       this.debouncedSaveSettings();
     });
 
-    // Show only favorites
-    this.controls.setOnShowOnlyFavoritesChange((showOnlyFavorites) => {
-      this.showOnlyFavorites = showOnlyFavorites;
-      this.updateModeSelector();
-      this.debouncedSaveSettings();
-    });
-
     // Seizure-safe mode
     this.controls.setOnSeizureSafeChange(async (enabled) => {
       // Save per-mode setting
@@ -1371,6 +1280,20 @@ export class App {
       this.lastFrameTimeForFPS = performance.now(); // Reset timing when FPS changes
       this.debouncedSaveSettings();
     });
+
+    // Settings button to toggle controls panel
+    const settingsButton = document.getElementById('settings-button');
+    if (settingsButton) {
+      settingsButton.addEventListener('click', () => {
+        // On mobile, use MobileUI's toggleControls method
+        if (TouchManager.isMobileScreen() && this.mobileUI) {
+          this.mobileUI.toggleControls();
+        } else {
+          // On desktop, use the standard toggle
+          this.toggleControlsPanel();
+        }
+      });
+    }
 
     // Rewind controls
     this.controls.setOnRewind(() => {
@@ -1415,13 +1338,9 @@ export class App {
 
     // Reverse playback toggle - simple flag-based approach
     this.controls.setOnReversePlaybackChange((enabled) => {
-      console.log('[REVERSE] Checkbox toggled:', enabled);
-      console.log('[REVERSE] Current time before toggle:', this.eyesy.time.toFixed(3));
-      console.log('[REVERSE] Previous reversePlaybackEnabled:', this.reversePlaybackEnabled);
       
       this.reversePlaybackEnabled = enabled;
       
-      console.log('[REVERSE] New reversePlaybackEnabled:', this.reversePlaybackEnabled);
       
       // Update UI
       this.controls.updateReversePlaybackState(enabled);
@@ -1607,6 +1526,17 @@ export class App {
       
       this.effectManager.resetAllEffects('post');
       
+      // Reset blend mix to 1.0 (full effects)
+      this.effectManager.setBlendMix(1.0);
+      const blendMixSlider = document.getElementById('effects-blend-mix') as HTMLInputElement;
+      const blendMixValue = document.getElementById('effects-blend-mix-value');
+      const blendMixQuickSlider = document.getElementById('effects-blend-mix-quick') as HTMLInputElement;
+      const blendMixQuickValue = document.getElementById('effects-blend-mix-value-quick');
+      if (blendMixSlider) blendMixSlider.value = '1.0';
+      if (blendMixValue) blendMixValue.textContent = '100%';
+      if (blendMixQuickSlider) blendMixQuickSlider.value = '1.0';
+      if (blendMixQuickValue) blendMixQuickValue.textContent = '100%';
+      
       // Update all UI elements
       this.effectManager.getPostEffects().forEach(effect => {
         const kebabName = effect.name.replace(/([A-Z])/g, '-$1').toLowerCase();
@@ -1644,6 +1574,91 @@ export class App {
       }
       
       this.debouncedSaveSettings();
+    });
+
+    this.controls.setOnRandomizeEffects(() => {
+      if (!this.effectManager) return;
+      
+      // Randomize all post-effects
+      const effects = this.effectManager.getPostEffects();
+      effects.forEach(effect => {
+        // Randomly enable/disable (70% chance to enable)
+        const shouldEnable = Math.random() < 0.7;
+        effect.enabled = shouldEnable;
+        
+        // Random intensity between 0.2 and 1.0 if enabled
+        if (shouldEnable) {
+          effect.intensity = 0.2 + Math.random() * 0.8;
+        } else {
+          effect.intensity = 0;
+        }
+        
+        // Special handling for Color Grading
+        if (effect.name === 'colorGrading' && shouldEnable) {
+          const colorGradingEffect = effect as any;
+          if (colorGradingEffect.setOptions) {
+            colorGradingEffect.setOptions({
+              brightness: (Math.random() - 0.5) * 0.4, // -0.2 to 0.2
+              contrast: (Math.random() - 0.5) * 0.4,   // -0.2 to 0.2
+              saturation: (Math.random() - 0.5) * 0.6, // -0.3 to 0.3
+              hue: (Math.random() - 0.5) * 0.4,        // -0.2 to 0.2
+            });
+          }
+        }
+        
+        // Update UI elements
+        const kebabName = effect.name.replace(/([A-Z])/g, '-$1').toLowerCase();
+        const enabledCheckbox = document.getElementById(`effect-${kebabName}-enabled`) as HTMLInputElement;
+        const intensitySlider = document.getElementById(`effect-${kebabName}-intensity`) as HTMLInputElement;
+        const intensityValue = document.getElementById(`effect-${kebabName}-intensity-value`);
+        const intensityValueContainer = intensityValue?.parentElement as HTMLElement;
+        const resetBtn = document.querySelector(`button.effect-reset-btn[data-effect="${kebabName}"]`) as HTMLElement;
+        
+        if (enabledCheckbox) {
+          enabledCheckbox.checked = effect.enabled;
+          enabledCheckbox.dispatchEvent(new Event('change'));
+        }
+        if (intensitySlider && intensityValue) {
+          intensitySlider.value = effect.intensity.toString();
+          intensityValue.textContent = effect.intensity.toFixed(2);
+        }
+        
+        // Update visibility based on enabled state
+        if (!effect.enabled) {
+          if (intensitySlider) intensitySlider.style.display = 'none';
+          if (intensityValueContainer) intensityValueContainer.style.display = 'none';
+          if (resetBtn) resetBtn.style.display = 'none';
+        } else {
+          if (intensitySlider) intensitySlider.style.display = 'block';
+          if (intensityValueContainer) intensityValueContainer.style.display = 'flex';
+          if (resetBtn) resetBtn.style.display = 'inline-block';
+        }
+        
+        // Update Color Grading UI sliders if applicable
+        if (effect.name === 'colorGrading' && shouldEnable) {
+          const colorGradingEffect = effect as any;
+          if (colorGradingEffect.setOptions) {
+            const options = colorGradingEffect.getOptions?.() || {};
+            const brightnessSlider = document.getElementById('color-grading-brightness') as HTMLInputElement;
+            const contrastSlider = document.getElementById('color-grading-contrast') as HTMLInputElement;
+            const saturationSlider = document.getElementById('color-grading-saturation') as HTMLInputElement;
+            const hueSlider = document.getElementById('color-grading-hue') as HTMLInputElement;
+            if (brightnessSlider) brightnessSlider.value = (options.brightness || 0).toString();
+            if (contrastSlider) contrastSlider.value = (options.contrast || 0).toString();
+            if (saturationSlider) saturationSlider.value = (options.saturation || 0).toString();
+            if (hueSlider) hueSlider.value = (options.hue || 0).toString();
+          }
+        }
+      });
+      
+      this.debouncedSaveSettings();
+    });
+
+    this.controls.setOnEffectsBlendMixChange((value) => {
+      if (this.effectManager) {
+        this.effectManager.setBlendMix(value);
+        this.debouncedSaveSettings();
+      }
     });
 
     this.controls.setOnResetAllToDefault(() => {
@@ -1745,6 +1760,43 @@ export class App {
     } catch (error) {
       console.error('Error applying portrait rotate:', error);
     }
+  }
+
+  private toggleControlsPanel(): void {
+    const controlsContainer = document.querySelector('#controls-container') as HTMLElement;
+    if (!controlsContainer) return;
+    
+    // Check if controls are currently visible by checking width
+    const currentWidth = controlsContainer.offsetWidth;
+    const isVisible = currentWidth > 50; // Threshold to account for minimal width
+    
+    if (isVisible) {
+      // Hide controls panel - collapse it completely to maximize canvas space
+      controlsContainer.style.flex = '0 0 0';
+      controlsContainer.style.width = '0';
+      controlsContainer.style.minWidth = '0';
+      controlsContainer.style.maxWidth = '0';
+      controlsContainer.style.overflow = 'hidden';
+      controlsContainer.style.opacity = '0';
+      controlsContainer.style.pointerEvents = 'none';
+      controlsContainer.setAttribute('data-collapsed', 'true');
+    } else {
+      // Show controls panel - restore default flex behavior
+      controlsContainer.style.flex = '';
+      controlsContainer.style.width = '';
+      controlsContainer.style.minWidth = '';
+      controlsContainer.style.maxWidth = '';
+      controlsContainer.style.overflow = '';
+      controlsContainer.style.opacity = '1';
+      controlsContainer.style.pointerEvents = 'auto';
+      controlsContainer.removeAttribute('data-collapsed');
+    }
+    
+    // Trigger canvas resize to take advantage of the new space
+    // Use requestAnimationFrame to ensure layout has updated
+    requestAnimationFrame(() => {
+      this.resizeCanvas();
+    });
   }
 
   private applyLeftHandedLayout(leftHanded: boolean) {
@@ -1898,13 +1950,27 @@ export class App {
       this.loadMode(modeInfo);
     });
 
+    // Show only favorites (now handled by ModeBrowser)
+    this.modeBrowser.setOnShowOnlyFavoritesChange((showOnlyFavorites) => {
+      this.showOnlyFavorites = showOnlyFavorites;
+      this.updateModeSelector();
+      this.debouncedSaveSettings();
+    });
+
+    // Handle enable feature prompt (when user clicks disabled mode 3 times)
+    this.modeBrowser.setOnEnableFeaturePrompt((mode, reason) => {
+      this.promptEnableFeature(mode, reason);
+    });
+
+    // Apply saved showOnlyFavorites setting to the browser
+    this.modeBrowser.setShowOnlyFavorites(this.showOnlyFavorites);
+
     // Browser button
     const browserBtn = document.getElementById('browser-btn');
     if (browserBtn) {
       browserBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Browse Modes button clicked');
         if (this.modeBrowser) {
           this.modeBrowser.toggle();
         } else {
@@ -2052,13 +2118,11 @@ export class App {
     pauseBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log('Pause button clicked, current state:', this.isPaused);
       this.togglePause();
     });
     
     // Update button state
     this.updatePauseButton();
-    console.log('Pause button setup complete');
   }
   
   private setupScreenshotButton(): void {
@@ -2095,7 +2159,6 @@ export class App {
       const modeName = this.sortedModes[this.currentModeIndex]?.name || 'Unknown';
       this.updateStatus(`Screenshot saved: ${modeName}`);
       
-      console.log('Screenshot captured successfully');
     } catch (error) {
       console.error('Error capturing screenshot:', error);
       this.updateStatus('Error capturing screenshot');
@@ -2107,16 +2170,13 @@ export class App {
     this.isPaused = !this.isPaused;
     // Track manual pause state: true if user manually paused, false if user manually resumed
     this.wasManuallyPaused = this.isPaused;
-    console.log('togglePause called:', { wasPaused, nowPaused: this.isPaused, wasManuallyPaused: this.wasManuallyPaused });
     
     this.updatePauseButton();
     
     if (this.isPaused) {
       this.updateStatus('Animation paused');
-      console.log('Animation paused - isPaused =', this.isPaused);
     } else {
       this.updateStatus('Animation resumed');
-      console.log('Animation resumed - isPaused =', this.isPaused);
       // Reset last frame time to avoid large delta jump
       this.lastFrameTime = performance.now();
     }
@@ -2319,7 +2379,6 @@ export class App {
           this.isPaused = true;
           this.wasManuallyPaused = false; // This is an auto-pause
           this.updatePauseButton();
-          console.log('Auto-paused: Tab is hidden');
         }
       } else {
         // Tab is now visible - resume only if we auto-paused (not if user manually paused)
@@ -2328,24 +2387,28 @@ export class App {
           this.updatePauseButton();
           // Reset last frame time to avoid large delta jump
           this.lastFrameTime = performance.now();
-          console.log('Auto-resumed: Tab is visible');
         }
       }
     });
   }
 
   private setupImagesButton(): void {
-    const imagesBtn = document.querySelector('#images-btn') as HTMLButtonElement;
-    const imagesIcon = document.querySelector('#images-icon')!;
-    const imagesText = document.querySelector('#images-text')!;
-    const imageUpload = document.querySelector('#image-upload') as HTMLInputElement;
-
-    imagesBtn.addEventListener('click', () => {
-      imageUpload.click();
+    // Use event delegation so this keeps working even when the controls panel re-renders.
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement | null;
+      const btn = target?.closest?.('#images-btn') as HTMLButtonElement | null;
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const imageUpload = document.getElementById('image-upload') as HTMLInputElement | null;
+      imageUpload?.click();
     });
 
-    imageUpload.addEventListener('change', async (e) => {
-      const files = (e.target as HTMLInputElement).files;
+    document.addEventListener('change', async (e) => {
+      const target = e.target as HTMLElement | null;
+      if (!target || target.id !== 'image-upload') return;
+
+      const files = (target as HTMLInputElement).files;
       if (!files || files.length === 0) return;
 
       this.updateStatus(`Loading ${files.length} image(s)...`);
@@ -2363,9 +2426,12 @@ export class App {
         this.hasUploadedImages = this.uploadedImages.length > 0;
 
         // Update button
-        imagesBtn.style.background = '#27ae60';
-        imagesIcon.textContent = '✅';
-        imagesText.textContent = `Images (${this.uploadedImages.length})`;
+        const imagesBtn = document.getElementById('images-btn') as HTMLButtonElement | null;
+        const imagesIcon = document.getElementById('images-icon');
+        const imagesText = document.getElementById('images-text');
+        if (imagesBtn) imagesBtn.style.background = '#27ae60';
+        if (imagesIcon) imagesIcon.textContent = '✅';
+        if (imagesText) imagesText.textContent = `Images (${this.uploadedImages.length})`;
         
         this.updateStatus(`Loaded ${newImages.length} image(s). Total: ${this.uploadedImages.length}`);
         this.updateModeSelector();
@@ -2376,9 +2442,11 @@ export class App {
       }
 
       // Reset file input
-      imageUpload.value = '';
+      (target as HTMLInputElement).value = '';
     });
   }
+
+  // FX button removed (Effects Panel is opened from Controls)
 
   private loadImageFile(file: File): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
@@ -2890,7 +2958,6 @@ export class App {
       // If a transition is already active, cancel it and start new one
       // This prevents getting stuck if a transition is hanging
       if (this.transitionManager.isActive()) {
-        console.log('Canceling active transition to start new mode switch');
         this.transitionManager.cancel();
         // Clear pending state
         this.pendingModeInfo = null;
@@ -2937,12 +3004,6 @@ export class App {
         transitionType
       };
       
-      console.log('Transition requested, will capture frame in next animation frame:', {
-        from: fromModeInfo.name,
-        to: modeInfo.name,
-        type: transitionType || 'auto',
-        duration: this.transitionDuration
-      });
 
       // Load new mode in background (async setup)
       this.loadModeInBackground(modeInfo);
@@ -3142,6 +3203,10 @@ export class App {
       // Sync auto-clear button state with current setting
       this.controls.updateAutoClear(this.eyesy.auto_clear);
       
+      // Disable Auto Clear button for 3D modes (Paint Mode not supported)
+      const is3DMode = modeInfo.category === '3d';
+      this.controls.setAutoClearEnabled(!is3DMode);
+      
       // Update webcam compositor support based on current mode
       this.updateWebcamCompositorForMode(modeInfo);
       this.modeSelector.setSelectedMode(modeInfo.id); // Sync dropdown with current mode
@@ -3229,6 +3294,140 @@ export class App {
     } catch (error) {
       console.error('Error auto-enabling seizure-safe mode:', error);
     }
+  }
+
+  private promptEnableFeature(mode: ModeInfo, reason: string): void {
+    let featureName = '';
+    let actionText = '';
+    let buttonId = '';
+    
+    switch (reason) {
+      case 'microphone':
+        featureName = 'Microphone';
+        actionText = 'Enable Microphone';
+        buttonId = 'mic-btn';
+        break;
+      case 'webcam':
+        featureName = 'Webcam';
+        actionText = 'Enable Webcam';
+        buttonId = 'webcam-btn';
+        break;
+      case 'images':
+        featureName = 'Images';
+        actionText = 'Upload Images';
+        buttonId = 'images-btn';
+        break;
+      default:
+        featureName = 'Required Permission';
+        actionText = 'Enable Required Feature';
+        break;
+    }
+    
+    // Create modal dialog
+    const dialog = document.createElement('div');
+    dialog.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+      background: #2a2a2a;
+      border: 2px solid #4a9eff;
+      border-radius: 8px;
+      padding: 2rem;
+      max-width: 500px;
+      color: #ccc;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    `;
+    
+    const title = document.createElement('div');
+    title.style.cssText = 'font-size: 1.2rem; font-weight: bold; color: #4a9eff; margin-bottom: 1rem;';
+    title.textContent = `Enable ${featureName}`;
+    
+    const message = document.createElement('div');
+    message.style.cssText = 'font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem; color: #aaa;';
+    message.innerHTML = `
+      The mode <strong style="color: #fff;">${mode.name}</strong> requires ${featureName.toLowerCase()} to be enabled.<br><br>
+      Click the button below to enable it, or click "Cancel" to dismiss.
+    `;
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = 'display: flex; gap: 1rem; justify-content: flex-end;';
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.cssText = `
+      padding: 0.75rem 1.5rem;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    `;
+    cancelBtn.addEventListener('click', () => {
+      document.body.removeChild(dialog);
+    });
+    
+    const enableBtn = document.createElement('button');
+    enableBtn.textContent = actionText;
+    enableBtn.style.cssText = `
+      padding: 0.75rem 1.5rem;
+      background: #4a9eff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+    `;
+    enableBtn.addEventListener('click', () => {
+      document.body.removeChild(dialog);
+      
+      // Trigger the appropriate button click
+      if (buttonId) {
+        const button = document.getElementById(buttonId) as HTMLElement;
+        if (button) {
+          button.click();
+        }
+      }
+    });
+    
+    buttonContainer.appendChild(cancelBtn);
+    buttonContainer.appendChild(enableBtn);
+    
+    content.appendChild(title);
+    content.appendChild(message);
+    content.appendChild(buttonContainer);
+    dialog.appendChild(content);
+    
+    // Close on backdrop click
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) {
+        document.body.removeChild(dialog);
+      }
+    });
+    
+    // Close on ESC key
+    const escHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        document.body.removeChild(dialog);
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+    
+    document.body.appendChild(dialog);
   }
 
   private updateStatus(message: string) {
@@ -3835,16 +4034,8 @@ export class App {
     // Log reverse playback state periodically (every ~60 frames at 60fps = ~1 second)
     if (this.fpsCounter % 60 === 0) {
       if (this.reversePlaybackEnabled) {
-        console.log('[REVERSE] ACTIVE - time:', timeAfter.toFixed(3), 
-                    'delta:', timeDelta.toFixed(6), 
-                    'before:', timeBefore.toFixed(3),
-                    'filteredDelta:', filteredDeltaSeconds.toFixed(6),
-                    'flag:', this.reversePlaybackEnabled);
       } else if (this.fpsCounter === 0) {
         // Log once when inactive to confirm it's being checked
-        console.log('[REVERSE] INACTIVE - time:', timeAfter.toFixed(3), 
-                    'delta:', timeDelta.toFixed(6),
-                    'flag:', this.reversePlaybackEnabled);
       }
     }
     
@@ -3934,7 +4125,6 @@ export class App {
       if (lastFrame) {
         // Store it temporarily - transition will pick it up when it starts
         (this as any)._pendingFromFrame = lastFrame;
-        console.log('Captured last frame before transition starts');
       } else {
         // No last frame available - draw current mode and capture
         try {
@@ -3944,7 +4134,6 @@ export class App {
           const fromTexture = this.canvasWrapper.getLastFrameTexture();
           if (fromTexture) {
             (this as any)._pendingFromFrame = fromTexture;
-            console.log('Drew and captured frame before transition starts');
           }
         } catch (error) {
           console.error('Error capturing frame before transition:', error);
@@ -3967,7 +4156,6 @@ export class App {
         if (pendingFrame) {
           this.transitionManager.setFromFrame(pendingFrame);
           (this as any)._pendingFromFrame = null;
-          console.log('Using pre-captured frame for transition');
         } else {
           console.warn('Transition: No pre-captured frame available, transition may not work correctly');
         }
@@ -4013,16 +4201,6 @@ export class App {
         ? ((performance.now() - this.transitionManager.getStartTime()) / 1000).toFixed(3)
         : '0.000';
       
-      console.log('Transition render:', {
-        active: transitionState.isActive,
-        progress: transitionState.progress.toFixed(3),
-        type: transitionState.type,
-        hasFromFrame: hasFromFrame,
-        hasNewFrame: newFrameTexture !== null,
-        hasPendingMode: this.pendingMode !== null,
-        duration: this.transitionManager.getDuration(),
-        elapsed: elapsed
-      });
       
       // Only render if we have a from frame - otherwise there's nothing to fade from
       if (hasFromFrame) {
@@ -4114,10 +4292,6 @@ export class App {
         if (!animationTextureForBlend) {
           console.warn('[App] Failed to capture animation frame for blend mode');
         } else {
-          console.log('[App] Captured animation frame for blend mode', {
-            width: animationTextureForBlend.image?.width || 'unknown',
-            height: animationTextureForBlend.image?.height || 'unknown'
-          });
         }
         
         // Clear the scene - we'll render webcam with blended animation, then animation on top
@@ -4161,13 +4335,16 @@ export class App {
         }
       }
 
-      // Apply web-only transforms (rotation and zoom) before drawing
+      // Apply web-only transforms (rotation, zoom, and position) before drawing
       if (this.eyesy.knob6 !== undefined) {
         const rotationDegrees = this.eyesy.knob6 * 360;
         this.canvasWrapper.setRotation(rotationDegrees);
       }
       if (this.eyesy.knob7 !== undefined) {
         this.canvasWrapper.setZoom(this.eyesy.knob7);
+      }
+      if (this.eyesy.knob9 !== undefined && this.eyesy.knob10 !== undefined) {
+        this.canvasWrapper.setPosition(this.eyesy.knob9, this.eyesy.knob10);
       }
 
       // Draw current mode (skip if already drawn for blend mode)
@@ -4193,10 +4370,6 @@ export class App {
           const fromTexture = this.canvasWrapper.getLastFrameTexture();
           
           if (fromTexture) {
-            console.log('Captured frame for transition:', {
-              textureId: fromTexture.uuid,
-              hasImage: !!fromTexture.image
-            });
             
             // IMPORTANT: Set duration before starting transition
             this.transitionManager.setDuration(this.transitionDuration);
@@ -4214,10 +4387,6 @@ export class App {
             
             // Set the from frame immediately
             this.transitionManager.setFromFrame(fromTexture);
-            console.log('Started transition with captured frame', {
-              duration: this.transitionDuration,
-              hasFromFrame: this.transitionManager.hasFromFrame()
-            });
             
             // Clear the pending transition flag
             (this as any)._pendingTransition = null;
@@ -4282,16 +4451,23 @@ export class App {
     if (this.effectManager) {
       const allPostEffects = this.effectManager.getEffects('post');
       const enabledEffects = allPostEffects.filter(e => e.enabled && e.intensity > 0);
+      const blendMix = this.effectManager.getBlendMix();
       
       if (enabledEffects.length > 0) {
         // Render scene to render target first (captures current frame before rendering to screen)
-        const frameTexture = this.canvasWrapper.renderToRenderTarget();
-        if (frameTexture) {
+        const originalTexture = this.canvasWrapper.renderToRenderTarget();
+        if (originalTexture) {
           // Apply effects to the frame texture
-          const processedTexture = this.effectManager.applyPostEffects(frameTexture);
-          if (processedTexture && processedTexture !== frameTexture) {
-            // Effects modified the texture - render it directly to screen
-            this.canvasWrapper.renderTextureToScreen(processedTexture);
+          const processedTexture = this.effectManager.applyPostEffects(originalTexture);
+          if (processedTexture && processedTexture !== originalTexture) {
+            // Effects modified the texture - blend with original if mix < 1.0
+            if (blendMix < 1.0) {
+              // Blend original and processed textures
+              this.canvasWrapper.renderBlendedTextures(originalTexture, processedTexture, blendMix);
+            } else {
+              // Full effects - render processed texture directly
+              this.canvasWrapper.renderTextureToScreen(processedTexture);
+            }
           } else {
             // Effects didn't modify texture - render normally as fallback
             this.canvasWrapper.flush();
@@ -4387,6 +4563,8 @@ export class App {
     this.eyesy.knob6 = 0.0; // Rotation: 0°
     this.eyesy.knob7 = 0.5; // Zoom: 1.0x
     this.eyesy.knob8 = 0.45; // Speed: ~0.63x default
+    this.eyesy.knob9 = 0.5; // X Position: center (0px)
+    this.eyesy.knob10 = 0.5; // Y Position: center (0px)
     
     // Reset feature toggles
     this.eyesy.auto_clear = true;
@@ -4521,6 +4699,20 @@ export class App {
       if (webcamMirrorCheckbox) webcamMirrorCheckbox.checked = options.mirror;
     }
     
+    // Update effects blend mix slider
+    if (this.effectManager) {
+      const blendMix = settings.effectsBlendMix !== undefined ? settings.effectsBlendMix : 1.0;
+      this.effectManager.setBlendMix(blendMix);
+      const blendMixSlider = document.getElementById('effects-blend-mix') as HTMLInputElement;
+      const blendMixValue = document.getElementById('effects-blend-mix-value');
+      const blendMixQuickSlider = document.getElementById('effects-blend-mix-quick') as HTMLInputElement;
+      const blendMixQuickValue = document.getElementById('effects-blend-mix-value-quick');
+      if (blendMixSlider) blendMixSlider.value = blendMix.toString();
+      if (blendMixValue) blendMixValue.textContent = `${Math.round(blendMix * 100)}%`;
+      if (blendMixQuickSlider) blendMixQuickSlider.value = blendMix.toString();
+      if (blendMixQuickValue) blendMixQuickValue.textContent = `${Math.round(blendMix * 100)}%`;
+    }
+    
     // Update all effect UI elements
     if (this.effectManager) {
       this.effectManager.getPostEffects().forEach(effect => {
@@ -4626,6 +4818,8 @@ export class App {
         if (settings.knob6 !== undefined) this.eyesy.knob6 = settings.knob6;
         if (settings.knob7 !== undefined) this.eyesy.knob7 = settings.knob7;
         if (settings.knob8 !== undefined) this.eyesy.knob8 = settings.knob8;
+        if (settings.knob9 !== undefined) this.eyesy.knob9 = settings.knob9;
+        if (settings.knob10 !== undefined) this.eyesy.knob10 = settings.knob10;
 
         // Load feature toggles
         if (settings.autoClear !== undefined) {
@@ -4653,23 +4847,18 @@ export class App {
         // Load knob lock states
         if (settings.knob1Locked !== undefined) {
           this.knob1Locked = settings.knob1Locked;
-          this.controls.updateKnobLock(1, this.knob1Locked);
         }
         if (settings.knob2Locked !== undefined) {
           this.knob2Locked = settings.knob2Locked;
-          this.controls.updateKnobLock(2, this.knob2Locked);
         }
         if (settings.knob3Locked !== undefined) {
           this.knob3Locked = settings.knob3Locked;
-          this.controls.updateKnobLock(3, this.knob3Locked);
         }
         if (settings.knob4Locked !== undefined) {
           this.knob4Locked = settings.knob4Locked;
-          this.controls.updateKnobLock(4, this.knob4Locked);
         }
         if (settings.knob5Locked !== undefined) {
           this.knob5Locked = settings.knob5Locked;
-          this.controls.updateKnobLock(5, this.knob5Locked);
         }
 
         // Load UI settings
@@ -4742,7 +4931,7 @@ export class App {
    */
   private applyLoadedSettingsToUI(settings: Partial<AppSettings>): void {
     // Update knob values in UI
-    for (let i = 1; i <= 8; i++) {
+    for (let i = 1; i <= 10; i++) {
       const knobValue = (settings as any)[`knob${i}`];
       if (knobValue !== undefined) {
         this.controls.updateKnobValue(i, knobValue);
@@ -4767,9 +4956,10 @@ export class App {
       this.applyPortraitRotate(settings.portraitRotate);
     }
     
-    // Update favorites settings
+    // Update favorites settings (applied after modeBrowser is created in setupModeSelector)
+    // Store the value here, it will be applied later
     if (settings.showOnlyFavorites !== undefined) {
-      this.controls.updateCheckboxSetting('show-only-favorites', settings.showOnlyFavorites);
+      this.showOnlyFavorites = settings.showOnlyFavorites;
     }
     
     // Update knob lock states (ensure they're applied after controls are ready)
@@ -4968,6 +5158,8 @@ export class App {
         knob6: this.eyesy.knob6 ?? 0,
         knob7: this.eyesy.knob7 ?? 0.5,
         knob8: this.eyesy.knob8 ?? 0.5,
+        knob9: this.eyesy.knob9 ?? 0.5,
+        knob10: this.eyesy.knob10 ?? 0.5,
         autoClear: this.eyesy.auto_clear,
         randomSequenceEnabled: this.randomSequenceEnabled,
         randomSequenceFrequency: this.randomSequenceFrequency,
@@ -4992,6 +5184,7 @@ export class App {
         showOnlyFavorites: this.showOnlyFavorites,
         targetFPS: this.targetFPS,
         activeEffects: this.effectManager ? this.getEffectSettings() : {},
+        effectsBlendMix: this.effectManager?.getBlendMix() ?? 1.0,
       };
       await this.settingsStorage.saveSettings(settings);
     } catch (error) {

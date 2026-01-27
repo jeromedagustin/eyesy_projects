@@ -651,6 +651,38 @@ export const knobDescriptions: Record<string, ModeInfo['knobDescriptions']> = {
     knob2: 'Audio reactivity',
     knob3: 'Distortion effects',
   },
+  
+  // 3D modes
+  '3d---rotating-cube': {
+    knob1: 'Rotation Speed (X)',
+    knob2: 'Rotation Speed (Y)',
+    knob3: 'Cube Size',
+  },
+  '3d---particle-field': {
+    knob1: 'Particle Speed',
+    knob2: 'Particle Count',
+    knob3: 'Particle Size',
+  },
+  '3d---geometric-shapes': {
+    knob1: 'Rotation Speed',
+    knob2: 'Number of Shapes',
+    knob3: 'Shape Size',
+  },
+  '3d---rotating-sphere': {
+    knob1: 'Rotation Speed (X)',
+    knob2: 'Rotation Speed (Y)',
+    knob3: 'Sphere Size',
+  },
+  '3d---torus-knot': {
+    knob1: 'Rotation Speed',
+    knob2: 'Knot Complexity',
+    knob3: 'Knot Size',
+  },
+  '3d---wave-plane': {
+    knob1: 'Wave Speed',
+    knob2: 'Wave Amplitude',
+    knob3: 'Wave Frequency',
+  },
 };
 
 /**

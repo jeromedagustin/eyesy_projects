@@ -185,12 +185,6 @@ export class WebcamCompositor {
     
     // Debug: Log webcam frame info for blend modes
     if (this.options.enabled && this.options.blendMode !== 'normal') {
-      console.log('[WebcamCompositor] Webcam frame available', {
-        width: frame.width,
-        height: frame.height,
-        textureValid: !!frame.texture,
-        blendMode: this.options.blendMode
-      });
     }
     
     // IMPORTANT: Always remove mesh from scene first, then re-add it
@@ -274,12 +268,6 @@ export class WebcamCompositor {
         
         // Debug: Log when background texture is set for non-normal blend modes
         if (this.options.blendMode !== 'normal') {
-          console.log('[WebcamCompositor] Background texture set for blend mode:', this.options.blendMode, {
-            textureSize: `${backgroundTexture.image?.width || backgroundTexture.image?.width || 'unknown'}x${backgroundTexture.image?.height || backgroundTexture.image?.height || 'unknown'}`,
-            webcamSize: `${targetWidth}x${targetHeight}`,
-            blendModeValue: this.getBlendModeValue(),
-            opacity: this.options.opacity
-          });
         }
       } else {
         // If no background texture provided, create a solid color texture
@@ -311,12 +299,6 @@ export class WebcamCompositor {
       scene.add(this.webcamMesh);
       // Debug: Log when webcam mesh is added
       if (this.options.blendMode !== 'normal') {
-        console.log('[WebcamCompositor] Webcam mesh added to scene', {
-          position: this.options.position,
-          blendMode: this.options.blendMode,
-          meshZ: this.webcamMesh.position.z,
-          meshVisible: this.webcamMesh.visible
-        });
       }
     }
   }
@@ -402,12 +384,6 @@ export class WebcamCompositor {
     
     // Debug: Log blend mode updates
     if (this.options.blendMode !== 'normal') {
-      console.log('[WebcamCompositor] Updated uniforms:', {
-        blendMode: this.options.blendMode,
-        blendModeValue: blendModeValue,
-        opacity: this.options.opacity,
-        hasBackgroundTexture: !!this.webcamMaterial.uniforms.backgroundTexture.value
-      });
     }
     
     // Opacity is handled in the shader, don't set it on material (would cause double opacity)

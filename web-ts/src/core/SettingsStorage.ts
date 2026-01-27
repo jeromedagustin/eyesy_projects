@@ -16,6 +16,8 @@ export interface AppSettings {
   knob6: number;
   knob7: number;
   knob8: number;
+  knob9: number;
+  knob10: number;
   
   // Feature toggles
   autoClear: boolean;
@@ -76,6 +78,7 @@ export interface AppSettings {
 
   // Effect settings
   activeEffects: { [effectName: string]: { enabled: boolean; intensity: number; [key: string]: any } };
+  effectsBlendMix: number; // Overall blend mix (0.0 = original, 1.0 = full effects)
 }
 
 const DB_NAME = 'eyesy-settings';
