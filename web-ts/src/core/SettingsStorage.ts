@@ -37,6 +37,10 @@ export interface AppSettings {
   knob3Locked: boolean;
   knob4Locked: boolean;
   knob5Locked: boolean;
+  knob6Locked: boolean;
+  knob7Locked: boolean;
+  knob9Locked: boolean;
+  knob10Locked: boolean;
   
   // Microphone settings
   micGain: number;

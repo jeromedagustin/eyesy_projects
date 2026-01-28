@@ -117,7 +117,8 @@ export class ImageLoader {
           const canvas = document.createElement('canvas');
           canvas.width = finalWidth;
           canvas.height = finalHeight;
-          const ctx = canvas.getContext('2d');
+          // Use willReadFrequently: true for better performance when reading canvas data
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
           
           if (ctx) {
             // Use high-quality scaling
@@ -275,7 +276,7 @@ export class ImageLoader {
       const canvas = document.createElement('canvas');
       canvas.width = 1;
       canvas.height = 1;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       if (ctx) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0)';
         ctx.fillRect(0, 0, 1, 1);
@@ -304,9 +305,9 @@ export class ImageLoader {
         // Create a 1x1 fallback texture
         const canvas = document.createElement('canvas');
         canvas.width = 1;
-        canvas.height = 1;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
+      canvas.height = 1;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (ctx) {
           ctx.fillStyle = 'rgba(0, 0, 0, 0)';
           ctx.fillRect(0, 0, 1, 1);
         }
@@ -333,9 +334,9 @@ export class ImageLoader {
         // Create fallback texture
         const canvas = document.createElement('canvas');
         canvas.width = 1;
-        canvas.height = 1;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
+      canvas.height = 1;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (ctx) {
           ctx.fillStyle = 'rgba(0, 0, 0, 0)';
           ctx.fillRect(0, 0, 1, 1);
         }
@@ -363,9 +364,9 @@ export class ImageLoader {
         // Create fallback texture
         const canvas = document.createElement('canvas');
         canvas.width = 1;
-        canvas.height = 1;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
+      canvas.height = 1;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (ctx) {
           ctx.fillStyle = 'rgba(0, 0, 0, 0)';
           ctx.fillRect(0, 0, 1, 1);
         }
@@ -415,7 +416,7 @@ export class ImageLoader {
       const canvas = document.createElement('canvas');
       canvas.width = 1;
       canvas.height = 1;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       if (ctx) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0)';
         ctx.fillRect(0, 0, 1, 1);
@@ -471,7 +472,7 @@ export class ImageLoader {
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       if (!ctx) return;
 
       ctx.drawImage(image, 0, 0, width, height);

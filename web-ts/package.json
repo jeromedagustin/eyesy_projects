@@ -17,7 +17,8 @@
     "auto-port": "tsx tools/auto-port.ts",
     "update-index": "tsx tools/update-index-from-manifest.ts",
     "fix-index": "tsx tools/fix-index.ts",
-    "test:validate-modes": "vitest run mode-validation.test.ts"
+    "test:validate-modes": "vitest run mode-validation.test.ts",
+    "audit:mode-rendering": "tsx scripts/audit-mode-rendering.ts"
   },
   "dependencies": {
     "three": "^0.169.0"

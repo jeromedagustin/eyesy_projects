@@ -13,6 +13,8 @@ export class Controls {
   private onKnobLockToggle?: (knob: number, locked: boolean) => void;
   private onRandomSequenceFrequencyChange?: (value: number) => void;
   private onRandomColorFrequencyChange?: (value: number) => void;
+  private onRandomVisualTransformChange?: (value: boolean) => void;
+  private onRandomVisualTransformFrequencyChange?: (value: number) => void;
   private onRandomTriggerChange?: (value: boolean) => void;
   private onRandomTriggerFrequencyChange?: (value: number) => void;
   private onMockAudioChange?: (value: boolean) => void;
@@ -36,6 +38,7 @@ export class Controls {
   private onReversePlaybackChange?: (enabled: boolean) => void;
   private onWebcamEnableChange?: (value: boolean) => void;
   private onWebcamDeviceChange?: (deviceId: string) => void;
+  private onMicrophoneEnableChange?: (value: boolean) => void;
   private onWebcamCompositorChange?: (options: {
     enabled?: boolean;
     position?: 'background' | 'foreground';
@@ -103,6 +106,14 @@ export class Controls {
     this.onRandomColorFrequencyChange = callback;
   }
 
+  setOnRandomVisualTransformChange(callback: (value: boolean) => void) {
+    this.onRandomVisualTransformChange = callback;
+  }
+
+  setOnRandomVisualTransformFrequencyChange(callback: (value: number) => void) {
+    this.onRandomVisualTransformFrequencyChange = callback;
+  }
+
   setOnRandomTriggerChange(callback: (value: boolean) => void) {
     this.onRandomTriggerChange = callback;
   }
@@ -121,6 +132,10 @@ export class Controls {
 
   setOnMockAudioIntensityRandomnessChange(callback: (value: number) => void) {
     this.onMockAudioIntensityRandomnessChange = callback;
+  }
+
+  setOnMicrophoneEnableChange(callback: (value: boolean) => void) {
+    this.onMicrophoneEnableChange = callback;
   }
 
   setOnTransitionEnabledChange(callback: (value: boolean) => void) {
@@ -699,16 +714,38 @@ export class Controls {
               <label style="font-size: 0.85rem; color: #ccc;">
                 Rotation: <span id="knob6-value">0°</span>
               </label>
-              <button class="reset-btn" data-knob="6" style="
-                background: #3a3a3a;
-                border: 1px solid #4a4a4a;
-                color: #aaa;
-                padding: 0.2rem 0.5rem;
-                border-radius: 3px;
-                font-size: 0.7rem;
-                cursor: pointer;
-                opacity: 0.6;
-              " title="Reset to default (0°)">↺</button>
+              <div style="display: flex; gap: 0.3rem;">
+                <button class="lock-btn" data-knob="6" id="lock-btn-6" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Lock knob (prevents random changes)">🔓</button>
+                <button class="randomize-btn" data-knob="6" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Randomize value">🎲</button>
+                <button class="reset-btn" data-knob="6" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Reset to default (0°)">↺</button>
+              </div>
             </div>
             <input type="range" id="knob6" min="0" max="1" step="0.01" value="0" 
               style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none;"
@@ -723,16 +760,38 @@ export class Controls {
               <label style="font-size: 0.85rem; color: #ccc;">
                 Zoom: <span id="knob7-value">1.0x</span>
               </label>
-              <button class="reset-btn" data-knob="7" style="
-                background: #3a3a3a;
-                border: 1px solid #4a4a4a;
-                color: #aaa;
-                padding: 0.2rem 0.5rem;
-                border-radius: 3px;
-                font-size: 0.7rem;
-                cursor: pointer;
-                opacity: 0.6;
-              " title="Reset to default (1.0x)">↺</button>
+              <div style="display: flex; gap: 0.3rem;">
+                <button class="lock-btn" data-knob="7" id="lock-btn-7" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Lock knob (prevents random changes)">🔓</button>
+                <button class="randomize-btn" data-knob="7" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Randomize value">🎲</button>
+                <button class="reset-btn" data-knob="7" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Reset to default (1.0x)">↺</button>
+              </div>
             </div>
             <input type="range" id="knob7" min="0" max="1" step="0.01" value="0.0" 
               style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none;"
@@ -747,16 +806,38 @@ export class Controls {
               <label style="font-size: 0.85rem; color: #ccc;">
                 X Position: <span id="knob9-value">0px</span>
               </label>
-              <button class="reset-btn" data-knob="9" style="
-                background: #3a3a3a;
-                border: 1px solid #4a4a4a;
-                color: #aaa;
-                padding: 0.2rem 0.5rem;
-                border-radius: 3px;
-                font-size: 0.7rem;
-                cursor: pointer;
-                opacity: 0.6;
-              " title="Reset to center (0px)">↺</button>
+              <div style="display: flex; gap: 0.3rem;">
+                <button class="lock-btn" data-knob="9" id="lock-btn-9" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Lock knob (prevents random changes)">🔓</button>
+                <button class="randomize-btn" data-knob="9" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Randomize value">🎲</button>
+                <button class="reset-btn" data-knob="9" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Reset to center (0px)">↺</button>
+              </div>
             </div>
             <input type="range" id="knob9" min="0" max="1" step="0.01" value="0.5" 
               style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none;"
@@ -771,22 +852,62 @@ export class Controls {
               <label style="font-size: 0.85rem; color: #ccc;">
                 Y Position: <span id="knob10-value">0px</span>
               </label>
-              <button class="reset-btn" data-knob="10" style="
-                background: #3a3a3a;
-                border: 1px solid #4a4a4a;
-                color: #aaa;
-                padding: 0.2rem 0.5rem;
-                border-radius: 3px;
-                font-size: 0.7rem;
-                cursor: pointer;
-                opacity: 0.6;
-              " title="Reset to center (0px)">↺</button>
+              <div style="display: flex; gap: 0.3rem;">
+                <button class="lock-btn" data-knob="10" id="lock-btn-10" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Lock knob (prevents random changes)">🔓</button>
+                <button class="randomize-btn" data-knob="10" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Randomize value">🎲</button>
+                <button class="reset-btn" data-knob="10" style="
+                  background: #3a3a3a;
+                  border: 1px solid #4a4a4a;
+                  color: #aaa;
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 3px;
+                  font-size: 0.7rem;
+                  cursor: pointer;
+                  opacity: 0.6;
+                " title="Reset to center (0px)">↺</button>
+              </div>
             </div>
             <input type="range" id="knob10" min="0" max="1" step="0.01" value="0.5" 
               style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none;"
               title="Double-click to reset to center (0px)">
             <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem;">
               Vertical offset (middle = center)
+            </div>
+          </div>
+
+          <!-- Random Sequence (Visual Transform) -->
+          <div style="margin-bottom: 1rem; padding: 0.75rem; background: #2a2a2a; border-radius: 4px;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #ccc;">
+              <input type="checkbox" id="random-visual-transform" style="cursor: pointer;">
+              Random Sequence (Visual Transform)
+            </label>
+            <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem; margin-left: 1.5rem;">
+              Randomly animates rotation, zoom, and position
+            </div>
+            <div id="random-visual-transform-frequency-container" style="margin-top: 0.5rem; margin-left: 1.5rem; display: none;">
+              <label style="display: block; margin-bottom: 0.25rem; font-size: 0.8rem; color: #aaa;">
+                Frequency: <span id="random-visual-transform-frequency-value">0.00</span>
+              </label>
+              <input type="range" id="random-visual-transform-frequency" min="0" max="1" step="0.01" value="0.0" 
+                style="width: 100%; height: 4px; background: #3a3a3a; border-radius: 2px; outline: none; -webkit-appearance: none;">
             </div>
           </div>
         </div>
@@ -857,6 +978,15 @@ export class Controls {
             margin-bottom: 1rem;
             font-weight: 600;
           ">Audio</div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #ccc;">
+              <input type="checkbox" id="enable-mic" style="cursor: pointer;">
+              Enable Mic
+            </label>
+            <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem; margin-left: 1.5rem;">
+              Enable microphone input for audio-reactive modes
+            </div>
+          </div>
           <div class="knob-group" style="margin-bottom: 1.5rem;">
             <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #ccc;">
               Mic Gain: <span id="mic-gain-value">5.00</span>
@@ -945,115 +1075,6 @@ export class Controls {
               </div>
               <div style="font-size: 0.7rem; color: #666; margin-top: 0.25rem;">
                 Aim for 50-80% for best results
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Images Section -->
-        <div id="images-section" class="controls-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #3a3a3a;">
-          <div class="section-header" style="
-            font-size: 0.85rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 1rem;
-            font-weight: 600;
-          ">Images</div>
-
-          <button id="images-btn" style="
-            width: 100%;
-            padding: 0.75rem;
-            background: #3a3a3a;
-            color: #fff;
-            border: 1px solid #4a4a4a;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-          " title="Upload images">
-            <span id="images-icon">🖼️</span>
-            <span id="images-text">Upload Images (0)</span>
-          </button>
-          <input type="file" id="image-upload" multiple accept="image/*" style="display: none;">
-
-          <div style="font-size: 0.7rem; color: #888; margin-top: 0.5rem;">
-            Used by image/slideshow modes.
-          </div>
-        </div>
-
-        <!-- Transitions Section -->
-        <div id="transition-section" class="controls-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #3a3a3a;">
-          <div class="section-header" style="
-            font-size: 0.85rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 1rem;
-            font-weight: 600;
-          ">Transitions</div>
-          <div style="margin-bottom: 1rem;">
-            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #ccc;">
-              <input type="checkbox" id="transition-enabled" checked style="cursor: pointer;">
-              Enable Transitions
-            </label>
-            <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem; margin-left: 1.5rem;">
-              Smooth transitions between modes
-            </div>
-          </div>
-          <div id="transition-controls-container" style="margin-left: 1.5rem;">
-            <div class="knob-group" style="margin-bottom: 1rem;">
-              <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #ccc;">
-                Duration: <span id="transition-duration-value">1.00</span>s
-              </label>
-              <input type="range" id="transition-duration" min="0.1" max="6.0" step="0.1" value="1.0" 
-                style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none;">
-              <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem;">
-                Transition duration (0.1-6.0 seconds)
-              </div>
-            </div>
-            <div style="margin-bottom: 1rem;">
-              <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #ccc;">
-                Type: <span id="transition-type-display">Auto</span>
-              </label>
-              <select id="transition-type" style="
-                width: 100%;
-                padding: 0.5rem;
-                background: #3a3a3a;
-                color: #fff;
-                border: 1px solid #4a4a4a;
-                border-radius: 4px;
-                font-size: 0.85rem;
-                cursor: pointer;
-              ">
-                <option value="auto">Auto (Smart Selection)</option>
-                <option value="fade">Fade</option>
-                <option value="slide-left">Slide Left</option>
-                <option value="slide-right">Slide Right</option>
-                <option value="slide-up">Slide Up</option>
-                <option value="slide-down">Slide Down</option>
-                <option value="wipe-left">Wipe Left</option>
-                <option value="wipe-right">Wipe Right</option>
-                <option value="wipe-up">Wipe Up</option>
-                <option value="wipe-down">Wipe Down</option>
-                <option value="circle-expand">Circle Expand</option>
-                <option value="circle-shrink">Circle Shrink</option>
-                <option value="zoom-in">Zoom In</option>
-                <option value="zoom-out">Zoom Out</option>
-                <option value="morph">Morph</option>
-                <option value="rotate-flip">Rotate & Flip</option>
-                <option value="wave-distort">Wave Distort</option>
-                <option value="spiral">Spiral</option>
-                <option value="color-blend">Color Blend</option>
-                <option value="particle-dissolve">Particle Dissolve</option>
-                <option value="crossfade-zoom">Crossfade Zoom</option>
-              </select>
-              <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem;">
-                Select transition type (Auto uses smart selection)
               </div>
             </div>
           </div>
@@ -2179,6 +2200,115 @@ export class Controls {
             </div>
           </div>
         <!-- Effects Panel Modal End -->
+
+        <!-- Images Section -->
+        <div id="images-section" class="controls-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #3a3a3a;">
+          <div class="section-header" style="
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+          ">Images</div>
+
+          <button id="images-btn" style="
+            width: 100%;
+            padding: 0.75rem;
+            background: #3a3a3a;
+            color: #fff;
+            border: 1px solid #4a4a4a;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+          " title="Upload images">
+            <span id="images-icon">🖼️</span>
+            <span id="images-text">Upload Images (0)</span>
+          </button>
+          <input type="file" id="image-upload" multiple accept="image/*" style="display: none;">
+
+          <div style="font-size: 0.7rem; color: #888; margin-top: 0.5rem;">
+            Used by image/slideshow modes.
+          </div>
+        </div>
+
+        <!-- Transitions Section -->
+        <div id="transition-section" class="controls-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #3a3a3a;">
+          <div class="section-header" style="
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+          ">Transitions</div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #ccc;">
+              <input type="checkbox" id="transition-enabled" checked style="cursor: pointer;">
+              Enable Transitions
+            </label>
+            <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem; margin-left: 1.5rem;">
+              Smooth transitions between modes
+            </div>
+          </div>
+          <div id="transition-controls-container" style="margin-left: 1.5rem;">
+            <div class="knob-group" style="margin-bottom: 1rem;">
+              <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #ccc;">
+                Duration: <span id="transition-duration-value">1.00</span>s
+              </label>
+              <input type="range" id="transition-duration" min="0.1" max="6.0" step="0.1" value="1.0" 
+                style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none;">
+              <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem;">
+                Transition duration (0.1-6.0 seconds)
+              </div>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #ccc;">
+                Type: <span id="transition-type-display">Auto</span>
+              </label>
+              <select id="transition-type" style="
+                width: 100%;
+                padding: 0.5rem;
+                background: #3a3a3a;
+                color: #fff;
+                border: 1px solid #4a4a4a;
+                border-radius: 4px;
+                font-size: 0.85rem;
+                cursor: pointer;
+              ">
+                <option value="auto">Auto (Smart Selection)</option>
+                <option value="fade">Fade</option>
+                <option value="slide-left">Slide Left</option>
+                <option value="slide-right">Slide Right</option>
+                <option value="slide-up">Slide Up</option>
+                <option value="slide-down">Slide Down</option>
+                <option value="wipe-left">Wipe Left</option>
+                <option value="wipe-right">Wipe Right</option>
+                <option value="wipe-up">Wipe Up</option>
+                <option value="wipe-down">Wipe Down</option>
+                <option value="circle-expand">Circle Expand</option>
+                <option value="circle-shrink">Circle Shrink</option>
+                <option value="zoom-in">Zoom In</option>
+                <option value="zoom-out">Zoom Out</option>
+                <option value="morph">Morph</option>
+                <option value="rotate-flip">Rotate & Flip</option>
+                <option value="wave-distort">Wave Distort</option>
+                <option value="spiral">Spiral</option>
+                <option value="color-blend">Color Blend</option>
+                <option value="particle-dissolve">Particle Dissolve</option>
+                <option value="crossfade-zoom">Crossfade Zoom</option>
+              </select>
+              <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem;">
+                Select transition type (Auto uses smart selection)
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Status Section -->
         <div class="controls-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #3a3a3a;">
@@ -3638,6 +3768,16 @@ export class Controls {
       if (!effectsPanelModal) return;
       const isLeftHanded = getIsLeftHanded();
 
+      // Add/remove classes for CSS rules (which use !important)
+      if (isLeftHanded) {
+        effectsPanelModal.classList.add('left-handed');
+        effectsPanelModal.classList.remove('right-handed');
+      } else {
+        effectsPanelModal.classList.add('right-handed');
+        effectsPanelModal.classList.remove('left-handed');
+      }
+
+      // Also set inline styles as fallback (for desktop/non-mobile)
       if (isLeftHanded) {
         effectsPanelModal.style.left = '0';
         effectsPanelModal.style.right = 'auto';
@@ -3698,8 +3838,24 @@ export class Controls {
     // Keep side in sync with left-handed mode
     const controlsContainer = document.querySelector('#controls-container') as HTMLElement | null;
     if (controlsContainer && effectsPanelModal) {
-      const observer = new MutationObserver(() => applyEffectsPanelSide());
+      // Apply initial side based on current state (with a small delay to ensure DOM is ready)
+      setTimeout(() => applyEffectsPanelSide(), 0);
+      
+      // Watch for changes to left-handed mode
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            applyEffectsPanelSide();
+          }
+        });
+      });
       observer.observe(controlsContainer, { attributes: true, attributeFilter: ['class'] });
+      
+      // Also watch for changes on the app-main element (which also gets left-handed-layout class)
+      const appMain = document.querySelector('.app-main') as HTMLElement | null;
+      if (appMain) {
+        observer.observe(appMain, { attributes: true, attributeFilter: ['class'] });
+      }
     }
 
     // Toggle button inside Controls
@@ -3769,7 +3925,7 @@ export class Controls {
       });
     }
     
-    // Effects Blend Mix slider
+    // Effects Blend Mix slider (main panel)
     const effectsBlendMixSlider = document.getElementById('effects-blend-mix') as HTMLInputElement;
     const effectsBlendMixValue = document.getElementById('effects-blend-mix-value');
     if (effectsBlendMixSlider && effectsBlendMixValue) {
@@ -3780,6 +3936,30 @@ export class Controls {
         if (this.onEffectsBlendMixChange) {
           this.onEffectsBlendMixChange(value);
         }
+        // Sync with quick slider
+        const quickSlider = document.getElementById('effects-blend-mix-quick') as HTMLInputElement;
+        const quickValue = document.getElementById('effects-blend-mix-value-quick');
+        if (quickSlider) quickSlider.value = value.toString();
+        if (quickValue) quickValue.textContent = `${percent}%`;
+      });
+    }
+
+    // Effects Blend Mix slider (quick access)
+    const effectsBlendMixQuickSlider = document.getElementById('effects-blend-mix-quick') as HTMLInputElement;
+    const effectsBlendMixQuickValue = document.getElementById('effects-blend-mix-value-quick');
+    if (effectsBlendMixQuickSlider && effectsBlendMixQuickValue) {
+      effectsBlendMixQuickSlider.addEventListener('input', (e) => {
+        const value = parseFloat((e.target as HTMLInputElement).value);
+        const percent = Math.round(value * 100);
+        effectsBlendMixQuickValue.textContent = `${percent}%`;
+        if (this.onEffectsBlendMixChange) {
+          this.onEffectsBlendMixChange(value);
+        }
+        // Sync with main slider
+        const mainSlider = document.getElementById('effects-blend-mix') as HTMLInputElement;
+        const mainValue = document.getElementById('effects-blend-mix-value');
+        if (mainSlider) mainSlider.value = value.toString();
+        if (mainValue) mainValue.textContent = `${percent}%`;
       });
     }
     
@@ -3922,6 +4102,35 @@ export class Controls {
       }
     });
 
+    // Random visual transform checkbox
+    const randomVisualTransform = document.getElementById('random-visual-transform') as HTMLInputElement;
+    const randomVisualTransformFreqContainer = document.getElementById('random-visual-transform-frequency-container');
+    if (randomVisualTransform) {
+      randomVisualTransform.addEventListener('change', (e) => {
+        const enabled = (e.target as HTMLInputElement).checked;
+        if (this.onRandomVisualTransformChange) {
+          this.onRandomVisualTransformChange(enabled);
+        }
+        // Show/hide frequency slider
+        if (randomVisualTransformFreqContainer) {
+          randomVisualTransformFreqContainer.style.display = enabled ? 'block' : 'none';
+        }
+      });
+    }
+
+    // Random visual transform frequency slider
+    const randomVisualTransformFreq = document.getElementById('random-visual-transform-frequency') as HTMLInputElement;
+    const randomVisualTransformFreqValue = document.getElementById('random-visual-transform-frequency-value');
+    if (randomVisualTransformFreq && randomVisualTransformFreqValue) {
+      randomVisualTransformFreq.addEventListener('input', (e) => {
+        const value = parseFloat((e.target as HTMLInputElement).value);
+        randomVisualTransformFreqValue.textContent = value.toFixed(2);
+        if (this.onRandomVisualTransformFrequencyChange) {
+          this.onRandomVisualTransformFrequencyChange(value);
+        }
+      });
+    }
+
     // Random color checkbox
     const randomColor = document.getElementById('random-color') as HTMLInputElement;
     const randomColorFreqContainer = document.getElementById('random-color-frequency-container');
@@ -3980,6 +4189,17 @@ export class Controls {
         this.onRandomTriggerFrequencyChange(value);
       }
     });
+
+    // Enable Mic checkbox
+    const enableMic = document.getElementById('enable-mic') as HTMLInputElement;
+    if (enableMic) {
+      enableMic.addEventListener('change', async (e) => {
+        const enabled = (e.target as HTMLInputElement).checked;
+        if (this.onMicrophoneEnableChange) {
+          this.onMicrophoneEnableChange(enabled);
+        }
+      });
+    }
 
     // Mock Audio checkbox
     const mockAudio = document.getElementById('mock-audio') as HTMLInputElement;
@@ -4208,6 +4428,18 @@ export class Controls {
       });
     }
 
+    // Random Effects button (Quick Effects section)
+    const randomEffectsQuickBtn = document.getElementById('random-effects-quick');
+    if (randomEffectsQuickBtn) {
+      randomEffectsQuickBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.onRandomizeEffects) {
+          this.onRandomizeEffects();
+        }
+      });
+    }
+
     // Reset All Effects button (Quick Effects section)
     const resetAllEffectsBtn = document.getElementById('reset-all-effects');
     if (resetAllEffectsBtn) {
@@ -4237,12 +4469,12 @@ export class Controls {
       });
     });
 
-    // Lock button event listeners (for knobs 1-5)
+    // Lock button event listeners (for knobs 1-5, 6, 7, 9, 10)
     document.querySelectorAll('.lock-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const knobNum = parseInt((btn as HTMLElement).dataset.knob || '0');
-        if (knobNum >= 1 && knobNum <= 5) {
+        if ((knobNum >= 1 && knobNum <= 7) || knobNum === 9 || knobNum === 10) {
           const lockBtn = btn as HTMLButtonElement;
           const isLocked = lockBtn.textContent === '🔒';
           const newLocked = !isLocked;
@@ -4256,6 +4488,26 @@ export class Controls {
           // Call callback
           if (this.onKnobLockToggle) {
             this.onKnobLockToggle(knobNum, newLocked);
+          }
+        }
+      });
+    });
+
+    // Randomize button event listeners (for Visual Transform knobs 6, 7, 9, 10)
+    document.querySelectorAll('.randomize-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const knobNum = parseInt((btn as HTMLElement).dataset.knob || '0');
+        if (knobNum === 6 || knobNum === 7 || knobNum === 9 || knobNum === 10) {
+          const slider = document.getElementById(`knob${knobNum}`) as HTMLInputElement;
+          if (slider) {
+            // Set random value between 0 and 1
+            const randomValue = Math.random();
+            slider.value = randomValue.toString();
+            
+            // Trigger input event to update display and callbacks
+            const inputEvent = new Event('input', { bubbles: true });
+            slider.dispatchEvent(inputEvent);
           }
         }
       });
@@ -4443,6 +4695,38 @@ export class Controls {
     const leftHandedCheckbox = document.getElementById('left-handed') as HTMLInputElement;
     if (leftHandedCheckbox) {
       leftHandedCheckbox.checked = value;
+    }
+    
+    // Trigger effects panel side update (in case MutationObserver hasn't fired yet)
+    const effectsPanelModal = document.getElementById('effects-panel-modal');
+    if (effectsPanelModal) {
+      const controlsContainer = document.querySelector('#controls-container') as HTMLElement | null;
+      const isLeftHanded = controlsContainer?.classList.contains('left-handed') || false;
+      
+      // Add/remove classes for CSS rules (which use !important)
+      if (isLeftHanded) {
+        effectsPanelModal.classList.add('left-handed');
+        effectsPanelModal.classList.remove('right-handed');
+        effectsPanelModal.style.left = '0';
+        effectsPanelModal.style.right = 'auto';
+        effectsPanelModal.style.borderRight = '2px solid #4a4a4a';
+        effectsPanelModal.style.borderLeft = 'none';
+        effectsPanelModal.style.boxShadow = '4px 0 20px rgba(0, 0, 0, 0.5)';
+        if (!effectsPanelModal.classList.contains('open')) {
+          effectsPanelModal.style.transform = 'translateX(-100%)';
+        }
+      } else {
+        effectsPanelModal.classList.add('right-handed');
+        effectsPanelModal.classList.remove('left-handed');
+        effectsPanelModal.style.left = 'auto';
+        effectsPanelModal.style.right = '0';
+        effectsPanelModal.style.borderLeft = '2px solid #4a4a4a';
+        effectsPanelModal.style.borderRight = 'none';
+        effectsPanelModal.style.boxShadow = '-4px 0 20px rgba(0, 0, 0, 0.5)';
+        if (!effectsPanelModal.classList.contains('open')) {
+          effectsPanelModal.style.transform = 'translateX(100%)';
+        }
+      }
     }
   }
 
@@ -4907,6 +5191,13 @@ export class Controls {
    */
   updateRandomTriggerFrequency(frequency: number) {
     this.updateFrequencySlider('random-trigger-frequency', frequency);
+  }
+
+  updateMicrophoneEnabled(enabled: boolean) {
+    const enableMic = document.getElementById('enable-mic') as HTMLInputElement;
+    if (enableMic) {
+      enableMic.checked = enabled;
+    }
   }
 
   updateMockAudioEnabled(enabled: boolean) {

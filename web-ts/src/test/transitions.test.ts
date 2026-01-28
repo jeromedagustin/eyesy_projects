@@ -8,7 +8,7 @@
  * - Transitions complete successfully
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { TransitionManager, TransitionType } from '../core/TransitionManager';
+import { TransitionManager, TransitionType } from '../core/transitions/TransitionManager';
 import { Canvas } from '../core/Canvas';
 import { createMockCanvas, createMockCanvasWrapper, createMockEYESY } from './setup';
 import * as THREE from 'three';

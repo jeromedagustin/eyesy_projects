@@ -45,7 +45,8 @@ export class WebcamReactive extends BaseAnimatedMode {
     this.canvas2D = document.createElement('canvas');
     this.canvas2D.width = 160; // Low res for performance
     this.canvas2D.height = 120;
-    this.ctx2D = this.canvas2D.getContext('2d');
+    // Use willReadFrequently: true to optimize frequent getImageData calls
+    this.ctx2D = this.canvas2D.getContext('2d', { willReadFrequently: true });
     
     // Try to start webcam if not already active (async, but don't wait)
     if (this.webcamService.isAvailable() && !this.webcamService.getActive()) {

@@ -35,15 +35,21 @@ export class Spinningdiscs implements Mode {
       // The original uses glob.glob, we'll try numbered images or common names
       const images: LoadedImage[] = [];
       
+      console.log('[Spinning Discs] Loading images from:', eyesy.mode_root);
+      
       // Try loading numbered images (image0.png, image1.png, etc.)
       for (let i = 0; i < 20; i++) {
         try {
           const imgPath = getImagePath(eyesy.mode_root, `image${i}.png`);
           const img = await loadImage(imgPath);
           images.push(img);
+          console.log(`[Spinning Discs] Loaded image${i}.png`);
         } catch (e) {
           // Image not found, try next
-          if (i === 0) break; // If first image fails, stop trying
+          if (i === 0) {
+            console.log(`[Spinning Discs] image0.png not found, trying other names...`);
+            break; // If first image fails, stop trying numbered images
+          }
         }
       }
       
@@ -55,6 +61,7 @@ export class Spinningdiscs implements Mode {
             const imgPath = getImagePath(eyesy.mode_root, name);
             const img = await loadImage(imgPath);
             images.push(img);
+            console.log(`[Spinning Discs] Loaded ${name}`);
           } catch (e) {
             // Continue trying
           }
@@ -62,8 +69,13 @@ export class Spinningdiscs implements Mode {
       }
       
       this.images = images;
+      if (this.images.length === 0) {
+        console.warn('[Spinning Discs] No images loaded! Mode will not render. Expected images in:', eyesy.mode_root + '/Images/');
+      } else {
+        console.log(`[Spinning Discs] Successfully loaded ${this.images.length} images`);
+      }
     } catch (error) {
-      console.error('Failed to load images for Spinning Discs mode:', error);
+      console.error('[Spinning Discs] Failed to load images:', error);
       // Continue with empty images array - mode will skip drawing if no images
     }
     
@@ -74,6 +86,10 @@ export class Spinningdiscs implements Mode {
 
   draw(canvas: Canvas, eyesy: EYESY): void {
     if (this.images.length === 0) {
+      // Log once per second to avoid spam
+      if (Math.floor(Date.now() / 1000) % 2 === 0) {
+        console.warn('[Spinning Discs] No images loaded - cannot render. Check console for image loading errors.');
+      }
       return; // No images loaded
     }
     

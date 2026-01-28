@@ -1,7 +1,7 @@
 /**
  * Transition Manager - Handles smooth transitions between modes
  */
-import { Canvas } from './Canvas';
+import { Canvas } from '../Canvas';
 import * as THREE from 'three';
 
 export type TransitionType = 

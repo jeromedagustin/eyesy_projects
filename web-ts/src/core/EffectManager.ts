@@ -222,6 +222,14 @@ export class EffectManager {
       }
     }
 
+    // CRITICAL: Ensure no render target is active before returning texture
+    // This prevents WebGL feedback loop errors when the returned texture is used
+    // Effects should restore render targets, but we ensure it's unbound as a safety measure
+    const finalRenderTarget = this.renderer.getRenderTarget();
+    if (finalRenderTarget) {
+      this.renderer.setRenderTarget(null);
+    }
+
     return currentTexture;
   }
 

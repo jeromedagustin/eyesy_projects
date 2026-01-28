@@ -11,17 +11,22 @@ import { MobileUI } from './ui/MobileUI';
 import { TouchManager, requestWakeLock } from './ui/TouchManager';
 import { modes } from './modes/index';
 import { MicrophoneAudio } from './core/MicrophoneAudio';
-import { TransitionManager } from './core/TransitionManager';
+import { TransitionManager } from './core/transitions/TransitionManager';
 import { SettingsStorage, AppSettings } from './core/SettingsStorage';
 import { ModeGrouper } from './core/ModeGrouper';
 import { SeizureSafetyFilter } from './core/SeizureSafetyFilter';
 import { ModeCache } from './core/ModeCache';
 import { ImageLoader } from './core/ImageLoader';
 import { WebcamService } from './core/WebcamService';
-import { WebcamCompositor } from './core/WebcamCompositor';
+import { WebcamCompositor } from './core/webcam/WebcamCompositor';
 import * as THREE from 'three';
 import { EffectManager } from './core/EffectManager';
 import { RewindManager } from './core/RewindManager';
+import { AudioGenerator } from './app/audio/AudioGenerator';
+import { RandomFeatures } from './app/random/RandomFeatures';
+import { ModeManager } from './app/modes/ModeManager';
+import { SettingsManager } from './app/settings/SettingsManager';
+import { UISetup } from './app/ui/UISetup';
 import { 
   BlurEffect, 
   ColorGradingEffect, 
@@ -81,6 +86,11 @@ export class App {
   private fpsCounter = 0;
   private fpsTime = 0;
   private isPaused = false;
+  // DOM update batching - update UI every N frames instead of every frame
+  private domUpdateFrameCounter = 0;
+  private domUpdateInterval = 8; // Update UI every 8 frames (~7.5 times per second at 60fps)
+  private pendingFPSUpdate: number | null = null;
+  private pendingKnobUpdates: Map<number, number> = new Map(); // knob number -> value
   private wasManuallyPaused = false; // Track if user manually paused (vs auto-paused by visibility)
   private reversePlaybackEnabled = false; // Simple flag for reverse playback
   private microphoneAudio: MicrophoneAudio;
@@ -100,11 +110,18 @@ export class App {
   private randomSequenceFrequency = 0.5; // 0.0 = slow, 1.0 = fast
   private saveSettingsTimeout: number | null = null;
   private randomColorFrequency = 0.5; // 0.0 = slow, 1.0 = fast
+  private randomVisualTransformEnabled = false;
+  private randomVisualTransformTime = 0;
+  private randomVisualTransformFrequency = 0.5; // 0.0 = slow, 1.0 = fast
   private knob1Locked = false;
   private knob2Locked = false;
   private knob3Locked = false;
   private knob4Locked = false;
   private knob5Locked = false;
+  private knob6Locked = false;
+  private knob7Locked = false;
+  private knob9Locked = false;
+  private knob10Locked = false;
   private randomTriggerEnabled = true; // Enabled by default
   private randomTriggerTime = 0;
   private randomTriggerFrequency = 0.5; // 0.0 = slow, 1.0 = fast (default: 0.5 for moderate frequency)
@@ -113,7 +130,11 @@ export class App {
   private mockAudioEnabled = false; // Disabled by default
   private mockAudioFrequency = 0.5; // 0.0 = simple 4/4 beat, 1.0 = random patterns
   private mockAudioIntensityRandomness = 0.0; // 0.0 = consistent intensity, 1.0 = highly random intensity
-  private mockAudioTime = 0.0; // Time accumulator for mock audio generation
+  private audioGenerator: AudioGenerator;
+  private randomFeatures: RandomFeatures;
+  private modeManager: ModeManager;
+  private settingsManager: SettingsManager;
+  private uiSetup: UISetup;
   private transitionsEnabled = false;
   private transitionDuration = 1.0; // seconds (increased for smoother transitions)
   private transitionType: string | null = null; // null = auto
@@ -127,6 +148,7 @@ export class App {
   private initializationError: Error | null = null;
   private targetFPS = 60; // Target FPS (1-60, 0 = unlimited)
   private lastFrameTimeForFPS = 0; // Track frame timing for FPS throttling
+  private frameTimeAccumulator = 0; // Time accumulator for FPS throttling (better than skipping frames)
   private webcamService: WebcamService;
   private webcamCompositor: WebcamCompositor | null = null;
   private effectManager: EffectManager | null = null;
@@ -183,8 +205,46 @@ export class App {
       // Initialize components (need to be created before loading settings)
       this.microphoneAudio = new MicrophoneAudio(200);
       this.seizureSafetyFilter = new SeizureSafetyFilter();
+      this.audioGenerator = new AudioGenerator();
       this.setupCanvas();
       this.setupEYESY();
+      
+      // Note: RandomFeatures will be initialized after setupControls() since it needs this.controls
+      
+      // Initialize mode manager
+      this.modeManager = new ModeManager({
+        getCurrentMode: () => this.currentMode,
+        getCurrentModeIndex: () => this.currentModeIndex,
+        getSortedModes: () => this.sortedModes,
+        getNavigationModes: () => this.navigationModes,
+        getPreviousModeInfo: () => this.previousModeInfo,
+        getPendingModeInfo: () => this.pendingModeInfo,
+        getPendingMode: () => this.pendingMode,
+        getTransitionsEnabled: () => this.transitionsEnabled,
+        getShowOnlyFavorites: () => this.showOnlyFavorites,
+        getFavorites: () => this.favorites,
+        getWebcamPermissionGranted: () => this.webcamPermissionGranted,
+        getHasUploadedImages: () => this.hasUploadedImages,
+        getUseMicrophone: () => this.useMicrophone,
+        getMockAudioEnabled: () => this.mockAudioEnabled,
+        updateStatus: (msg) => this.updateStatus(msg),
+        updateHeaderModeName: (name) => this.updateHeaderModeName(name),
+        ensureColorContrast: () => this.ensureColorContrast(),
+        updateWebcamCompositorForMode: (info) => this.updateWebcamCompositorForMode(info),
+        updateFavoriteButtons: () => this.updateFavoriteButtons(),
+        startAnimation: () => this.startAnimation(),
+        loadMode: (info) => this.loadMode(info),
+        getTransitionManager: () => this.transitionManager,
+        getAnimationId: () => this.animationId,
+        setCurrentModeIndex: (idx) => { this.currentModeIndex = idx; },
+        setSortedModes: (modes) => { this.sortedModes = modes; },
+        setNavigationModes: (modes) => { this.navigationModes = modes; },
+        setPendingModeInfo: (info) => { this.pendingModeInfo = info; },
+        setPendingMode: (mode) => { this.pendingMode = mode; },
+      });
+      
+      // Initialize settings manager (after controls are set up)
+      // Note: This will be initialized after setupControls() is called
       
       // Initialize rewind manager (after canvas is set up)
       this.rewindManager = new RewindManager(60, 2); // 60 frames max, capture every 2nd frame (30fps history at 60fps)
@@ -646,18 +706,144 @@ export class App {
         this.webcamCompositor.setEffectManager(this.effectManager);
       }
       
-      // Load saved settings (after components are initialized)
-      await this.loadSettings();
-      
       // Continue initialization with loaded settings
       this.transitionManager = new TransitionManager(this.canvasWrapper);
       this.transitionManager.setDuration(this.transitionDuration);
       this.setupControls();
       
-      // Apply loaded settings to UI (after controls are set up)
-      const loadedSettings = await this.settingsStorage.loadSettings();
+      // Initialize random features manager (after controls are set up)
+      // Create a proxy object that forwards property access to App's state
+      const app = this;
+      const randomState = new Proxy({} as RandomFeaturesState, {
+        get(_target, prop: keyof RandomFeaturesState) {
+          return (app as any)[prop];
+        },
+        set(_target, prop: keyof RandomFeaturesState, value) {
+          (app as any)[prop] = value;
+          return true;
+        }
+      });
+      
+      this.randomFeatures = new RandomFeatures(
+        randomState,
+        this.eyesy,
+        this.controls,
+        this.pendingKnobUpdates
+      );
+      
+      // Initialize settings manager (after controls are set up)
+      this.settingsManager = new SettingsManager(
+        this.settingsStorage,
+        this.controls,
+        {
+          getTransitionsEnabled: () => this.transitionsEnabled,
+          getTransitionDuration: () => this.transitionDuration,
+          getTransitionType: () => this.transitionType,
+          getEyesy: () => this.eyesy,
+          getRandomSequenceEnabled: () => this.randomSequenceEnabled,
+          getRandomSequenceFrequency: () => this.randomSequenceFrequency,
+          getRandomColorEnabled: () => this.randomColorEnabled,
+          getRandomColorFrequency: () => this.randomColorFrequency,
+          getRandomTriggerEnabled: () => this.randomTriggerEnabled,
+          getRandomTriggerFrequency: () => this.randomTriggerFrequency,
+          getMockAudioEnabled: () => this.mockAudioEnabled,
+          getMockAudioFrequency: () => this.mockAudioFrequency,
+          getMockAudioIntensityRandomness: () => this.mockAudioIntensityRandomness,
+          getKnob1Locked: () => this.knob1Locked,
+          getKnob2Locked: () => this.knob2Locked,
+          getKnob3Locked: () => this.knob3Locked,
+          getKnob4Locked: () => this.knob4Locked,
+          getKnob5Locked: () => this.knob5Locked,
+          getKnob6Locked: () => this.knob6Locked,
+          getKnob7Locked: () => this.knob7Locked,
+          getKnob9Locked: () => this.knob9Locked,
+          getKnob10Locked: () => this.knob10Locked,
+          getMicrophoneAudio: () => this.microphoneAudio,
+          getUseMicrophone: () => this.useMicrophone,
+          getWebcamPermissionGranted: () => this.webcamPermissionGranted,
+          getLeftHanded: () => this.leftHanded,
+          getPortraitRotate: () => this.portraitRotate,
+          getFavorites: () => this.favorites,
+          getShowOnlyFavorites: () => this.showOnlyFavorites,
+          getTargetFPS: () => this.targetFPS,
+          getEffectManager: () => this.effectManager,
+          setTransitionsEnabled: (v) => { this.transitionsEnabled = v; },
+          setTransitionDuration: (v) => { this.transitionDuration = v; },
+          setTransitionType: (v) => { this.transitionType = v; },
+          setRandomSequenceEnabled: (v) => { this.randomSequenceEnabled = v; },
+          setRandomSequenceFrequency: (v) => { this.randomSequenceFrequency = v; },
+          setRandomColorEnabled: (v) => { this.randomColorEnabled = v; },
+          setRandomColorFrequency: (v) => { this.randomColorFrequency = v; },
+          setRandomTriggerEnabled: (v) => { this.randomTriggerEnabled = v; },
+          setRandomTriggerFrequency: (v) => { this.randomTriggerFrequency = v; },
+          setMockAudioEnabled: (v) => { this.mockAudioEnabled = v; },
+          setMockAudioFrequency: (v) => { this.mockAudioFrequency = v; },
+          setMockAudioIntensityRandomness: (v) => { this.mockAudioIntensityRandomness = v; },
+          setKnob1Locked: (v) => { this.knob1Locked = v; },
+          setKnob2Locked: (v) => { this.knob2Locked = v; },
+          setKnob3Locked: (v) => { this.knob3Locked = v; },
+          setKnob4Locked: (v) => { this.knob4Locked = v; },
+          setKnob5Locked: (v) => { this.knob5Locked = v; },
+          setKnob6Locked: (v) => { this.knob6Locked = v; },
+          setKnob7Locked: (v) => { this.knob7Locked = v; },
+          setKnob9Locked: (v) => { this.knob9Locked = v; },
+          setKnob10Locked: (v) => { this.knob10Locked = v; },
+          setUseMicrophone: (v) => { this.useMicrophone = v; },
+          setWebcamPermissionGranted: (v) => { this.webcamPermissionGranted = v; },
+          setLeftHanded: (v) => { this.leftHanded = v; },
+          setPortraitRotate: (v) => { this.portraitRotate = v; },
+          setFavorites: (v) => { this.favorites = v; },
+          setShowOnlyFavorites: (v) => { this.showOnlyFavorites = v; },
+          setTargetFPS: (v) => { this.targetFPS = v; },
+          applyPortraitRotate: (v) => this.applyPortraitRotate(v),
+          getEffectSettings: () => this.getEffectSettings(),
+        }
+      );
+      
+      // Initialize UI setup (after controls are set up)
+      this.uiSetup = new UISetup({
+        getIsPaused: () => this.isPaused,
+        getWasManuallyPaused: () => this.wasManuallyPaused,
+        getUseMicrophone: () => this.useMicrophone,
+        getMicrophoneAudio: () => this.microphoneAudio,
+        getWebcamService: () => this.webcamService,
+        getWebcamCompositor: () => this.webcamCompositor,
+        getWebcamPermissionGranted: () => this.webcamPermissionGranted,
+        getHasUploadedImages: () => this.hasUploadedImages,
+        getCurrentModeIndex: () => this.currentModeIndex,
+        getSortedModes: () => this.sortedModes,
+        getNavigationModes: () => this.navigationModes,
+        getEyesy: () => this.eyesy,
+        getCanvas: () => this.canvas,
+        getCanvasWrapper: () => this.canvasWrapper,
+        getControls: () => this.controls,
+        getModeBrowser: () => this.modeBrowser,
+        getRewindManager: () => this.rewindManager,
+        getLastFrameTime: () => this.lastFrameTime,
+        getUploadedImages: () => this.uploadedImages,
+        setIsPaused: (v) => { this.isPaused = v; },
+        setWasManuallyPaused: (v) => { this.wasManuallyPaused = v; },
+        setUseMicrophone: (v) => { this.useMicrophone = v; },
+        setHasUploadedImages: (v) => { this.hasUploadedImages = v; },
+        setCurrentModeIndex: (v) => { this.currentModeIndex = v; },
+        setLastFrameTime: (v) => { this.lastFrameTime = v; },
+        setUploadedImages: (v) => { this.uploadedImages = v; },
+        setMobileUI: (v) => { this.mobileUI = v; },
+        updateStatus: (msg) => this.updateStatus(msg),
+        updatePauseButton: () => this.updatePauseButton(),
+        navigateMode: (dir) => this.navigateMode(dir),
+        loadMode: (info) => this.loadMode(info),
+        updateModeSelector: () => this.updateModeSelector(),
+        updateRewindUI: () => this.updateRewindUI(),
+        debouncedSaveSettings: () => this.debouncedSaveSettings(),
+        toggleCurrentModeFavorite: () => this.toggleCurrentModeFavorite(),
+        updateWebcamButtonState: () => this.updateWebcamButtonState(),
+      });
+      
+      // Load saved settings and apply to UI (after controls are set up)
+      const loadedSettings = await this.settingsManager.loadSettings();
       if (loadedSettings) {
-        this.applyLoadedSettingsToUI(loadedSettings);
+        this.settingsManager.applyLoadedSettingsToUI(loadedSettings);
       }
       
       // Apply left-handed layout after UI is fully set up
@@ -672,13 +858,14 @@ export class App {
       this.updateModeSelector();
       // Load first mode after updateModeSelector() to ensure correct ordering
       await this.loadFirstMode();
-      this.setupPauseButton();
-      this.setupScreenshotButton();
-      this.setupMicrophoneButton();
-      this.setupWebcamButton();
-      this.setupImagesButton();
-      this.setupMobileUI();
-      this.setupVisibilityPause();
+      // Setup UI buttons and event handlers
+      this.uiSetup.setupPauseButton();
+      this.uiSetup.setupScreenshotButton();
+      this.uiSetup.setupMicrophoneButton();
+      this.uiSetup.setupWebcamButton();
+      this.uiSetup.setupImagesButton();
+      this.uiSetup.setupMobileUI();
+      this.uiSetup.setupVisibilityPause();
       
       // Update FAB position after mobile UI is set up
       if (this.mobileUI) {
@@ -1161,6 +1348,17 @@ export class App {
       this.debouncedSaveSettings();
     });
 
+    this.controls.setOnRandomVisualTransformChange((enabled) => {
+      this.randomVisualTransformEnabled = enabled;
+      this.randomVisualTransformTime = 0;
+      this.debouncedSaveSettings();
+    });
+
+    this.controls.setOnRandomVisualTransformFrequencyChange((frequency) => {
+      this.randomVisualTransformFrequency = frequency;
+      this.debouncedSaveSettings();
+    });
+
     this.controls.setOnRandomColorFrequencyChange((frequency) => {
       this.randomColorFrequency = frequency;
       this.debouncedSaveSettings();
@@ -1181,9 +1379,89 @@ export class App {
       this.debouncedSaveSettings();
     });
 
+    // Microphone enable/disable from menu
+    this.controls.setOnMicrophoneEnableChange(async (enabled) => {
+      try {
+        if (enabled) {
+          // Start microphone
+          await this.microphoneAudio.start();
+          this.useMicrophone = true;
+          
+          // Update top button state
+          const micBtn = document.getElementById('mic-btn') as HTMLElement;
+          const micIcon = document.getElementById('mic-icon');
+          const micText = document.getElementById('mic-text');
+          if (micBtn) micBtn.style.background = '#e74c3c';
+          if (micIcon) micIcon.textContent = '🔴';
+          if (micText) micText.textContent = 'Disable Mic';
+          
+          // Enable mic gain slider and set initial value
+          this.controls.setMicGainEnabled(true);
+          this.controls.updateMicGain(this.microphoneAudio.getGain());
+          this.updateStatus('Microphone enabled - speak or make noise!');
+          this.debouncedSaveSettings();
+          
+          // Update mode selector to enable scope modes
+          this.updateModeSelector();
+        } else {
+          // Stop microphone
+          this.microphoneAudio.stop();
+          this.useMicrophone = false;
+          
+          // Update top button state
+          const micBtn = document.getElementById('mic-btn') as HTMLElement;
+          const micIcon = document.getElementById('mic-icon');
+          const micText = document.getElementById('mic-text');
+          if (micBtn) micBtn.style.background = '#666';
+          if (micIcon) micIcon.textContent = '🎤';
+          if (micText) micText.textContent = 'Enable Mic';
+          
+          // Disable mic gain slider
+          this.controls.setMicGainEnabled(false);
+          this.updateStatus('Microphone disabled');
+          this.debouncedSaveSettings();
+          
+          // Update mode selector to disable scope modes
+          this.updateModeSelector();
+          
+          // If current mode is a scope mode, switch to first enabled non-scope mode
+          const currentMode = this.sortedModes[this.currentModeIndex];
+          if (currentMode && currentMode.category === 'scopes') {
+            const modesToUse = this.navigationModes.length > 0 ? this.navigationModes : this.sortedModes;
+            const firstEnabledIndex = modesToUse.findIndex(m => !m.disabled);
+            if (firstEnabledIndex >= 0) {
+              this.currentModeIndex = firstEnabledIndex;
+              await this.loadMode(modesToUse[firstEnabledIndex]);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Microphone error:', error);
+        this.updateStatus('Microphone access denied. Please allow microphone access.');
+        this.useMicrophone = false;
+        
+        // Update top button state
+        const micBtn = document.getElementById('mic-btn') as HTMLElement;
+        const micIcon = document.getElementById('mic-icon');
+        const micText = document.getElementById('mic-text');
+        if (micBtn) micBtn.style.background = '#666';
+        if (micIcon) micIcon.textContent = '🎤';
+        if (micText) micText.textContent = 'Enable Mic';
+        
+        // Disable mic gain slider
+        this.controls.setMicGainEnabled(false);
+        // Update checkbox to reflect actual state
+        this.controls.updateMicrophoneEnabled(false);
+        this.debouncedSaveSettings();
+        
+        // Update mode selector to disable scope modes
+        this.updateModeSelector();
+      }
+    });
+
     this.controls.setOnMockAudioChange((enabled) => {
       this.mockAudioEnabled = enabled;
-      this.mockAudioTime = 0.0; // Reset time when toggled
+      this.audioGenerator.setMockAudioEnabled(enabled);
       // Update mode selector to enable/disable scope modes based on mock audio state
       this.updateModeSelector();
       this.debouncedSaveSettings();
@@ -1213,6 +1491,10 @@ export class App {
         case 3: this.knob3Locked = locked; break;
         case 4: this.knob4Locked = locked; break;
         case 5: this.knob5Locked = locked; break;
+        case 6: this.knob6Locked = locked; break;
+        case 7: this.knob7Locked = locked; break;
+        case 9: this.knob9Locked = locked; break;
+        case 10: this.knob10Locked = locked; break;
       }
       this.debouncedSaveSettings();
     });
@@ -1278,6 +1560,7 @@ export class App {
     this.controls.setOnTargetFPSChange((targetFPS) => {
       this.targetFPS = targetFPS;
       this.lastFrameTimeForFPS = performance.now(); // Reset timing when FPS changes
+      this.frameTimeAccumulator = 0; // Reset accumulator when FPS changes
       this.debouncedSaveSettings();
     });
 
@@ -2028,7 +2311,7 @@ export class App {
     }
 
     // Add keyboard navigation
-    this.setupKeyboardNavigation();
+    this.uiSetup.setupKeyboardNavigation();
   }
   
   /**
@@ -2461,7 +2744,7 @@ export class App {
             const scale = Math.min(maxSize / img.width, maxSize / img.height);
             canvas.width = Math.floor(img.width * scale);
             canvas.height = Math.floor(img.height * scale);
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
             if (ctx) {
               ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
               const scaledImg = new Image();
@@ -2561,235 +2844,26 @@ export class App {
    * Groups by category, then sorts alphabetically within each category
    */
   private createNavigationOrder(modes: ModeInfo[]): ModeInfo[] {
-    // Category priority order (lower = earlier in navigation)
-    const categoryOrder: Record<string, number> = {
-      'scopes': 1,
-      'triggers': 2,
-      'lfo': 3,
-      'time': 4,
-      'noise': 5,
-      'geometric': 6,
-      'pattern': 7,
-      '3d': 8,
-      'utilities': 9,
-      'font': 10,
-    };
-    
-    // Sort modes: by category priority, then alphabetically within category
-    const sorted = [...modes].sort((a, b) => {
-      const aCategory = categoryOrder[a.category] || 99;
-      const bCategory = categoryOrder[b.category] || 99;
-      
-      if (aCategory !== bCategory) {
-        return aCategory - bCategory;
-      }
-      
-      // Within same category, sort alphabetically
-      return a.name.localeCompare(b.name);
-    });
-    
-    return sorted;
+    return this.modeManager.createNavigationOrder(modes);
   }
 
   /**
    * Navigate to next/previous mode
    */
   private navigateMode(direction: 1 | -1): void {
-    // Use navigationModes for arrow navigation (simpler ordering)
-    const modesToUse = this.navigationModes.length > 0 ? this.navigationModes : this.sortedModes;
-    
-    if (modesToUse.length === 0) return;
-    
-    // Don't navigate if transition is active or mode is loading
-    // But allow navigation if transitions are disabled or transition has been active too long (recovery mechanism)
-    const transitionActive = this.transitionManager.isActive();
-    const transitionStartTime = this.transitionManager.getStartTime();
-    const maxTransitionTime = 10.0; // 10 seconds max
-    const transitionStuck = transitionActive && transitionStartTime > 0 && 
-      (performance.now() - transitionStartTime) / 1000 > maxTransitionTime;
-    
-    // If transitions are disabled, ignore transition state
-    if (this.transitionsEnabled) {
-      if ((transitionActive && !transitionStuck) || (this.pendingModeInfo !== null && !transitionStuck)) {
-        return;
-      }
-      
-      // If transition is stuck, cancel it
-      if (transitionStuck) {
-        console.warn('Transition appears stuck, canceling to allow navigation');
-        this.transitionManager.cancel();
-        this.pendingModeInfo = null;
-        this.pendingMode = null;
-      }
-    } else {
-      // Transitions disabled - only block if mode is actively loading
-      if (this.pendingModeInfo !== null) {
-        // Check if mode loading is stuck (more than 5 seconds)
-        // This shouldn't happen, but just in case
-        return;
-      }
-    }
-    
-    // Find current mode index in navigation order
-    let currentIndex = this.currentModeIndex;
-    if (currentIndex < 0 || currentIndex >= modesToUse.length) {
-      // Find by ID if index is invalid
-      const currentModeId = this.previousModeInfo?.id;
-      if (currentModeId) {
-        currentIndex = modesToUse.findIndex(m => m.id === currentModeId);
-        if (currentIndex === -1) {
-          currentIndex = 0;
-        }
-      } else {
-        currentIndex = 0;
-      }
-    }
-    
-    // Find next enabled mode
-    let attempts = 0;
-    let newIndex = currentIndex;
-    while (attempts < modesToUse.length) {
-      newIndex = (newIndex + direction + modesToUse.length) % modesToUse.length;
-      if (!modesToUse[newIndex].disabled) {
-        break;
-      }
-      attempts++;
-    }
-    
-    if (newIndex !== currentIndex) {
-      this.currentModeIndex = newIndex;
-      this.loadMode(modesToUse[newIndex]);
-    }
+    this.modeManager.navigateMode(direction);
   }
 
   /**
    * Update navigation button states (enable/disable based on current state)
    */
   private updateNavigationButtons(): void {
-    const prevModeHeaderBtn = document.getElementById('prev-mode-header-btn') as HTMLButtonElement;
-    const nextModeHeaderBtn = document.getElementById('next-mode-header-btn') as HTMLButtonElement;
-    
-    // Check if navigation should be disabled
-    const isTransitionActive = this.transitionManager.isActive();
-    const isModeLoading = this.pendingModeInfo !== null;
-    const canNavigate = !isTransitionActive && !isModeLoading;
-    
-    // Check if there are enabled modes in each direction
-    let canGoPrev = false;
-    let canGoNext = false;
-    
-    if (canNavigate && this.sortedModes.length > 0 && this.currentModeIndex >= 0) {
-      // Check previous direction
-      let attempts = 0;
-      let checkIndex = this.currentModeIndex;
-      while (attempts < this.sortedModes.length) {
-        checkIndex = (checkIndex - 1 + this.sortedModes.length) % this.sortedModes.length;
-        if (!this.sortedModes[checkIndex].disabled) {
-          canGoPrev = true;
-          break;
-        }
-        attempts++;
-      }
-      
-      // Check next direction
-      attempts = 0;
-      checkIndex = this.currentModeIndex;
-      while (attempts < this.sortedModes.length) {
-        checkIndex = (checkIndex + 1) % this.sortedModes.length;
-        if (!this.sortedModes[checkIndex].disabled) {
-          canGoNext = true;
-          break;
-        }
-        attempts++;
-      }
-    }
-    
-    // Update previous button
-    if (prevModeHeaderBtn) {
-      const shouldDisable = !canNavigate || !canGoPrev;
-      prevModeHeaderBtn.disabled = shouldDisable;
-      prevModeHeaderBtn.style.opacity = shouldDisable ? '0.5' : '1';
-      prevModeHeaderBtn.style.cursor = shouldDisable ? 'not-allowed' : 'pointer';
-    }
-    
-    // Update next button
-    if (nextModeHeaderBtn) {
-      const shouldDisable = !canNavigate || !canGoNext;
-      nextModeHeaderBtn.disabled = shouldDisable;
-      nextModeHeaderBtn.style.opacity = shouldDisable ? '0.5' : '1';
-      nextModeHeaderBtn.style.cursor = shouldDisable ? 'not-allowed' : 'pointer';
-    }
-    
-    // Also update mobile navigation buttons if they exist
-    const prevModeBtn = document.getElementById('prev-mode-btn') as HTMLButtonElement;
-    const nextModeBtn = document.getElementById('next-mode-btn') as HTMLButtonElement;
-    
-    if (prevModeBtn) {
-      const shouldDisable = !canNavigate || !canGoPrev;
-      prevModeBtn.disabled = shouldDisable;
-      prevModeBtn.style.opacity = shouldDisable ? '0.5' : '1';
-      prevModeBtn.style.cursor = shouldDisable ? 'not-allowed' : 'pointer';
-    }
-    
-    if (nextModeBtn) {
-      const shouldDisable = !canNavigate || !canGoNext;
-      nextModeBtn.disabled = shouldDisable;
-      nextModeBtn.style.opacity = shouldDisable ? '0.5' : '1';
-      nextModeBtn.style.cursor = shouldDisable ? 'not-allowed' : 'pointer';
-    }
+    this.modeManager.updateNavigationButtons();
   }
 
   private updateModeSelector(): void {
-    // Helper to check if a mode is an image mode
-    const isImageMode = (mode: ModeInfo): boolean => {
-      const nameLower = mode.name.toLowerCase();
-      return nameLower.startsWith('image -') || nameLower.includes('slideshow');
-    };
-
-    // Helper to check if a mode is a scope mode
-    const isScopeMode = (mode: ModeInfo): boolean => {
-      return mode.category === 'scopes';
-    };
-
-    // Check if microphone is enabled
-    const micEnabled = this.useMicrophone && this.microphoneAudio?.active;
+    this.modeManager.updateModeSelector();
     
-    // Check if mock audio is enabled (allows scope modes to work without real mic)
-    const audioAvailable = micEnabled || (this.mockAudioEnabled && !this.useMicrophone);
-
-    // Process modes with current permission states
-    let processedModes = [...modes].map(mode => {
-      // Mark webcam mode as disabled if permission not granted
-      if (mode.id === 'u---webcam' && !this.webcamPermissionGranted) {
-        return { ...mode, disabled: true };
-      }
-      // Mark image modes as disabled if no images uploaded
-      if (isImageMode(mode) && !this.hasUploadedImages) {
-        return { ...mode, disabled: true };
-      }
-      // Mark scope modes as disabled if neither microphone nor mock audio is enabled
-      if (isScopeMode(mode) && !audioAvailable) {
-        return { ...mode, disabled: true };
-      }
-      return { ...mode, disabled: false };
-    });
-
-    // Filter by favorites if enabled
-    if (this.showOnlyFavorites && this.favorites.length > 0) {
-      // Always include the current mode in the list, even if not favorited
-      // This ensures navigation works correctly
-      const currentModeId = this.previousModeInfo?.id;
-      processedModes = processedModes.filter(mode => 
-        this.favorites.includes(mode.id) || mode.id === currentModeId
-      );
-    }
-
-    // Use intelligent grouping for browser/dropdown (same as setupModeSelector)
-    this.sortedModes = ModeGrouper.groupModes(processedModes);
-
-    // Create simpler navigation order for arrow keys: by category, then alphabetical
-    this.navigationModes = this.createNavigationOrder(processedModes);
-
     // Update both mode selector and browser (if they exist)
     if (this.modeSelector) {
       this.modeSelector.setModes(this.sortedModes);
@@ -2806,141 +2880,6 @@ export class App {
   private currentModeIndex = -1;
   private sortedModes: ModeInfo[] = []; // For browser/dropdown (grouped by similarity)
   private navigationModes: ModeInfo[] = []; // For arrow navigation (simpler ordering)
-
-  private setupKeyboardNavigation() {
-    // Helper to check if a mode is an image mode
-    const isImageMode = (mode: ModeInfo): boolean => {
-      const nameLower = mode.name.toLowerCase();
-      return nameLower.startsWith('image -') || nameLower.includes('slideshow');
-    };
-
-    // Sort modes: non-experimental first, then experimental
-    // This will be updated by updateModeSelector, but we need it here for initial setup
-    this.sortedModes = [...modes].map(mode => {
-      if (mode.id === 'u---webcam' && !this.webcamPermissionGranted) {
-        return { ...mode, disabled: true };
-      }
-      // Mark image modes as disabled if no images uploaded
-      if (isImageMode(mode) && !this.hasUploadedImages) {
-        return { ...mode, disabled: true };
-      }
-      return mode;
-    }).sort((a, b) => {
-      if (a.experimental === b.experimental) return 0;
-      return a.experimental ? 1 : -1; // Experimental modes go to bottom
-    });
-
-    document.addEventListener('keydown', (e) => {
-      // Handle spacebar for trigger - allow it even in some inputs
-      if (e.key === ' ' || e.key === 'Spacebar') {
-        const target = e.target as HTMLElement;
-        // Only block spacebar if typing in a text/search input or textarea
-        if ((target instanceof HTMLInputElement && (target.type === 'text' || target.type === 'search')) ||
-            target instanceof HTMLTextAreaElement ||
-            (target.isContentEditable && target.tagName !== 'BODY')) {
-          // Allow spacebar to work normally in text inputs
-          return;
-        }
-        // For all other cases, trigger animation (momentary pulse)
-        e.preventDefault();
-        e.stopPropagation();
-        this.eyesy.trig = true; // Set trigger, will be cleared after frame
-        return;
-      }
-      
-      // Don't intercept other keys if typing in an input
-      const target = e.target as HTMLElement;
-      if (target instanceof HTMLInputElement || 
-          target instanceof HTMLSelectElement || 
-          target instanceof HTMLTextAreaElement ||
-          target.isContentEditable) {
-        return;
-      }
-
-      // Use navigationModes for arrow key navigation (simpler ordering)
-      const modesToUse = this.navigationModes.length > 0 ? this.navigationModes : this.sortedModes;
-
-      // Helper to find next enabled mode
-      const findNextEnabledMode = (startIndex: number, direction: 1 | -1): number => {
-        let attempts = 0;
-        let index = startIndex;
-        while (attempts < modesToUse.length) {
-          index = (index + direction + modesToUse.length) % modesToUse.length;
-          if (!modesToUse[index].disabled) {
-            return index;
-          }
-          attempts++;
-        }
-        return startIndex; // Fallback to current if all disabled
-      };
-
-      // Arrow keys to navigate modes
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        // Fast forward (if not navigating modes)
-        if (e.shiftKey && this.rewindManager.canFastForward()) {
-          e.preventDefault();
-          this.rewindManager.fastForward(this.eyesy);
-          // Update UI controls
-          this.controls.updateKnobValue(1, this.eyesy.knob1);
-          this.controls.updateKnobValue(2, this.eyesy.knob2);
-          this.controls.updateKnobValue(3, this.eyesy.knob3);
-          this.controls.updateKnobValue(4, this.eyesy.knob4);
-          this.controls.updateKnobValue(5, this.eyesy.knob5);
-          if (this.eyesy.knob6 !== undefined) {
-            this.controls.updateKnobValue(6, this.eyesy.knob6);
-          }
-          if (this.eyesy.knob7 !== undefined) {
-            this.controls.updateKnobValue(7, this.eyesy.knob7);
-          }
-          this.updateRewindUI();
-          return;
-        }
-        e.preventDefault();
-        // Ensure we have modes and currentModeIndex is valid
-        if (modesToUse.length === 0) return;
-        if (this.currentModeIndex < 0 || this.currentModeIndex >= modesToUse.length) {
-          this.currentModeIndex = findNextEnabledMode(-1, 1);
-        } else {
-          this.currentModeIndex = findNextEnabledMode(this.currentModeIndex, 1);
-        }
-        this.loadMode(modesToUse[this.currentModeIndex]);
-        this.updateStatus(`Mode ${this.currentModeIndex + 1}/${modesToUse.length}: ${modesToUse[this.currentModeIndex].name}`);
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        // Ensure we have modes and currentModeIndex is valid
-        if (modesToUse.length === 0) return;
-        if (this.currentModeIndex < 0 || this.currentModeIndex >= modesToUse.length) {
-          this.currentModeIndex = findNextEnabledMode(modesToUse.length, -1);
-        } else {
-          this.currentModeIndex = findNextEnabledMode(this.currentModeIndex, -1);
-        }
-        this.loadMode(modesToUse[this.currentModeIndex]);
-        this.updateStatus(`Mode ${this.currentModeIndex + 1}/${modesToUse.length}: ${modesToUse[this.currentModeIndex].name}`);
-      } else if (e.key === 'Home') {
-        e.preventDefault();
-        this.currentModeIndex = findNextEnabledMode(-1, 1);
-        this.loadMode(this.sortedModes[this.currentModeIndex]);
-        this.updateStatus(`Mode ${this.currentModeIndex + 1}/${this.sortedModes.length}: ${this.sortedModes[this.currentModeIndex].name}`);
-      } else if (e.key === 'End') {
-        e.preventDefault();
-        this.currentModeIndex = findNextEnabledMode(this.sortedModes.length, -1);
-        this.loadMode(this.sortedModes[this.currentModeIndex]);
-        this.updateStatus(`Mode ${this.currentModeIndex + 1}/${this.sortedModes.length}: ${this.sortedModes[this.currentModeIndex].name}`);
-      } else if (e.key === 'b' || e.key === 'B') {
-        e.preventDefault();
-        this.modeBrowser.toggle();
-      } else if (e.key === 'p' || e.key === 'P') {
-        // P key for pause/resume
-        e.preventDefault();
-        this.togglePause();
-      } else if (e.key === 's' || e.key === 'S') {
-        // S key for screenshot
-        e.preventDefault();
-        this.captureScreenshot();
-      }
-      // Note: Spacebar is handled earlier in the function (before other key handlers)
-    });
-  }
 
   private async loadMode(modeInfo: ModeInfo) {
     try {
@@ -3667,143 +3606,7 @@ export class App {
   }
 
   private generateAudioData(): Float32Array {
-    const data = new Float32Array(200);
-    
-    if (this.mockAudioEnabled && !this.useMicrophone) {
-      // Generate mock audio with varying pattern complexity
-      // mockAudioTime is updated in the animation loop
-      
-      // Pattern complexity: 0.0 = simple 4/4 beat, 1.0 = random
-      const complexity = this.mockAudioFrequency;
-      
-      // Base intensity (increased to ensure values are above noise threshold)
-      // Noise threshold is 0.03, so we need values well above that
-      const baseIntensity = 1.0;
-      
-      // Determine pattern type based on complexity
-      let beatPattern: number;
-      let freqVariation: number;
-      let rhythmVariation: number;
-      
-      if (complexity < 0.3) {
-        // Simple 4/4 beat pattern
-        const beatTime = this.mockAudioTime * 2.0; // 2 beats per second (120 BPM)
-        const beatPhase = (beatTime % 1.0) * 4.0; // 4 beats per measure
-        // Strong beat on 1, weaker on 2, 3, 4
-        if (beatPhase < 1.0) {
-          beatPattern = 1.0; // Strong downbeat
-        } else if (beatPhase < 2.0) {
-          beatPattern = 0.3; // Weak beat
-        } else if (beatPhase < 3.0) {
-          beatPattern = 0.6; // Medium beat
-        } else {
-          beatPattern = 0.3; // Weak beat
-        }
-        freqVariation = 0.1; // Minimal frequency variation
-        rhythmVariation = 0.0; // No rhythm variation
-      } else if (complexity < 0.7) {
-        // More complex patterns (polyrhythms, syncopation)
-        const blend = (complexity - 0.3) / 0.4; // 0 to 1 within this range
-        
-        // Mix of 4/4 and 3/4 time
-        const beatTime4 = this.mockAudioTime * 2.0;
-        const beatTime3 = this.mockAudioTime * 1.5;
-        const pattern4 = Math.sin(beatTime4 * Math.PI * 2) * 0.5 + 0.5;
-        const pattern3 = Math.sin(beatTime3 * Math.PI * 2) * 0.5 + 0.5;
-        beatPattern = pattern4 * (1.0 - blend * 0.5) + pattern3 * (blend * 0.5);
-        
-        // Add syncopation
-        const syncopation = Math.sin(this.mockAudioTime * 3.0) * 0.3 * blend;
-        beatPattern = Math.max(0.2, Math.min(1.0, beatPattern + syncopation));
-        
-        freqVariation = 0.1 + blend * 0.3; // Moderate frequency variation
-        rhythmVariation = blend * 0.4; // Some rhythm variation
-      } else {
-        // Random patterns
-        const randomness = (complexity - 0.7) / 0.3; // 0 to 1 within this range
-        
-        // Random beat pattern with some structure
-        const structured = Math.sin(this.mockAudioTime * 2.0) * 0.5 + 0.5;
-        const random = Math.random();
-        beatPattern = structured * (1.0 - randomness) + random * randomness;
-        beatPattern = Math.max(0.2, Math.min(1.0, beatPattern));
-        
-        freqVariation = 0.4 + randomness * 0.3; // High frequency variation
-        rhythmVariation = 0.4 + randomness * 0.4; // High rhythm variation
-      }
-      
-      // Frequency components with variation
-      const baseFreq1 = 60 + freqVariation * 40; // 60-100 Hz (bass)
-      const baseFreq2 = 200 + freqVariation * 100; // 200-300 Hz (mid)
-      const baseFreq3 = 800 + freqVariation * 400; // 800-1200 Hz (treble)
-      
-      // Apply rhythm variation to frequencies
-      const freq1 = baseFreq1 + Math.sin(this.mockAudioTime * (1.0 + rhythmVariation * 2.0)) * 20;
-      const freq2 = baseFreq2 + Math.sin(this.mockAudioTime * (1.5 + rhythmVariation * 3.0)) * 50;
-      const freq3 = baseFreq3 + Math.sin(this.mockAudioTime * (2.0 + rhythmVariation * 4.0)) * 200;
-      
-      // Amplitude modulation
-      const ampMod = 0.7 + Math.sin(this.mockAudioTime * 0.5) * 0.3;
-      
-      // Intensity randomness: adds variation to the base intensity
-      // 0.0 = consistent intensity, 1.0 = highly random intensity
-      const intensityRandomness = this.mockAudioIntensityRandomness;
-      
-      for (let i = 0; i < data.length; i++) {
-        // Time offset for each sample (simulates audio buffer)
-        const t = this.mockAudioTime + (i / data.length) * 0.01;
-        
-        // Apply intensity randomness: vary the intensity per sample
-        // Use per-sample random variation when intensityRandomness > 0
-        const randomIntensityVariation = intensityRandomness > 0 
-          ? 1.0 + (Math.random() - 0.5) * intensityRandomness * 0.8 // ±40% variation at max
-          : 1.0;
-        const effectiveIntensity = baseIntensity * randomIntensityVariation;
-        
-        // Combine multiple frequencies with harmonics, modulated by beat pattern
-        // Scale beatPattern to ensure minimum amplitude (map 0.2-1.0 to 0.3-1.0)
-        const scaledBeatPattern = 0.3 + (beatPattern - 0.2) * (1.0 - 0.3) / (1.0 - 0.2);
-        const effectiveBeatPattern = Math.max(0.3, Math.min(1.0, scaledBeatPattern));
-        
-        const sample = 
-          Math.sin(t * freq1 * Math.PI * 2) * 0.4 * effectiveIntensity * effectiveBeatPattern +
-          Math.sin(t * freq2 * Math.PI * 2) * 0.3 * effectiveIntensity * effectiveBeatPattern +
-          Math.sin(t * freq3 * Math.PI * 2) * 0.2 * effectiveIntensity * effectiveBeatPattern +
-          Math.sin(t * freq1 * Math.PI * 4) * 0.05 * effectiveIntensity * effectiveBeatPattern + // Harmonic
-          Math.sin(t * freq2 * Math.PI * 3) * 0.05 * effectiveIntensity * effectiveBeatPattern; // Harmonic
-        
-        // Add noise based on complexity (more random = more noise)
-        const noiseAmount = complexity * 0.1;
-        const noise = (Math.random() - 0.5) * noiseAmount;
-        
-        // Combine sample with amplitude modulation and noise
-        // Ensure ampMod doesn't go too low (minimum 0.6 instead of 0.4)
-        const effectiveAmpMod = Math.max(0.6, ampMod);
-        let finalSample = sample * effectiveAmpMod + noise;
-        
-        // Ensure minimum amplitude to avoid noise threshold filtering (0.03)
-        // Target: at least 0.15 amplitude (well above 0.03 threshold)
-        const targetMinAmp = 0.15;
-        const currentAmp = Math.abs(finalSample);
-        if (currentAmp < targetMinAmp) {
-          // Scale up to ensure meaningful signal
-          // Preserve the sign and scale to target minimum
-          finalSample = Math.sign(finalSample) * targetMinAmp;
-        }
-        
-        // Clamp to valid range
-        data[i] = Math.max(-1.0, Math.min(1.0, finalSample));
-      }
-    } else {
-      // Simple fallback when mock audio is disabled
-    const time = Date.now() * 0.001;
-    for (let i = 0; i < data.length; i++) {
-      const t = time + (i / data.length) * 0.01;
-      data[i] = Math.sin(t * 220) * 0.5 + Math.sin(t * 440) * 0.25;
-    }
-    }
-    
-    return data;
+    return this.audioGenerator.generateAudioData();
   }
 
   private startAnimation() {
@@ -3821,24 +3624,31 @@ export class App {
     }
     
     const currentTime = performance.now();
-
-    // FPS throttling: skip frame if not enough time has passed
-    if (this.targetFPS > 0 && this.targetFPS <= 60) {
-      const minFrameTime = 1000 / this.targetFPS; // Minimum milliseconds per frame
-      const timeSinceLastFrame = currentTime - this.lastFrameTimeForFPS;
-      if (timeSinceLastFrame < minFrameTime) {
-        // Not enough time has passed, skip this frame
-        this.animationId = requestAnimationFrame(this.animate);
-        return;
-      }
-      this.lastFrameTimeForFPS = currentTime;
-    } else {
-      // Unlimited FPS (targetFPS = 0), update timing normally
-      this.lastFrameTimeForFPS = currentTime;
-    }
     
     // Update lastFrameTime only when not paused
     const deltaTime = currentTime - this.lastFrameTime;
+    
+    // FPS throttling: use time accumulator for consistent frame pacing
+    if (this.targetFPS > 0 && this.targetFPS <= 60) {
+      const targetFrameTime = 1000 / this.targetFPS; // Target milliseconds per frame
+      this.frameTimeAccumulator += deltaTime;
+      
+      if (this.frameTimeAccumulator < targetFrameTime) {
+        // Not enough time accumulated, skip this frame
+        this.animationId = requestAnimationFrame(this.animate);
+        return;
+      }
+      
+      // Render frame and subtract target frame time
+      this.frameTimeAccumulator -= targetFrameTime;
+      // Clamp accumulator to prevent unbounded growth
+      if (this.frameTimeAccumulator > targetFrameTime * 2) {
+        this.frameTimeAccumulator = targetFrameTime;
+      }
+    } else {
+      // Unlimited FPS (targetFPS = 0), reset accumulator
+      this.frameTimeAccumulator = 0;
+    }
     
     // Calculate animation speed multiplier from knob8
     // 0.0 = 0.01x (very slow), 0.5 = 1.0x (normal), 1.0 = 3.0x (fastest)
@@ -3862,157 +3672,36 @@ export class App {
     // Apply seizure safety filter to delta time
     const filteredDeltaSeconds = this.seizureSafetyFilter.filterDeltaTime(deltaSeconds);
 
-    // Update FPS counter
+    // Update FPS counter (batched DOM update)
     this.fpsCounter++;
     if (currentTime - this.fpsTime >= 1000) {
       this.fps = this.fpsCounter;
       this.fpsCounter = 0;
       this.fpsTime = currentTime;
-      this.controls.updateFPS(this.fps);
+      this.pendingFPSUpdate = this.fps; // Queue for batched update
     }
-
-    // Random sequence mode (Knobs 1-3)
-    if (this.randomSequenceEnabled) {
-      this.randomSequenceTime += deltaSeconds;
-      // Frequency controls how often values change
-      // 0.0 = very slow (5-7 seconds), 1.0 = very fast (0.5-1.5 seconds)
-      const minInterval = 0.5 + (1.0 - this.randomSequenceFrequency) * 4.5; // 0.5 to 5.0 seconds
-      const maxInterval = 1.5 + (1.0 - this.randomSequenceFrequency) * 5.5; // 1.5 to 7.0 seconds
-      const interval = minInterval + Math.random() * (maxInterval - minInterval);
+    
+    // Batch DOM updates every N frames to reduce layout thrashing
+    this.domUpdateFrameCounter++;
+    if (this.domUpdateFrameCounter >= this.domUpdateInterval) {
+      this.domUpdateFrameCounter = 0;
       
-      if (this.randomSequenceTime >= interval) {
-        if (!this.knob1Locked) {
-          this.eyesy.knob1 = Math.random();
-          this.controls.updateKnobValue(1, this.eyesy.knob1);
-        }
-        if (!this.knob2Locked) {
-          this.eyesy.knob2 = Math.random();
-          this.controls.updateKnobValue(2, this.eyesy.knob2);
-        }
-        if (!this.knob3Locked) {
-          this.eyesy.knob3 = Math.random();
-          this.controls.updateKnobValue(3, this.eyesy.knob3);
-        }
-        this.randomSequenceTime = 0;
-      }
-    }
-
-    // Random color mode (Knobs 4-5)
-    if (this.randomColorEnabled) {
-      this.randomColorTime += deltaSeconds;
-      // Frequency controls how often colors change
-      // 0.0 = very slow (3-5 seconds), 1.0 = very fast (0.5-1.5 seconds)
-      const minInterval = 0.5 + (1.0 - this.randomColorFrequency) * 2.5; // 0.5 to 3.0 seconds
-      const maxInterval = 1.5 + (1.0 - this.randomColorFrequency) * 3.5; // 1.5 to 5.0 seconds
-      const interval = minInterval + Math.random() * (maxInterval - minInterval);
-      
-      if (this.randomColorTime >= interval) {
-        // Generate random colors ensuring they're never equal
-        // Minimum color distance threshold for visibility (RGB distance)
-        const minColorDistance = 30;
-        let attempts = 0;
-        const maxAttempts = 20; // Prevent infinite loops
-        
-        // Generate new values for unlocked knobs
-        if (!this.knob4Locked) {
-          this.eyesy.knob4 = Math.random();
-        }
-        if (!this.knob5Locked) {
-          this.eyesy.knob5 = Math.random();
-        }
-        
-        // Check if colors are too similar and adjust if needed
-        let fgColor = this.eyesy.color_picker(this.eyesy.knob4);
-        let bgColor = this.eyesy.color_picker(this.eyesy.knob5);
-        let colorDistance = Math.sqrt(
-          Math.pow(fgColor[0] - bgColor[0], 2) +
-          Math.pow(fgColor[1] - bgColor[1], 2) +
-          Math.pow(fgColor[2] - bgColor[2], 2)
-        );
-        
-        // If colors are too similar, adjust the unlocked knob(s) to be different
-        while (colorDistance < minColorDistance && attempts < maxAttempts) {
-          attempts++;
-          
-          // If both knobs are locked, we can't change them (shouldn't happen in random mode)
-          if (this.knob4Locked && this.knob5Locked) {
-            break;
-          }
-          
-          // Adjust the unlocked knob(s) to create contrast
-          if (this.knob4Locked && !this.knob5Locked) {
-            // Knob4 is locked, adjust knob5 to be different
-            // Try opposite hue on color wheel for maximum contrast
-            const lockedHue = (this.eyesy.knob4 / 0.85) * 360;
-            const oppositeHue = (lockedHue + 180) % 360;
-            this.eyesy.knob5 = (oppositeHue / 360) * 0.85;
-          } else if (this.knob5Locked && !this.knob4Locked) {
-            // Knob5 is locked, adjust knob4 to be different
-            const lockedHue = (this.eyesy.knob5 / 0.85) * 360;
-            const oppositeHue = (lockedHue + 180) % 360;
-            this.eyesy.knob4 = (oppositeHue / 360) * 0.85;
-          } else {
-            // Both unlocked - try random again, or set to contrasting colors
-            if (attempts < 10) {
-              // Try a few more random attempts
-              this.eyesy.knob4 = Math.random();
-              this.eyesy.knob5 = Math.random();
-            } else {
-              // Force contrasting colors after too many attempts
-              this.eyesy.knob4 = 0.0; // Red
-              this.eyesy.knob5 = 0.66; // Blue
-            }
-          }
-          
-          // Recalculate color distance
-          fgColor = this.eyesy.color_picker(this.eyesy.knob4);
-          bgColor = this.eyesy.color_picker(this.eyesy.knob5);
-          colorDistance = Math.sqrt(
-            Math.pow(fgColor[0] - bgColor[0], 2) +
-            Math.pow(fgColor[1] - bgColor[1], 2) +
-            Math.pow(fgColor[2] - bgColor[2], 2)
-          );
-        }
-        
-        // Update UI controls
-        if (!this.knob4Locked) {
-          this.controls.updateKnobValue(4, this.eyesy.knob4);
-        }
-        if (!this.knob5Locked) {
-          this.controls.updateKnobValue(5, this.eyesy.knob5);
-        }
-        this.randomColorTime = 0;
-      }
-    }
-
-    // Random trigger mode
-    this.randomTriggerJustFired = false;
-    if (this.randomTriggerEnabled) {
-      this.randomTriggerTime += deltaSeconds;
-      // Frequency controls how often trigger fires
-      // 0.0 = very slow (3-5 seconds), 1.0 = very fast (0.1-0.5 seconds)
-      const minInterval = 0.1 + (1.0 - this.randomTriggerFrequency) * 2.9; // 0.1 to 3.0 seconds
-      const maxInterval = 0.5 + (1.0 - this.randomTriggerFrequency) * 4.5; // 0.5 to 5.0 seconds
-      const interval = minInterval + Math.random() * (maxInterval - minInterval);
-      
-      if (this.randomTriggerTime >= interval) {
-        // Always trigger (positive pulse) - don't randomly turn off
-        this.eyesy.trig = true;
-        this.randomTriggerTime = 0;
-        this.lastRandomTriggerTime = 0; // Reset time since last trigger
-        this.randomTriggerJustFired = true;
-      } else {
-        // Update time since last trigger
-        this.lastRandomTriggerTime += deltaSeconds;
+      // Apply pending FPS update
+      if (this.pendingFPSUpdate !== null) {
+        this.controls.updateFPS(this.pendingFPSUpdate);
+        this.pendingFPSUpdate = null;
       }
       
-      // Update visual indicator
-      const timeSinceLastTrigger = this.lastRandomTriggerTime;
-      this.controls.updateRandomTriggerActivity(this.randomTriggerJustFired, timeSinceLastTrigger);
-    } else {
-      // Reset indicator when disabled
-      this.controls.updateRandomTriggerActivity(false, 999);
+      // Apply pending knob value updates
+      this.pendingKnobUpdates.forEach((value, knob) => {
+        this.controls.updateKnobValue(knob, value);
+      });
+      this.pendingKnobUpdates.clear();
     }
+
+    // Update random features
+    this.randomFeatures.update(deltaSeconds);
+    this.randomTriggerJustFired = this.randomFeatures.getRandomTriggerJustFired();
 
     // Clear trigger after modes have had a chance to see it (creates momentary pulse)
     const triggerWasSet = this.eyesy.trig;
@@ -4043,9 +3732,7 @@ export class App {
     // The trigger will be cleared AFTER the mode's draw() is called
 
     // Update mock audio time (for smooth animation)
-    if (this.mockAudioEnabled && !this.useMicrophone) {
-      this.mockAudioTime += deltaSeconds;
-    }
+    this.audioGenerator.updateTime(deltaSeconds);
 
     // Update microphone enabled state first
     const micEnabled = this.useMicrophone && this.microphoneAudio.active;
@@ -4053,6 +3740,10 @@ export class App {
     // Determine if we should use mock audio
     // Use mock audio when: mock audio is enabled AND mic is disabled
     const useMockAudio = this.mockAudioEnabled && !micEnabled;
+    this.audioGenerator.setMockAudioEnabled(this.mockAudioEnabled);
+    this.audioGenerator.setUseMicrophone(this.useMicrophone);
+    this.audioGenerator.setMockAudioFrequency(this.mockAudioFrequency);
+    this.audioGenerator.setMockAudioIntensityRandomness(this.mockAudioIntensityRandomness);
     
     // Set mic_enabled to true if either real mic OR mock audio is active
     // This allows AudioScope utility to process the audio
@@ -4460,13 +4151,16 @@ export class App {
           // Apply effects to the frame texture
           const processedTexture = this.effectManager.applyPostEffects(originalTexture);
           if (processedTexture && processedTexture !== originalTexture) {
-            // Effects modified the texture - blend with original if mix < 1.0
-            if (blendMix < 1.0) {
-              // Blend original and processed textures
-              this.canvasWrapper.renderBlendedTextures(originalTexture, processedTexture, blendMix);
-            } else {
+            // Effects modified the texture - blend based on mix value
+            if (blendMix <= 0.0) {
+              // No effects - render original texture directly
+              this.canvasWrapper.renderTextureToScreen(originalTexture);
+            } else if (blendMix >= 1.0) {
               // Full effects - render processed texture directly
               this.canvasWrapper.renderTextureToScreen(processedTexture);
+            } else {
+              // Partial blend - blend original and processed textures
+              this.canvasWrapper.renderBlendedTextures(originalTexture, processedTexture, blendMix);
             }
           } else {
             // Effects didn't modify texture - render normally as fallback
@@ -4795,134 +4489,10 @@ export class App {
    * Load settings from IndexedDB
    */
   private async loadSettings(): Promise<void> {
-    try {
-      const settings = await this.settingsStorage.loadSettings();
-      if (settings) {
-        // Load transition settings
-        if (settings.transitionsEnabled !== undefined) {
-          this.transitionsEnabled = settings.transitionsEnabled;
-        }
-        if (settings.transitionDuration !== undefined) {
-          this.transitionDuration = settings.transitionDuration;
-        }
-        if (settings.transitionType !== undefined) {
-          this.transitionType = settings.transitionType;
-        }
-
-        // Load knob values (will be applied after controls are set up)
-        if (settings.knob1 !== undefined) this.eyesy.knob1 = settings.knob1;
-        if (settings.knob2 !== undefined) this.eyesy.knob2 = settings.knob2;
-        if (settings.knob3 !== undefined) this.eyesy.knob3 = settings.knob3;
-        if (settings.knob4 !== undefined) this.eyesy.knob4 = settings.knob4;
-        if (settings.knob5 !== undefined) this.eyesy.knob5 = settings.knob5;
-        if (settings.knob6 !== undefined) this.eyesy.knob6 = settings.knob6;
-        if (settings.knob7 !== undefined) this.eyesy.knob7 = settings.knob7;
-        if (settings.knob8 !== undefined) this.eyesy.knob8 = settings.knob8;
-        if (settings.knob9 !== undefined) this.eyesy.knob9 = settings.knob9;
-        if (settings.knob10 !== undefined) this.eyesy.knob10 = settings.knob10;
-
-        // Load feature toggles
-        if (settings.autoClear !== undefined) {
-          this.eyesy.auto_clear = settings.autoClear;
-        }
-        if (settings.randomSequenceEnabled !== undefined) {
-          this.randomSequenceEnabled = settings.randomSequenceEnabled;
-        }
-        if (settings.randomSequenceFrequency !== undefined) {
-          this.randomSequenceFrequency = settings.randomSequenceFrequency;
-        }
-        if (settings.randomColorEnabled !== undefined) {
-          this.randomColorEnabled = settings.randomColorEnabled;
-        }
-        if (settings.randomColorFrequency !== undefined) {
-          this.randomColorFrequency = settings.randomColorFrequency;
-        }
-        if (settings.randomTriggerEnabled !== undefined) {
-          this.randomTriggerEnabled = settings.randomTriggerEnabled;
-        }
-        if (settings.randomTriggerFrequency !== undefined) {
-          this.randomTriggerFrequency = settings.randomTriggerFrequency;
-        }
-        
-        // Load knob lock states
-        if (settings.knob1Locked !== undefined) {
-          this.knob1Locked = settings.knob1Locked;
-        }
-        if (settings.knob2Locked !== undefined) {
-          this.knob2Locked = settings.knob2Locked;
-        }
-        if (settings.knob3Locked !== undefined) {
-          this.knob3Locked = settings.knob3Locked;
-        }
-        if (settings.knob4Locked !== undefined) {
-          this.knob4Locked = settings.knob4Locked;
-        }
-        if (settings.knob5Locked !== undefined) {
-          this.knob5Locked = settings.knob5Locked;
-        }
-
-        // Load UI settings
-        if (settings.leftHanded !== undefined) {
-          this.leftHanded = settings.leftHanded;
-        }
-        if (settings.portraitRotate !== undefined) {
-          this.portraitRotate = settings.portraitRotate;
-        }
-        if (settings.favorites !== undefined) {
-          this.favorites = settings.favorites;
-        }
-        if (settings.showOnlyFavorites !== undefined) {
-          this.showOnlyFavorites = settings.showOnlyFavorites;
-        }
-
-        // Load font settings
-        if (settings.fontFamily !== undefined) {
-          this.eyesy.font_family = settings.fontFamily;
-        }
-        if (settings.fontText !== undefined) {
-          this.eyesy.font_text = settings.fontText;
-        }
-
-        // Load microphone settings
-        if (settings.micGain !== undefined && this.microphoneAudio) {
-          this.microphoneAudio.setGain(settings.micGain);
-        }
-        if (settings.useMicrophone !== undefined) {
-          this.useMicrophone = settings.useMicrophone;
-        }
-
-        // Load webcam permission state
-        if (settings.webcamPermissionGranted !== undefined) {
-          this.webcamPermissionGranted = settings.webcamPermissionGranted;
-        }
-
-        // Load target FPS
-        if (settings.targetFPS !== undefined) {
-          this.targetFPS = settings.targetFPS;
-        }
-
-        // Load effect settings
-        if (settings.activeEffects && this.effectManager) {
-          Object.entries(settings.activeEffects).forEach(([name, config]) => {
-            const effect = this.effectManager!.getEffect(name, 'post');
-            if (effect) {
-              effect.enabled = config.enabled;
-              effect.intensity = config.intensity;
-              
-              // Load additional options for Color Grading
-              if (name === 'colorGrading' && config.options && (effect as any).setOptions) {
-                (effect as any).setOptions(config.options);
-              }
-            }
-          });
-        }
-
-        // Note: applyLoadedSettingsToUI is called after setupControls() in initializeApp()
-        // to ensure controls are initialized before trying to update them
-      }
-    } catch (error) {
-      console.warn('Failed to load settings:', error);
-      // Continue with defaults if loading fails
+    // Settings are now loaded in initializeApp after setupControls
+    // This method is kept for compatibility but should not be called directly
+    if (this.settingsManager) {
+      await this.settingsManager.loadSettings();
     }
   }
 
@@ -4930,179 +4500,8 @@ export class App {
    * Apply loaded settings to UI controls
    */
   private applyLoadedSettingsToUI(settings: Partial<AppSettings>): void {
-    // Update knob values in UI
-    for (let i = 1; i <= 10; i++) {
-      const knobValue = (settings as any)[`knob${i}`];
-      if (knobValue !== undefined) {
-        this.controls.updateKnobValue(i, knobValue);
-      }
-    }
-
-    // Update transition settings
-    this.controls.updateTransitionSettings(
-      this.transitionsEnabled,
-      this.transitionDuration,
-      this.transitionType
-    );
-
-    // Update left-handed setting
-    if (settings.leftHanded !== undefined) {
-      this.controls.updateLeftHanded(settings.leftHanded);
-    }
-
-    // Update portrait rotate setting
-    if (settings.portraitRotate !== undefined) {
-      this.controls.updateCheckboxSetting('portrait-rotate', settings.portraitRotate);
-      this.applyPortraitRotate(settings.portraitRotate);
-    }
-    
-    // Update favorites settings (applied after modeBrowser is created in setupModeSelector)
-    // Store the value here, it will be applied later
-    if (settings.showOnlyFavorites !== undefined) {
-      this.showOnlyFavorites = settings.showOnlyFavorites;
-    }
-    
-    // Update knob lock states (ensure they're applied after controls are ready)
-    if (settings.knob1Locked !== undefined) {
-      this.knob1Locked = settings.knob1Locked;
-      this.controls.updateKnobLock(1, this.knob1Locked);
-    }
-    if (settings.knob2Locked !== undefined) {
-      this.knob2Locked = settings.knob2Locked;
-      this.controls.updateKnobLock(2, this.knob2Locked);
-    }
-    if (settings.knob3Locked !== undefined) {
-      this.knob3Locked = settings.knob3Locked;
-      this.controls.updateKnobLock(3, this.knob3Locked);
-    }
-    if (settings.knob4Locked !== undefined) {
-      this.knob4Locked = settings.knob4Locked;
-      this.controls.updateKnobLock(4, this.knob4Locked);
-    }
-    if (settings.knob5Locked !== undefined) {
-      this.knob5Locked = settings.knob5Locked;
-      this.controls.updateKnobLock(5, this.knob5Locked);
-    }
-    
-    // Update active effects UI
-    if (settings.activeEffects && this.effectManager) {
-      Object.entries(settings.activeEffects).forEach(([name, config]) => {
-        // Convert camelCase to kebab-case for UI element IDs
-        const kebabName = name.replace(/([A-Z])/g, '-$1').toLowerCase();
-        
-        // Update checkbox
-        this.controls.updateCheckboxSetting(`effect-${kebabName}-enabled`, config.enabled);
-        
-        // Update intensity slider
-        const intensitySlider = document.getElementById(`effect-${kebabName}-intensity`) as HTMLInputElement;
-        const intensityValue = document.getElementById(`effect-${kebabName}-intensity-value`);
-        const intensityValueContainer = intensityValue?.parentElement as HTMLElement;
-        const resetBtn = document.querySelector(`button.effect-reset-btn[data-effect="${kebabName}"]`) as HTMLElement;
-        
-        if (intensitySlider) {
-          intensitySlider.value = config.intensity.toString();
-          // Explicitly hide/show slider based on enabled state
-          intensitySlider.style.display = config.enabled ? 'block' : 'none';
-          intensitySlider.style.visibility = config.enabled ? 'visible' : 'hidden';
-        }
-        if (intensityValue) {
-          intensityValue.textContent = config.intensity.toFixed(2);
-          intensityValue.style.display = config.enabled ? 'inline' : 'none';
-          intensityValue.style.visibility = config.enabled ? 'visible' : 'hidden';
-        }
-        if (intensityValueContainer) {
-          intensityValueContainer.style.display = config.enabled ? 'flex' : 'none';
-          intensityValueContainer.style.visibility = config.enabled ? 'visible' : 'hidden';
-        }
-        if (resetBtn) {
-          resetBtn.style.display = config.enabled ? 'inline-block' : 'none';
-          resetBtn.style.visibility = config.enabled ? 'visible' : 'hidden';
-        }
-        
-        // Update Color Grading specific sliders
-        if (name === 'colorGrading' && config.options) {
-          const brightnessSlider = document.getElementById('color-grading-brightness') as HTMLInputElement;
-          const contrastSlider = document.getElementById('color-grading-contrast') as HTMLInputElement;
-          const saturationSlider = document.getElementById('color-grading-saturation') as HTMLInputElement;
-          const hueSlider = document.getElementById('color-grading-hue') as HTMLInputElement;
-          
-          const brightnessValue = document.getElementById('color-grading-brightness-value');
-          const contrastValue = document.getElementById('color-grading-contrast-value');
-          const saturationValue = document.getElementById('color-grading-saturation-value');
-          const hueValue = document.getElementById('color-grading-hue-value');
-          
-          if (brightnessSlider) brightnessSlider.value = config.options.brightness.toString();
-          if (brightnessValue) brightnessValue.textContent = config.options.brightness.toFixed(2);
-          
-          if (contrastSlider) contrastSlider.value = config.options.contrast.toString();
-          if (contrastValue) contrastValue.textContent = config.options.contrast.toFixed(2);
-          
-          if (saturationSlider) saturationSlider.value = config.options.saturation.toString();
-          if (saturationValue) saturationValue.textContent = config.options.saturation.toFixed(2);
-          
-          if (hueSlider) hueSlider.value = config.options.hue.toString();
-          if (hueValue) hueValue.textContent = `${config.options.hue}°`;
-        }
-      });
-    }
-    
-    // Note: updateModeSelector() will be called after setupModeSelector() completes
-    // to ensure modeSelector and modeBrowser are initialized
-
-    // Update font settings
-    if (settings.fontFamily !== undefined || settings.fontText !== undefined) {
-      this.controls.updateFontSettings(
-        settings.fontFamily || 'Arial, sans-serif',
-        settings.fontText || ''
-      );
-    }
-
-    // Update auto clear button
-    if (settings.autoClear !== undefined) {
-      this.controls.updateAutoClear(settings.autoClear);
-    } else {
-      // Initialize with current state if not in settings
-      this.controls.updateAutoClear(this.eyesy.auto_clear);
-    }
-    if (settings.randomSequenceEnabled !== undefined) {
-      this.controls.updateCheckboxSetting('random-sequence', settings.randomSequenceEnabled);
-      if (settings.randomSequenceFrequency !== undefined) {
-        this.controls.updateFrequencySlider('random-sequence-frequency', settings.randomSequenceFrequency);
-      }
-    }
-    if (settings.randomColorEnabled !== undefined) {
-      this.controls.updateCheckboxSetting('random-color', settings.randomColorEnabled);
-      if (settings.randomColorFrequency !== undefined) {
-        this.controls.updateFrequencySlider('random-color-frequency', settings.randomColorFrequency);
-      }
-    }
-    if (settings.randomTriggerEnabled !== undefined) {
-      this.controls.updateCheckboxSetting('random-trigger', settings.randomTriggerEnabled);
-      if (settings.randomTriggerFrequency !== undefined) {
-        this.controls.updateFrequencySlider('random-trigger-frequency', settings.randomTriggerFrequency);
-      }
-    }
-    if (settings.mockAudioEnabled !== undefined) {
-      this.mockAudioEnabled = settings.mockAudioEnabled;
-      this.controls.updateMockAudioEnabled(settings.mockAudioEnabled);
-      if (settings.mockAudioFrequency !== undefined) {
-        this.mockAudioFrequency = settings.mockAudioFrequency;
-        this.controls.updateMockAudioFrequency(settings.mockAudioFrequency);
-      }
-      if (settings.mockAudioIntensityRandomness !== undefined) {
-        this.mockAudioIntensityRandomness = settings.mockAudioIntensityRandomness;
-        this.controls.updateMockAudioIntensityRandomness(settings.mockAudioIntensityRandomness);
-      }
-    }
-
-    // Update mic gain
-    if (settings.micGain !== undefined) {
-      this.controls.updateMicGain(settings.micGain);
-    }
-
-    // Update target FPS
-    if (settings.targetFPS !== undefined) {
-      this.controls.updateTargetFPS(settings.targetFPS);
+    if (this.settingsManager) {
+      this.settingsManager.applyLoadedSettingsToUI(settings);
     }
   }
 
@@ -5110,86 +4509,43 @@ export class App {
    * Debounced save settings (waits 500ms after last change)
    */
   private debouncedSaveSettings(): void {
-    if (this.saveSettingsTimeout) {
-      clearTimeout(this.saveSettingsTimeout);
+    if (this.settingsManager) {
+      this.settingsManager.debouncedSaveSettings();
     }
-    this.saveSettingsTimeout = window.setTimeout(() => {
-      this.saveSettings();
-    }, 500);
   }
 
   /**
    * Get current effect settings for saving
    */
   private getEffectSettings(): { [effectName: string]: { enabled: boolean; intensity: number; [key: string]: any } } {
-    const effectSettings: { [effectName: string]: { enabled: boolean; intensity: number; [key: string]: any } } = {};
-    
-    if (this.effectManager) {
-      this.effectManager.getPostEffects().forEach(effect => {
-        effectSettings[effect.name] = {
-          enabled: effect.enabled,
-          intensity: effect.intensity
-        };
-        
-        // Save additional options for Color Grading
-        if (effect.name === 'colorGrading' && (effect as any).options) {
-          effectSettings[effect.name].options = (effect as any).options;
-        }
-      });
+    if (!this.effectManager) {
+      return {};
     }
     
-    return effectSettings;
+    const settings: { [effectName: string]: { enabled: boolean; intensity: number; [key: string]: any } } = {};
+    const postEffects = this.effectManager.getPostEffects();
+    
+    for (const effect of postEffects) {
+      settings[effect.name] = {
+        enabled: effect.enabled,
+        intensity: effect.intensity,
+      };
+      
+      // Add additional options for Color Grading
+      if (effect.name === 'colorGrading' && (effect as any).getOptions) {
+        settings[effect.name].options = (effect as any).getOptions();
+      }
+    }
+    
+    return settings;
   }
 
   /**
    * Save current settings to IndexedDB
    */
   private async saveSettings(): Promise<void> {
-    try {
-      const settings: Partial<AppSettings> = {
-        transitionsEnabled: this.transitionsEnabled,
-        transitionDuration: this.transitionDuration,
-        transitionType: this.transitionType,
-        knob1: this.eyesy.knob1,
-        knob2: this.eyesy.knob2,
-        knob3: this.eyesy.knob3,
-        knob4: this.eyesy.knob4,
-        knob5: this.eyesy.knob5,
-        knob6: this.eyesy.knob6 ?? 0,
-        knob7: this.eyesy.knob7 ?? 0.5,
-        knob8: this.eyesy.knob8 ?? 0.5,
-        knob9: this.eyesy.knob9 ?? 0.5,
-        knob10: this.eyesy.knob10 ?? 0.5,
-        autoClear: this.eyesy.auto_clear,
-        randomSequenceEnabled: this.randomSequenceEnabled,
-        randomSequenceFrequency: this.randomSequenceFrequency,
-        randomColorEnabled: this.randomColorEnabled,
-        randomColorFrequency: this.randomColorFrequency,
-        randomTriggerEnabled: this.randomTriggerEnabled,
-        randomTriggerFrequency: this.randomTriggerFrequency,
-        mockAudioEnabled: this.mockAudioEnabled,
-        mockAudioFrequency: this.mockAudioFrequency,
-        mockAudioIntensityRandomness: this.mockAudioIntensityRandomness,
-        knob1Locked: this.knob1Locked,
-        knob2Locked: this.knob2Locked,
-        knob3Locked: this.knob3Locked,
-        knob4Locked: this.knob4Locked,
-        knob5Locked: this.knob5Locked,
-        micGain: this.microphoneAudio?.getGain() ?? 5.0,
-        useMicrophone: this.useMicrophone,
-        webcamPermissionGranted: this.webcamPermissionGranted,
-        leftHanded: this.leftHanded,
-        portraitRotate: this.portraitRotate,
-        favorites: this.favorites,
-        showOnlyFavorites: this.showOnlyFavorites,
-        targetFPS: this.targetFPS,
-        activeEffects: this.effectManager ? this.getEffectSettings() : {},
-        effectsBlendMix: this.effectManager?.getBlendMix() ?? 1.0,
-      };
-      await this.settingsStorage.saveSettings(settings);
-    } catch (error) {
-      console.warn('Failed to save settings:', error);
-      // Don't throw - settings saving is non-critical
+    if (this.settingsManager) {
+      await this.settingsManager.saveSettings();
     }
   }
 }

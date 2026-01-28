@@ -3,8 +3,8 @@
  * Supports background/foreground positioning, blend modes, opacity, and more
  */
 import * as THREE from 'three';
-import { WebcamService, WebcamFrame } from './WebcamService';
-import { EffectManager, Effect } from './EffectManager';
+import { WebcamService, WebcamFrame } from '../WebcamService';
+import { EffectManager, Effect } from '../EffectManager';
 
 export type WebcamBlendMode = 
   | 'normal'      // Standard alpha blending

@@ -1392,7 +1392,7 @@ input[type="range"]::-moz-range-thumb {
     display: block !important;
   }
   
-  /* Effects panel backdrop (same as controls backdrop) */
+  /* Effects panel backdrop (transparent - no dimming so animation remains visible) */
   .effects-panel-backdrop {
     display: none;
     position: fixed;
@@ -1400,11 +1400,11 @@ input[type="range"]::-moz-range-thumb {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: transparent;
     z-index: calc(var(--z-overlay) - 1);
     opacity: 0;
     transition: opacity var(--transition-normal);
-    backdrop-filter: blur(2px);
+    /* No backdrop-filter blur - keep animation fully visible */
   }
   
   .effects-panel-backdrop.visible {

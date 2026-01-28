@@ -1,10 +1,26 @@
 /**
- * Tests for Post-Processing Effects
- * Verifies that all effects can be instantiated, enabled/disabled, and applied correctly
+ * Comprehensive Tests for Post-Processing Effects
+ * 
+ * Test Coverage:
+ * - Effect instantiation and basic functionality
+ * - Enable/disable and intensity management
+ * - Effect application and chaining
+ * - Render target safety (null checks, creation, disposal)
+ * - Effect blending and mix functionality
+ * - Error handling and edge cases
+ * - Canvas integration with effects
+ * - Effect settings persistence
+ * - Size management and custom dimensions
+ * - Effect reset functionality
+ * 
+ * These tests verify that effects work correctly and handle edge cases gracefully,
+ * including the critical render target null safety fixes.
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as THREE from 'three';
 import { EffectManager } from '../core/EffectManager';
+import { renderToRenderTarget, RenderingContext } from '../core/canvas/rendering';
+import { Canvas } from '../core/Canvas';
 import {
   BlurEffect,
   SepiaEffect,
@@ -446,6 +462,485 @@ describe('Effects', () => {
       }
       
       effect.dispose();
+    });
+  });
+
+  describe('Render Target Safety', () => {
+    it('should handle null render target gracefully', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      // Create a context with null render target
+      const mockScene = new THREE.Scene();
+      const mockCamera = new THREE.OrthographicCamera(-width/2, width/2, height/2, -height/2, 0.1, 1000);
+      
+      const context = {
+        width,
+        height,
+        scene: mockScene,
+        renderer,
+        camera: mockCamera,
+        customCamera: null,
+        objects: [],
+        effectsRenderTarget: null as THREE.WebGLRenderTarget | null,
+        setEffectsRenderTarget: (target: THREE.WebGLRenderTarget | null) => {
+          // Simulate failure to set render target
+          // (context.effectsRenderTarget stays null)
+        },
+        cleanupInvalidTextures: () => false,
+      };
+      
+      // Should return null instead of throwing
+      const result = renderToRenderTarget(context as RenderingContext);
+      expect(result).toBeNull();
+      
+      manager.dispose();
+    });
+
+    it('should create render target when missing', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const mockScene = new THREE.Scene();
+      const mockCamera = new THREE.OrthographicCamera(-width/2, width/2, height/2, -height/2, 0.1, 1000);
+      
+      let effectsRenderTarget: THREE.WebGLRenderTarget | null = null;
+      
+      const context = {
+        width,
+        height,
+        scene: mockScene,
+        renderer,
+        camera: mockCamera,
+        customCamera: null,
+        objects: [],
+        get effectsRenderTarget() {
+          return effectsRenderTarget;
+        },
+        setEffectsRenderTarget: (target: THREE.WebGLRenderTarget | null) => {
+          effectsRenderTarget = target;
+        },
+        cleanupInvalidTextures: () => false,
+      };
+      
+      // First call should create render target
+      const result = renderToRenderTarget(context as RenderingContext);
+      
+      // Should have created a render target
+      expect(effectsRenderTarget).not.toBeNull();
+      expect(effectsRenderTarget?.width).toBe(width);
+      expect(effectsRenderTarget?.height).toBe(height);
+      
+      // Result may be null in test environment, but shouldn't throw
+      expect(() => renderToRenderTarget(context as RenderingContext)).not.toThrow();
+      
+      if (effectsRenderTarget) {
+        effectsRenderTarget.dispose();
+      }
+      manager.dispose();
+    });
+  });
+
+  describe('Effect Blending and Mix', () => {
+    it('should support blend mix functionality', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      // Set blend mix
+      manager.setBlendMix(0.5);
+      expect(manager.getBlendMix()).toBe(0.5);
+      
+      // Test full effects (mix = 1.0)
+      manager.setBlendMix(1.0);
+      expect(manager.getBlendMix()).toBe(1.0);
+      
+      // Test no effects (mix = 0.0)
+      manager.setBlendMix(0.0);
+      expect(manager.getBlendMix()).toBe(0.0);
+      
+      // Test clamping (values outside 0-1 should be clamped)
+      manager.setBlendMix(-0.5);
+      expect(manager.getBlendMix()).toBe(0.0);
+      
+      manager.setBlendMix(1.5);
+      expect(manager.getBlendMix()).toBe(1.0);
+      
+      manager.dispose();
+    });
+
+    it('should apply effects with different blend mix values', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.5;
+      manager.addPostEffect(blurEffect);
+      
+      // With blend mix at 1.0, should apply full effects
+      manager.setBlendMix(1.0);
+      const result1 = manager.applyPostEffects(testTexture);
+      expect(result1).toBeDefined();
+      expect(result1).not.toBeNull();
+      
+      // With blend mix at 0.0, should return original (if implemented)
+      manager.setBlendMix(0.0);
+      const result2 = manager.applyPostEffects(testTexture);
+      expect(result2).toBeDefined();
+      
+      manager.dispose();
+    });
+  });
+
+  describe('Effect Chain Application', () => {
+    it('should apply multiple effects in sequence', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.5;
+      manager.addPostEffect(blurEffect);
+      
+      const sepiaEffect = new SepiaEffect(renderer, width, height);
+      sepiaEffect.enabled = true;
+      sepiaEffect.intensity = 0.5;
+      manager.addPostEffect(sepiaEffect);
+      
+      const grayscaleEffect = new GrayscaleEffect(renderer, width, height);
+      grayscaleEffect.enabled = true;
+      grayscaleEffect.intensity = 0.5;
+      manager.addPostEffect(grayscaleEffect);
+      
+      const result = manager.applyPostEffects(testTexture);
+      
+      expect(result).toBeDefined();
+      expect(result).not.toBeNull();
+      
+      manager.dispose();
+    });
+
+    it('should skip disabled effects in chain', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.5;
+      manager.addPostEffect(blurEffect);
+      
+      const sepiaEffect = new SepiaEffect(renderer, width, height);
+      sepiaEffect.enabled = false; // Disabled
+      sepiaEffect.intensity = 0.5;
+      manager.addPostEffect(sepiaEffect);
+      
+      const grayscaleEffect = new GrayscaleEffect(renderer, width, height);
+      grayscaleEffect.enabled = true;
+      grayscaleEffect.intensity = 0.5;
+      manager.addPostEffect(grayscaleEffect);
+      
+      const result = manager.applyPostEffects(testTexture);
+      
+      expect(result).toBeDefined();
+      expect(result).not.toBeNull();
+      
+      manager.dispose();
+    });
+
+    it('should skip effects with zero intensity', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.0; // Zero intensity
+      manager.addPostEffect(blurEffect);
+      
+      const sepiaEffect = new SepiaEffect(renderer, width, height);
+      sepiaEffect.enabled = true;
+      sepiaEffect.intensity = 0.5;
+      manager.addPostEffect(sepiaEffect);
+      
+      const result = manager.applyPostEffects(testTexture);
+      
+      expect(result).toBeDefined();
+      expect(result).not.toBeNull();
+      
+      manager.dispose();
+    });
+  });
+
+  describe('Effect Error Handling', () => {
+    it('should handle effect apply errors gracefully', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.5;
+      manager.addPostEffect(blurEffect);
+      
+      // Apply with null texture - should handle gracefully
+      const result = manager.applyPostEffects(null);
+      expect(result).toBeNull();
+      
+      manager.dispose();
+    });
+
+    it('should handle missing renderer gracefully', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      // Simulate renderer being null
+      (manager as any).renderer = null;
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.5;
+      manager.addPostEffect(blurEffect);
+      
+      // Should return input texture when renderer is null
+      const result = manager.applyPostEffects(testTexture);
+      expect(result).toBe(testTexture);
+      
+      manager.dispose();
+    });
+
+    it('should handle effect disposal errors gracefully', () => {
+      const effect = new BlurEffect(renderer, width, height);
+      
+      // Dispose multiple times should not throw
+      expect(() => {
+        effect.dispose();
+        effect.dispose();
+        effect.dispose();
+      }).not.toThrow();
+    });
+  });
+
+  describe('Effect Size Management', () => {
+    it('should resize effects when canvas size changes', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      manager.addPostEffect(blurEffect);
+      
+      const newWidth = 1920;
+      const newHeight = 1080;
+      
+      manager.setSize(newWidth, newHeight);
+      
+      // Effects should handle size change
+      expect(() => {
+        manager.applyPostEffects(testTexture, newWidth, newHeight);
+      }).not.toThrow();
+      
+      manager.dispose();
+    });
+
+    it('should handle custom dimensions for webcam effects', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.5;
+      manager.addPostEffect(blurEffect);
+      
+      const customWidth = 640;
+      const customHeight = 480;
+      
+      // Apply with custom dimensions (for webcam)
+      const result = manager.applyPostEffects(testTexture, customWidth, customHeight);
+      
+      expect(result).toBeDefined();
+      expect(result).not.toBeNull();
+      
+      manager.dispose();
+    });
+  });
+
+  describe('Effect Reset Functionality', () => {
+    it('should reset effects to default values', () => {
+      const blurEffect = new BlurEffect(renderer, width, height);
+      
+      // Modify effect
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.8;
+      
+      // Reset if method exists
+      if (blurEffect.reset) {
+        blurEffect.reset();
+        // After reset, should have default values
+        expect(blurEffect.enabled).toBe(false);
+        expect(blurEffect.intensity).toBeGreaterThanOrEqual(0);
+        expect(blurEffect.intensity).toBeLessThanOrEqual(1);
+      }
+      
+      blurEffect.dispose();
+    });
+
+    it('should reset all effects through manager', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.8;
+      manager.addPostEffect(blurEffect);
+      
+      const sepiaEffect = new SepiaEffect(renderer, width, height);
+      sepiaEffect.enabled = true;
+      sepiaEffect.intensity = 0.6;
+      manager.addPostEffect(sepiaEffect);
+      
+      // Reset all post effects
+      manager.resetAllEffects('post');
+      
+      // Effects should be reset (if reset method exists)
+      if (blurEffect.reset) {
+        expect(blurEffect.enabled).toBe(false);
+      }
+      
+      manager.dispose();
+    });
+  });
+
+  describe('Canvas Integration with Effects', () => {
+    it('should handle renderToRenderTarget when effects are enabled', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      
+      let canvasWrapper: Canvas;
+      try {
+        canvasWrapper = new Canvas(canvas);
+      } catch (error) {
+        // Skip test if Canvas can't be created (e.g., in test environment)
+        return;
+      }
+      
+      // Should be able to render to render target without errors
+      expect(() => {
+        const texture = canvasWrapper.renderToRenderTarget();
+        // Result may be null in test environment, but shouldn't throw
+        expect(texture === null || texture instanceof THREE.Texture).toBe(true);
+      }).not.toThrow();
+      
+      canvasWrapper.dispose();
+    });
+
+    it('should handle renderToRenderTarget with custom dimensions', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      
+      let canvasWrapper: Canvas;
+      try {
+        canvasWrapper = new Canvas(canvas);
+      } catch (error) {
+        return;
+      }
+      
+      const customWidth = 1920;
+      const customHeight = 1080;
+      
+      expect(() => {
+        const texture = canvasWrapper.renderToRenderTarget(customWidth, customHeight);
+        expect(texture === null || texture instanceof THREE.Texture).toBe(true);
+      }).not.toThrow();
+      
+      canvasWrapper.dispose();
+    });
+
+    it('should handle effects with Canvas render target', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      
+      let canvasWrapper: Canvas;
+      try {
+        canvasWrapper = new Canvas(canvas);
+      } catch (error) {
+        return;
+      }
+      
+      const manager = new EffectManager(canvasWrapper.getRenderer(), width, height);
+      
+      const blurEffect = new BlurEffect(canvasWrapper.getRenderer(), width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.5;
+      manager.addPostEffect(blurEffect);
+      
+      // Render scene to texture first
+      const originalTexture = canvasWrapper.renderToRenderTarget();
+      
+      if (originalTexture) {
+        // Apply effects
+        const processedTexture = manager.applyPostEffects(originalTexture);
+        
+        expect(processedTexture).toBeDefined();
+        expect(processedTexture).not.toBeNull();
+      }
+      
+      manager.dispose();
+      canvasWrapper.dispose();
+    });
+
+    it('should handle multiple renderToRenderTarget calls safely', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      
+      let canvasWrapper: Canvas;
+      try {
+        canvasWrapper = new Canvas(canvas);
+      } catch (error) {
+        return;
+      }
+      
+      // Multiple calls should not cause errors
+      expect(() => {
+        for (let i = 0; i < 5; i++) {
+          const texture = canvasWrapper.renderToRenderTarget();
+          expect(texture === null || texture instanceof THREE.Texture).toBe(true);
+        }
+      }).not.toThrow();
+      
+      canvasWrapper.dispose();
+    });
+  });
+
+  describe('Effect Settings Persistence', () => {
+    it('should maintain effect state after resize', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.7;
+      manager.addPostEffect(blurEffect);
+      
+      // Resize
+      manager.setSize(1920, 1080);
+      
+      // Effect should still be enabled and have same intensity
+      const retrieved = manager.getEffect('blur', 'post');
+      expect(retrieved).toBe(blurEffect);
+      expect(retrieved?.enabled).toBe(true);
+      expect(retrieved?.intensity).toBe(0.7);
+      
+      manager.dispose();
+    });
+
+    it('should maintain multiple effects state', () => {
+      const manager = new EffectManager(renderer, width, height);
+      
+      const blurEffect = new BlurEffect(renderer, width, height);
+      blurEffect.enabled = true;
+      blurEffect.intensity = 0.5;
+      manager.addPostEffect(blurEffect);
+      
+      const sepiaEffect = new SepiaEffect(renderer, width, height);
+      sepiaEffect.enabled = true;
+      sepiaEffect.intensity = 0.8;
+      manager.addPostEffect(sepiaEffect);
+      
+      // Verify both effects are maintained
+      expect(manager.getEffect('blur', 'post')?.enabled).toBe(true);
+      expect(manager.getEffect('blur', 'post')?.intensity).toBe(0.5);
+      expect(manager.getEffect('sepia', 'post')?.enabled).toBe(true);
+      expect(manager.getEffect('sepia', 'post')?.intensity).toBe(0.8);
+      
+      manager.dispose();
     });
   });
 });
