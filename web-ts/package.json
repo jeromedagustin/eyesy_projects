@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:ingredients": "vite build --base=/video/",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",

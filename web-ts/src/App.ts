@@ -3021,7 +3021,7 @@ export class App {
       this.ensureColorContrast();
 
       // Set mode_root path for image/font loading
-      this.eyesy.mode_root = `/modes/${modeInfo.id}`;
+      this.eyesy.mode_root = this.modeAssetRoot(modeInfo.id);
 
       // Create new mode instance
       const ModeClass = modeInfo.mode;
@@ -3096,7 +3096,7 @@ export class App {
       this.ensureColorContrast();
 
       // Set mode_root path (needed for mode setup)
-      this.eyesy.mode_root = `/modes/${modeInfo.id}`;
+      this.eyesy.mode_root = this.modeAssetRoot(modeInfo.id);
 
       // Load the new mode while keeping the old one visible
       // Use pending mode if available (from background loading), otherwise create new
@@ -3607,6 +3607,12 @@ export class App {
     if (errorHint) {
       errorHint.style.display = 'block';
     }
+  }
+
+  /** URL path for mode assets; must stay aligned with Vite `base` (subpath deploys). */
+  private modeAssetRoot(modeId: string): string {
+    const base = import.meta.env.BASE_URL.replace(/\/+$/, '') || '';
+    return base ? `${base}/modes/${modeId}` : `/modes/${modeId}`;
   }
 
   /**
