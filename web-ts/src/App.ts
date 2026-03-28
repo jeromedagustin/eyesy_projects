@@ -894,6 +894,8 @@ export class App {
 
   private setupUI() {
     const app = document.querySelector('#app')!;
+    const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '') || '';
+    const homeHref = basePath ? `${basePath}/` : '/';
     app.innerHTML = `
       <div id="loading-overlay" style="
         position: fixed;
@@ -1022,6 +1024,15 @@ export class App {
                 <span id="auto-clear-icon" class="btn-icon">🔄</span>
                 <span id="auto-clear-text">Auto Clear</span>
               </button>
+              <a
+                href="${homeHref}"
+                id="header-home-btn"
+                class="btn btn-secondary header-home-btn"
+                title="Home"
+                aria-label="Home"
+              >
+                <span class="btn-icon" aria-hidden="true">🏠</span>
+              </a>
             </div>
           </div>
         </div>
@@ -1578,6 +1589,19 @@ export class App {
       });
     }
 
+    // Close controls (✕ in panel): on desktop, actually collapse the flex sidebar;
+    // MobileUI already handles .open for max-width 768px.
+    window.addEventListener('eyesy:close-controls', () => {
+      if (!TouchManager.isMobileScreen()) {
+        this.setDesktopControlsPanelCollapsed(true);
+      }
+    });
+
+    // Before mobile overlay opens, drop desktop-only collapse inlines so the panel can show.
+    window.addEventListener('eyesy:prepare-mobile-controls-open', () => {
+      this.clearDesktopControlsPanelCollapseStyles();
+    });
+
     // Rewind controls
     this.controls.setOnRewind(() => {
       const success = this.rewindManager.rewind(this.eyesy);
@@ -1991,6 +2015,9 @@ export class App {
 
     // Initialize webcam device list
     this.updateWebcamDeviceList();
+
+    // Until first mode loads, image upload is off (enabled in completeModeSwitch for image modes)
+    this.controls.updateImageUploadAvailability(false);
   }
 
   private async updateWebcamDeviceList() {
@@ -2045,16 +2072,15 @@ export class App {
     }
   }
 
-  private toggleControlsPanel(): void {
+  /**
+   * Desktop/tablet (>768px): collapse or expand the side controls strip.
+   * Mobile overlay uses .open / MobileUI instead; inline styles here would break that overlay.
+   */
+  private setDesktopControlsPanelCollapsed(collapsed: boolean): void {
     const controlsContainer = document.querySelector('#controls-container') as HTMLElement;
     if (!controlsContainer) return;
-    
-    // Check if controls are currently visible by checking width
-    const currentWidth = controlsContainer.offsetWidth;
-    const isVisible = currentWidth > 50; // Threshold to account for minimal width
-    
-    if (isVisible) {
-      // Hide controls panel - collapse it completely to maximize canvas space
+
+    if (collapsed) {
       controlsContainer.style.flex = '0 0 0';
       controlsContainer.style.width = '0';
       controlsContainer.style.minWidth = '0';
@@ -2064,22 +2090,38 @@ export class App {
       controlsContainer.style.pointerEvents = 'none';
       controlsContainer.setAttribute('data-collapsed', 'true');
     } else {
-      // Show controls panel - restore default flex behavior
       controlsContainer.style.flex = '';
       controlsContainer.style.width = '';
       controlsContainer.style.minWidth = '';
       controlsContainer.style.maxWidth = '';
       controlsContainer.style.overflow = '';
-      controlsContainer.style.opacity = '1';
-      controlsContainer.style.pointerEvents = 'auto';
+      controlsContainer.style.opacity = '';
+      controlsContainer.style.pointerEvents = '';
       controlsContainer.removeAttribute('data-collapsed');
     }
-    
-    // Trigger canvas resize to take advantage of the new space
-    // Use requestAnimationFrame to ensure layout has updated
+
     requestAnimationFrame(() => {
       this.resizeCanvas();
     });
+  }
+
+  /** Clear desktop collapse inlines before opening the mobile slide-over panel. */
+  private clearDesktopControlsPanelCollapseStyles(): void {
+    const el = document.querySelector('#controls-container') as HTMLElement;
+    if (!el || el.getAttribute('data-collapsed') !== 'true') return;
+    this.setDesktopControlsPanelCollapsed(false);
+  }
+
+  private toggleControlsPanel(): void {
+    const controlsContainer = document.querySelector('#controls-container') as HTMLElement;
+    if (!controlsContainer) return;
+
+    const collapsed = controlsContainer.getAttribute('data-collapsed') === 'true';
+    const wideEnough = controlsContainer.offsetWidth > 50;
+    const expanded = !collapsed && wideEnough;
+
+    // If currently expanded, collapse; if collapsed, expand
+    this.setDesktopControlsPanelCollapsed(expanded);
   }
 
   private applyLeftHandedLayout(leftHanded: boolean) {
@@ -2122,11 +2164,6 @@ export class App {
   private async setupModeSelector() {
     // Group modes by similarity for better transitions (web-only feature)
     // Mark webcam and image modes as disabled based on permission/upload state
-    const isImageMode = (mode: ModeInfo): boolean => {
-      const nameLower = mode.name.toLowerCase();
-      return nameLower.startsWith('image -') || nameLower.includes('slideshow');
-    };
-
     // Helper to check if a mode is a scope mode
     const isScopeMode = (mode: ModeInfo): boolean => {
       return mode.category === 'scopes';
@@ -2144,7 +2181,7 @@ export class App {
         return { ...mode, disabled: true };
       }
       // Mark image modes as disabled if no images uploaded
-      if (isImageMode(mode) && !this.hasUploadedImages) {
+      if (ModeManager.isImageMode(mode) && !this.hasUploadedImages) {
         return { ...mode, disabled: true };
       }
       // Mark scope modes as disabled if neither microphone nor mock audio is enabled
@@ -2199,10 +2236,6 @@ export class App {
       // Re-check if mode should be disabled (in case state changed since mode list was created)
       const micEnabled = this.useMicrophone && this.microphoneAudio?.active;
       const audioAvailable = micEnabled || (this.mockAudioEnabled && !this.useMicrophone);
-      const isImageMode = (mode: ModeInfo): boolean => {
-        const nameLower = mode.name.toLowerCase();
-        return nameLower.startsWith('image -') || nameLower.includes('slideshow');
-      };
       const isScopeMode = (mode: ModeInfo): boolean => {
         return mode.category === 'scopes';
       };
@@ -2211,7 +2244,7 @@ export class App {
       let shouldBeDisabled = false;
       if (modeInfo.id === 'u---webcam' && !this.webcamPermissionGranted) {
         shouldBeDisabled = true;
-      } else if (isImageMode(modeInfo) && !this.hasUploadedImages) {
+      } else if (ModeManager.isImageMode(modeInfo) && !this.hasUploadedImages) {
         shouldBeDisabled = true;
       } else if (isScopeMode(modeInfo) && !audioAvailable) {
         shouldBeDisabled = true;
@@ -3158,6 +3191,8 @@ export class App {
       // Show/hide font settings based on mode type
       const isFontMode = modeInfo.name.toLowerCase().includes('font');
       this.controls.showFontSettings(isFontMode);
+
+      this.controls.updateImageUploadAvailability(ModeManager.isImageMode(modeInfo));
 
       // Update knob descriptions
       const { getKnobDescriptions } = await import('./core/KnobDescriptions');
@@ -4248,12 +4283,16 @@ export class App {
    * Reset all settings to default (except current mode)
    */
   private resetAllToDefault(): void {
+    // Keep foreground / background color knobs (EYESY convention: knob4, knob5)
+    const savedForeground = this.eyesy.knob4;
+    const savedBackground = this.eyesy.knob5;
+
     // Reset knobs to defaults
     this.eyesy.knob1 = 0.0;
     this.eyesy.knob2 = 0.0;
     this.eyesy.knob3 = 0.0;
-    this.eyesy.knob4 = 0.0;
-    this.eyesy.knob5 = 0.0;
+    this.eyesy.knob4 = savedForeground;
+    this.eyesy.knob5 = savedBackground;
     this.eyesy.knob6 = 0.0; // Rotation: 0°
     this.eyesy.knob7 = 0.5; // Zoom: 1.0x
     this.eyesy.knob8 = 0.45; // Speed: ~0.63x default
@@ -4321,15 +4360,14 @@ export class App {
     this.eyesy.font_family = 'Arial, sans-serif';
     this.eyesy.font_text = '';
     
-    // Update UI - update all knobs individually
-    for (let i = 1; i <= 8; i++) {
+    // Update UI - update all knobs individually (1–10 when present in DOM)
+    for (let i = 1; i <= 10; i++) {
       const knobValue = (this.eyesy as any)[`knob${i}`];
+      if (knobValue === undefined) continue;
       this.controls.updateKnobValue(i, knobValue);
-      // Trigger input event to ensure callbacks are called
       const slider = document.getElementById(`knob${i}`) as HTMLInputElement;
       if (slider) {
-        const inputEvent = new Event('input', { bubbles: true });
-        slider.dispatchEvent(inputEvent);
+        slider.dispatchEvent(new Event('input', { bubbles: true }));
       }
     }
     this.controls.updateAutoClear(this.eyesy.auto_clear);
@@ -4393,9 +4431,9 @@ export class App {
       if (webcamMirrorCheckbox) webcamMirrorCheckbox.checked = options.mirror;
     }
     
-    // Update effects blend mix slider
+    // Update effects blend mix slider (defaults to full mix — not loaded from storage here)
     if (this.effectManager) {
-      const blendMix = settings.effectsBlendMix !== undefined ? settings.effectsBlendMix : 1.0;
+      const blendMix = 1.0;
       this.effectManager.setBlendMix(blendMix);
       const blendMixSlider = document.getElementById('effects-blend-mix') as HTMLInputElement;
       const blendMixValue = document.getElementById('effects-blend-mix-value');

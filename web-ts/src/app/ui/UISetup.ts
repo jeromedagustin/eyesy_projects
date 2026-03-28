@@ -11,6 +11,7 @@ import { RewindManager } from '../../core/RewindManager';
 import { WebcamService } from '../../core/WebcamService';
 import { WebcamCompositor } from '../../core/webcam/WebcamCompositor';
 import { modes } from '../../modes/index';
+import { ModeManager } from '../modes/ModeManager';
 
 export interface UISetupContext {
   // State getters
@@ -317,7 +318,7 @@ export class UISetup {
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement | null;
       const btn = target?.closest?.('#images-btn') as HTMLButtonElement | null;
-      if (!btn) return;
+      if (!btn || btn.disabled) return;
       e.preventDefault();
       e.stopPropagation();
       const imageUpload = document.getElementById('image-upload') as HTMLInputElement | null;
@@ -474,12 +475,6 @@ export class UISetup {
 
   setupKeyboardNavigation(): void {
     const ctx = this.context;
-    // Helper to check if a mode is an image mode
-    const isImageMode = (mode: ModeInfo): boolean => {
-      const nameLower = mode.name.toLowerCase();
-      return nameLower.startsWith('image -') || nameLower.includes('slideshow');
-    };
-
     // Sort modes: non-experimental first, then experimental
     // This will be updated by updateModeSelector, but we need it here for initial setup
     const sortedModes = [...modes].map(mode => {
@@ -487,7 +482,7 @@ export class UISetup {
         return { ...mode, disabled: true };
       }
       // Mark image modes as disabled if no images uploaded
-      if (isImageMode(mode) && !ctx.getHasUploadedImages()) {
+      if (ModeManager.isImageMode(mode) && !ctx.getHasUploadedImages()) {
         return { ...mode, disabled: true };
       }
       return mode;

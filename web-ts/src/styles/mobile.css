@@ -427,6 +427,17 @@ input[type="range"]::-moz-range-thumb {
   flex: 0 0 auto;
 }
 
+.header-actions a.btn {
+  text-decoration: none;
+  color: inherit;
+  box-sizing: border-box;
+}
+
+.header-actions .header-home-btn {
+  min-width: var(--touch-target-min);
+  padding: var(--spacing-sm);
+}
+
 /* Hide header button labels sooner so header stays one line */
 @media (max-width: 1400px) {
   .header-actions .btn span:not(.btn-icon) {

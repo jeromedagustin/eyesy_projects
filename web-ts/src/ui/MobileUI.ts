@@ -55,7 +55,7 @@ export class MobileUI {
   private setupDelegatedControlClose() {
     this.container.addEventListener('click', (e) => {
       const target = e.target as HTMLElement | null;
-      const closeBtn = target?.closest?.('#close-controls-btn');
+      const closeBtn = target?.closest?.('.close-controls-panel-btn');
       if (closeBtn) {
         e.preventDefault();
         this.closeControls();
@@ -329,8 +329,10 @@ export class MobileUI {
   }
 
   openControls() {
+    window.dispatchEvent(new Event('eyesy:prepare-mobile-controls-open'));
+
     this.controlsOpen = true;
-    
+
     const controlsPanel = this.container.querySelector('.controls-panel');
     if (controlsPanel) {
       controlsPanel.classList.add('open');
@@ -343,13 +345,9 @@ export class MobileUI {
       this.controlsToggle.innerHTML = '✕';
       this.controlsToggle.style.display = 'none'; // Hide FAB when panel is open
     }
-    
-    // Setup close button listener
-    const closeBtn = document.getElementById('close-controls-btn');
-    if (closeBtn) {
-      closeBtn.onclick = () => this.closeControls();
-    }
-    
+
+    // Close is handled via delegated click on .close-controls-panel-btn (setupDelegatedControlClose)
+
     this.callbacks.onToggleControls?.();
   }
 

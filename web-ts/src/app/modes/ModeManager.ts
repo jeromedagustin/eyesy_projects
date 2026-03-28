@@ -49,6 +49,12 @@ export class ModeManager {
     this.context = context;
   }
 
+  /** Image or slideshow modes use uploaded assets (same rule as mode list disabling). */
+  static isImageMode(mode: Pick<ModeInfo, 'name'>): boolean {
+    const nameLower = mode.name.toLowerCase();
+    return nameLower.startsWith('image -') || nameLower.includes('slideshow');
+  }
+
   /**
    * Create navigation order for arrow key navigation
    */
@@ -89,12 +95,6 @@ export class ModeManager {
   updateModeSelector(): void {
     const ctx = this.context;
     
-    // Helper to check if a mode is an image mode
-    const isImageMode = (mode: ModeInfo): boolean => {
-      const nameLower = mode.name.toLowerCase();
-      return nameLower.startsWith('image -') || nameLower.includes('slideshow');
-    };
-
     // Helper to check if a mode is a scope mode
     const isScopeMode = (mode: ModeInfo): boolean => {
       return mode.category === 'scopes';
@@ -113,7 +113,7 @@ export class ModeManager {
         return { ...mode, disabled: true };
       }
       // Mark image modes as disabled if no images uploaded
-      if (isImageMode(mode) && !ctx.getHasUploadedImages()) {
+      if (ModeManager.isImageMode(mode) && !ctx.getHasUploadedImages()) {
         return { ...mode, disabled: true };
       }
       // Mark scope modes as disabled if neither microphone nor mock audio is enabled

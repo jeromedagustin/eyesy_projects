@@ -384,7 +384,7 @@ export class Controls {
           border-bottom: 1px solid #3a3a3a;
         ">
           <h2 style="font-size: 1rem; margin: 0; color: #fff;">Controls</h2>
-          <button id="close-controls-btn" style="
+          <button type="button" class="close-controls-panel-btn" title="Close controls" aria-label="Close controls" style="
             background: transparent;
             border: none;
             color: #aaa;
@@ -411,7 +411,7 @@ export class Controls {
               transition: opacity 0.2s;
               display: none;
             " onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Lock current mode (prevent random mode switching)">🔒</button>
-            <button id="reset-all-btn" style="
+            <button type="button" id="reset-all-btn" class="reset-all-settings-btn" style="
               background: #3a3a3a;
               border: 1px solid #4a4a4a;
               color: #aaa;
@@ -421,7 +421,16 @@ export class Controls {
               cursor: pointer;
               opacity: 0.8;
               transition: opacity 0.2s;
-            " onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Reset all settings to default (except current mode)">Reset All</button>
+            " onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Reset settings to default; keeps current mode and foreground/background colors">Reset All</button>
+            <button type="button" class="close-controls-panel-btn" title="Close controls panel" aria-label="Close controls panel" style="
+              background: transparent;
+              border: none;
+              color: #aaa;
+              font-size: 1.35rem;
+              cursor: pointer;
+              padding: 0.25rem 0.45rem;
+              line-height: 1;
+            ">✕</button>
           </div>
         </div>
         
@@ -599,6 +608,30 @@ export class Controls {
               title="Double-click to reset to default (1.0x)">
             <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem;">
               Animation speed (middle = normal)
+            </div>
+          </div>
+
+          <div class="knob-group" style="margin-top: 1rem; margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <label style="font-size: 0.85rem; color: #ccc;">
+                Target FPS: <span id="target-fps-value">60</span>
+              </label>
+              <button type="button" id="reset-fps-btn" style="
+                background: #3a3a3a;
+                border: 1px solid #4a4a4a;
+                color: #aaa;
+                padding: 0.2rem 0.5rem;
+                border-radius: 3px;
+                font-size: 0.7rem;
+                cursor: pointer;
+                opacity: 0.6;
+              " title="Reset to default (60 FPS)">↺</button>
+            </div>
+            <input type="range" id="target-fps" min="1" max="60" step="1" value="60" 
+              style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none;"
+              title="Target frame rate (1-60 FPS)">
+            <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem;">
+              Limit frame rate to slow down animation (1-60 FPS)
             </div>
           </div>
         </div>
@@ -1076,41 +1109,6 @@ export class Controls {
               <div style="font-size: 0.7rem; color: #666; margin-top: 0.25rem;">
                 Aim for 50-80% for best results
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Performance Section -->
-        <div class="controls-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #3a3a3a;">
-          <div class="section-header" style="
-            font-size: 0.85rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 1rem;
-            font-weight: 600;
-          ">Performance</div>
-          <div class="knob-group" style="margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              <label style="font-size: 0.85rem; color: #ccc;">
-                Target FPS: <span id="target-fps-value">60</span>
-              </label>
-              <button id="reset-fps-btn" style="
-                background: #3a3a3a;
-                border: 1px solid #4a4a4a;
-                color: #aaa;
-                padding: 0.2rem 0.5rem;
-                border-radius: 3px;
-                font-size: 0.7rem;
-                cursor: pointer;
-                opacity: 0.6;
-              " title="Reset to default (60 FPS)">↺</button>
-            </div>
-            <input type="range" id="target-fps" min="1" max="60" step="1" value="60" 
-              style="width: 100%; height: 6px; background: #3a3a3a; border-radius: 3px; outline: none; -webkit-appearance: none;"
-              title="Target frame rate (1-60 FPS)">
-            <div style="font-size: 0.7rem; color: #888; margin-top: 0.2rem;">
-              Limit frame rate to slow down animation (1-60 FPS)
             </div>
           </div>
         </div>
@@ -2212,7 +2210,7 @@ export class Controls {
             font-weight: 600;
           ">Images</div>
 
-          <button id="images-btn" style="
+          <button type="button" id="images-btn" style="
             width: 100%;
             padding: 0.75rem;
             background: #3a3a3a;
@@ -2226,13 +2224,13 @@ export class Controls {
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-          " title="Upload images">
+          " title="Upload images for image and slideshow modes">
             <span id="images-icon">🖼️</span>
             <span id="images-text">Upload Images (0)</span>
           </button>
           <input type="file" id="image-upload" multiple accept="image/*" style="display: none;">
 
-          <div style="font-size: 0.7rem; color: #888; margin-top: 0.5rem;">
+          <div id="images-upload-hint" style="font-size: 0.7rem; color: #888; margin-top: 0.5rem;">
             Used by image/slideshow modes.
           </div>
         </div>
@@ -2773,6 +2771,25 @@ export class Controls {
             </div>
           </div>
         </div>
+
+        <div class="controls-section controls-footer-reset" style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #3a3a3a;">
+          <button type="button" class="reset-all-settings-btn" style="
+            width: 100%;
+            padding: 0.65rem 1rem;
+            background: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            color: #e8e8e8;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            opacity: 0.95;
+            transition: opacity 0.2s, background 0.2s;
+          " onmouseover="this.style.opacity='1'; this.style.background='#454545';" onmouseout="this.style.opacity='0.95'; this.style.background='#3a3a3a';" title="Reset settings to default; keeps current mode and foreground/background colors">Reset All</button>
+          <p style="margin: 0.5rem 0 0; font-size: 0.7rem; color: #888; text-align: center; line-height: 1.4;">
+            Restores defaults for knobs, toggles, and UI. Foreground and background colors are kept. Current mode is unchanged.
+          </p>
+        </div>
       </div>
     `;
 
@@ -2808,23 +2825,19 @@ export class Controls {
   }
 
   private setupListeners() {
-    // Mobile controls header close button (✕)
-    // Use an event-based close so it works even if other parts of the UI manage panel state.
-    const closeControlsBtn = document.getElementById('close-controls-btn') as HTMLButtonElement | null;
-    if (closeControlsBtn) {
-      closeControlsBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    // Close controls (✕) — mobile overlay + desktop sidebar (see App `eyesy:close-controls`)
+    this.container.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('.close-controls-panel-btn');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
 
-        // Preferred: tell MobileUI to close (keeps its internal `controlsOpen` in sync)
-        window.dispatchEvent(new Event('eyesy:close-controls'));
+      window.dispatchEvent(new Event('eyesy:close-controls'));
 
-        // Fallback: directly close the panel/backdrop in case MobileUI isn't active
-        const controlsPanel = document.querySelector('#controls-container.controls-panel') as HTMLElement | null;
-        controlsPanel?.classList.remove('open');
-        document.querySelector('.controls-backdrop')?.classList.remove('visible');
-      });
-    }
+      const controlsPanel = document.querySelector('#controls-container.controls-panel') as HTMLElement | null;
+      controlsPanel?.classList.remove('open');
+      document.querySelector('.controls-backdrop')?.classList.remove('visible');
+    });
 
     // Knob sliders
     for (let i = 1; i <= 5; i++) {
@@ -4418,15 +4431,19 @@ export class Controls {
       }
     }
 
-    // Reset All button (main settings)
-    const resetAllBtn = document.getElementById('reset-all-btn');
-    if (resetAllBtn) {
-      resetAllBtn.addEventListener('click', () => {
-        if (this.onResetAllToDefault) {
-          this.onResetAllToDefault();
-        }
+    // Reset All (header + footer) — same callback
+    const runResetAllSettings = (): void => {
+      if (this.onResetAllToDefault) {
+        this.onResetAllToDefault();
+      }
+    };
+    this.container.querySelectorAll('.reset-all-settings-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        runResetAllSettings();
       });
-    }
+    });
 
     // Random Effects button (Quick Effects section)
     const randomEffectsQuickBtn = document.getElementById('random-effects-quick');
@@ -4688,6 +4705,26 @@ export class Controls {
     if (section) {
       section.style.opacity = enabled ? '1' : '0.8';
       section.style.pointerEvents = enabled ? 'auto' : 'auto'; // Still allow interaction
+    }
+  }
+
+  /**
+   * Enable upload only for image/slideshow modes; keeps button styling if images were already loaded.
+   */
+  updateImageUploadAvailability(enabled: boolean): void {
+    const btn = document.getElementById('images-btn') as HTMLButtonElement | null;
+    const hint = document.getElementById('images-upload-hint');
+    if (!btn) return;
+    btn.disabled = !enabled;
+    btn.style.opacity = enabled ? '1' : '0.5';
+    btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+    btn.title = enabled
+      ? 'Upload images for image and slideshow modes'
+      : 'Switch to an image or slideshow mode to upload images';
+    if (hint) {
+      hint.textContent = enabled
+        ? 'Used by image/slideshow modes.'
+        : 'Upload is only available while an image or slideshow mode is active.';
     }
   }
 
